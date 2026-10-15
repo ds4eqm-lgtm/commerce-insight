@@ -2,3 +2,5 @@
 products_live.txt
 # 미리보기용 로컬 설정
 .claude/
+# 상품목록_적용.bat 이 만드는 로컬 백업
+backups/
