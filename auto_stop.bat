@@ -1,4 +1,4 @@
 @echo off
-echo Removing hourly task: CompetitorStockHourly
-schtasks /delete /tn "CompetitorStockHourly" /f
+echo Removing hourly task: CommerceInsightHourly
+schtasks /delete /tn "CommerceInsightHourly" /f
 pause
