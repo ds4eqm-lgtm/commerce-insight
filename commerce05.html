@@ -1,0 +1,934 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>커머스 인사이트 05 · V2.4</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f4f6fa;font:15px/1.5 'Malgun Gothic',Arial,sans-serif;color:#182335}header{background:#fff;border-bottom:1px solid #e0e5ec;padding:15px 22px;display:flex;justify-content:space-between;align-items:center}h1{font-size:21px;margin:0}small{color:#64748b}.shell{display:grid;grid-template-columns:290px 1fr;gap:16px;max-width:1600px;margin:18px auto;padding:0 18px}.panel{background:white;border:1px solid #e1e7ee;border-radius:14px;padding:18px;box-shadow:0 2px 9px #0d22330b}.sidebar{display:flex;flex-direction:column;gap:12px}.cat{border:1px solid #dce4ee;border-radius:12px;background:#fff;text-align:left;padding:16px;font-weight:700;font-size:17px;cursor:pointer}.cat.active{border-color:#207a64;background:#e8f6f0;color:#106e54}.cat small{display:block;font-weight:400}.newcat{display:flex;gap:6px}.newcat input{min-width:0;flex:1}.newcat button,.btn{border:0;background:#16866a;color:white;border-radius:8px;padding:10px 13px;cursor:pointer}input{border:1px solid #d1d9e3;border-radius:8px;padding:10px}.main{display:grid;grid-template-rows:auto 1fr;gap:16px}.top{display:grid;grid-template-columns:1fr 220px;gap:16px}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:12px}.day{border:1px solid #e2e8f0;background:#f8fafc;border-radius:7px;min-height:48px;padding:5px;text-align:left;font-size:12px}.day.today{border:2px solid #16866a;background:#e8f6f0}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.stat{background:#f6f8fb;padding:13px;border-radius:9px}.stat b{display:block;font-size:22px}.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:15px}.total{border:1px solid #dce9e4;background:#eff8f4;border-radius:10px;padding:13px 15px}.total small{display:block;color:#506b62}.total strong{display:block;font-size:23px;margin-top:3px}.stores{display:grid;gap:10px;margin-top:14px}.store{display:grid;grid-template-columns:minmax(145px,1.1fr) minmax(310px,2fr) minmax(250px,1.6fr) 105px;gap:14px;align-items:center;padding:14px;border:1px solid #e2e8f0;border-radius:10px}.store b{font-size:16px}.cumul{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.cumul>div{background:#eff7f4;border-radius:7px;padding:8px 4px;text-align:center}.cumul small{display:block;font-size:11px}.cumul strong{font-size:14px;white-space:nowrap}.rank{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:9px;background:#edf3fa;color:#28435f;font-weight:800;margin-right:10px}.rank.first{background:#fff2cf;color:#875900}.rank.second{background:#eef0f4;color:#526174}.rank.third{background:#f9e9dc;color:#986137}.store .sales{font-weight:800;text-align:right;font-size:22px}.compare{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.delta{background:#f5f7fa;border-radius:9px;padding:9px 7px;text-align:center}.delta .dt{display:block;font-size:11px;color:#64748b}.delta strong{font-size:15px}.delta em{display:block;font-style:normal;font-size:11px;color:#64748b}.positive{color:#087a57}.negative{color:#c44141}.neutral{color:#64748b}.store .bar{height:5px;background:#e8edf2;border-radius:4px;margin-top:7px;overflow:hidden}.store .bar i{display:block;height:100%;background:#16866a;border-radius:4px}.store .storeName{display:flex;align-items:center}.muted{color:#64748b}.pill{font-size:12px;background:#e9f2fb;padding:3px 8px;border-radius:50px}.notice{font-size:12px;color:#64748b;margin-top:12px}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{padding:7px 10px;border:1px solid #cbd5e1;background:white;border-radius:8px;cursor:pointer}@media(max-width:1150px){.store{grid-template-columns:1fr 1fr}.cumul{grid-column:1/-1;grid-row:2}.compare{grid-column:1/-1;grid-row:3}.store .sales{grid-column:2;grid-row:1}}@media(max-width:800px){.totals{grid-template-columns:repeat(2,minmax(0,1fr))}.shell{grid-template-columns:1fr}.top{grid-template-columns:1fr}.store{grid-template-columns:1fr 120px}.compare{grid-column:1/-1}.sidebar{display:grid;grid-template-columns:repeat(2,1fr)}.newcat{grid-column:1/-1}}
+
+/* 색상 개선: 전체 합계는 통일된 청록, 업체 누적은 파랑, 비교는 증감색 */
+body{background:#f1f5f9;color:#17243b}
+.panel{border-color:#dbe5ee;box-shadow:0 5px 18px rgba(28,55,88,.055)}
+.total{background:linear-gradient(145deg,#e5f6f1,#f0fbf7);border:1px solid #a9dfcf;border-top:4px solid #12856d;box-shadow:0 2px 6px #0b695314}
+.total small{color:#24715f;font-weight:700;font-size:12px}
+.total strong{color:#0b6b58;font-size:clamp(17px,1.55vw,24px);font-variant-numeric:tabular-nums}
+.store{background:#fff;border:1px solid #dfe7f0;box-shadow:0 2px 6px rgba(24,50,85,.035)}
+.store:hover{border-color:#9dbbd2;background:#fcfdff}
+.cumul>div{background:#edf4ff;border:1px solid #d7e5fc;padding:10px 4px}
+.cumul small{color:#426797;font-weight:700}
+.cumul strong{color:#174e90;font-variant-numeric:tabular-nums}
+.delta{background:#f5f7fb;border:1px solid #edf0f5}
+.delta .dt{font-weight:700;color:#5c6a7e}
+.positive{color:#087b5b}.negative{color:#d24b54}
+.store .sales{color:#192b45}
+.store .bar{height:7px;background:#e5edf4}.store .bar i{background:linear-gradient(90deg,#16866a,#38bda0)}
+.cat.active{box-shadow:inset 4px 0 0 #13846a}
+@media(min-width:1151px){.store{grid-template-columns:minmax(145px,1.1fr) minmax(310px,2fr) minmax(250px,1.6fr) 105px}}
+
+/* 최종 가독성 개선: 명확한 정보 위계와 절제된 컬러 */
+:root{--navy:#183153;--teal:#0b806b;--blue:#2369c7;--red:#c94050}
+header{background:linear-gradient(105deg,#142f4d,#21567a);color:white;padding:19px 28px;box-shadow:0 3px 16px #102b4a22}
+header h1{font-size:24px;letter-spacing:-.6px}header small{color:#d5e5f4}header .pill{background:#ffffff22;color:#fff;border:1px solid #ffffff33}
+.shell{max-width:1880px;grid-template-columns:250px minmax(0,1fr);gap:18px;margin:20px auto}
+.panel{border-radius:16px}.sidebar{align-self:start;position:sticky;top:16px}
+.sidebar h2{color:var(--navy)}.cat{width:100%;display:block;margin-bottom:9px;border-radius:11px;padding:13px 15px;transition:.15s}
+.cat:hover{border-color:#90cdbd;background:#f1faf7}.cat.active{background:linear-gradient(100deg,#d9f5e9,#edf9f4);border-color:#66bea6;color:#076e54}
+.head h2{color:#203855;font-size:20px}.total{background:#e7f7f2;border-top:4px solid #0e9277;min-height:95px}
+.total strong{font-size:clamp(21px,1.7vw,29px);letter-spacing:-.7px}.total small{font-size:12px}
+.store{grid-template-columns:minmax(150px,1.05fr) minmax(320px,2.05fr) minmax(260px,1.65fr) 110px;gap:12px;padding:13px 15px;border-radius:12px}
+.store:nth-child(even){background:#f9fbfe}.storeName b{font-size:16px;letter-spacing:-.4px}
+.cumul>div{background:#eaf2ff;border:1px solid #d2e2fa;border-radius:9px;padding:11px 4px}
+.cumul strong{font-size:15px}.cumul small{font-size:11px}
+.delta{padding:10px 5px}.delta strong{font-size:15px}.store .sales{font-size:23px}
+.stats .stat:first-child{background:#eaf2ff}.stats .stat:last-child{background:#fff5e8}
+.day.today{background:#dff6ed;border:2px solid #138a6e;font-weight:700}
+.tabs button{font-weight:700;color:#23415f}.tabs button:hover{background:#eaf2ff}
+.notice{background:#fff8e9;border:1px solid #f0dfb7;padding:12px 14px;border-radius:9px;line-height:1.7}
+@media(max-width:1400px){.store{grid-template-columns:minmax(130px,1fr) minmax(270px,2fr) minmax(220px,1.6fr) 90px;gap:8px}.store .sales{font-size:19px}.cumul strong{font-size:13px}}
+@media(max-width:1150px){.store{grid-template-columns:1fr 130px}.cumul{grid-column:1/-1;grid-row:2}.compare{grid-column:1/-1;grid-row:3}.store .sales{grid-column:2;grid-row:1}.sidebar{position:static}}
+@media(max-width:800px){.shell{grid-template-columns:1fr;padding:0 10px}.top{grid-template-columns:1fr}.totals{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar{display:block}.store{grid-template-columns:1fr 100px}.cumul{grid-column:1/-1}.compare{grid-column:1/-1}}
+.version-wrap{display:flex;align-items:flex-end;flex-direction:column;gap:5px}.version-stamp{display:flex;align-items:center;gap:8px;font-size:12px;color:#475569}.version-stamp b{background:#e8f6f0;color:#08715e;border-radius:6px;padding:3px 8px;font-size:13px}@media(max-width:640px){header{gap:12px;align-items:flex-start}.version-stamp{flex-wrap:wrap;justify-content:flex-end;text-align:right}} 
+/* V2.4 실사용 기능용 스타일 */
+.navbtn{border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:3px 9px;cursor:pointer}
+.day{cursor:pointer}.day.has b{display:block;color:#0b6b58;font-size:12px}.day.sel{outline:2px solid #2369c7}.day.nodata{color:#94a3b8;cursor:default}
+.list{margin-top:12px;border:1px solid #e2e8f0;border-radius:10px;max-height:460px;overflow:auto}
+.list table{width:100%;border-collapse:collapse;font-size:13px}.list th,.list td{padding:7px 9px;border-bottom:1px solid #eef2f6;text-align:left;vertical-align:middle}.list th{position:sticky;top:0;background:#f6f8fb;z-index:1}
+.list a{color:#2369c7;word-break:break-all}
+.loader{padding:30px;text-align:center;color:#64748b}
+.filepick{margin-top:10px;padding:14px;border:1px dashed #94a3b8;border-radius:10px;background:#f8fafc}
+.na{color:#94a3b8}
+.store .today{display:block;text-align:right;color:#2369c7;font-weight:700}
+#manage{margin-top:14px;border:1px solid #dbe5ee;border-radius:12px;padding:4px 14px 14px;background:#fbfdff}
+.tabs button.on{background:#e8f6f0;border-color:#16866a;color:#0b6b58}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.ctl label{font-size:13px;color:#475569;font-weight:700}
+select,.mbtn{border:1px solid #cbd5e1;border-radius:8px;padding:7px 9px;background:#fff;font:inherit;font-size:13px}
+.mbtn{cursor:pointer;font-weight:700;color:#23415f}.mbtn:hover{background:#eaf2ff}.mbtn.danger{color:#c94050}.mbtn.primary{background:#16866a;border-color:#16866a;color:#fff}.mbtn:disabled{opacity:.45;cursor:default}
+.mtabs{display:flex;gap:6px;margin-top:12px;border-bottom:1px solid #e2e8f0}.mtabs button{border:0;background:none;padding:9px 13px;font:inherit;font-weight:700;color:#64748b;cursor:pointer;border-bottom:3px solid transparent}.mtabs button.on{color:#0b6b58;border-bottom-color:#16866a}
+.mform{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;padding:12px;background:#f6f8fb;border-radius:10px}.mform input{padding:8px 9px;font-size:13px}
+.savebar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding:10px 12px;border-radius:10px;background:#f1f5f9;font-size:13px}.savebar.dirty{background:#fff4e0;border:1px solid #f0c987}
+header .version-stamp{color:#d5e5f4}
+.mode a{color:#fff}
+</style>
+<header><div><h1>커머스 인사이트 <small>커머스 05</small></h1><small>품목별 시장 규모 · 업체별 판매 순위 · 기간별 누적 판매량</small></div>
+<div class="version-wrap"><span class="pill">실데이터 연결 · <span class="mode" id="mode">보기 전용</span></span><div class="version-stamp" aria-label="화면 버전 및 수정 일시"><b id="verNo">-</b><span>화면 수정 <span id="verScreen">-</span></span></div><div class="version-stamp" aria-label="데이터 수집 일시"><span>데이터 수집 <span id="verData">-</span></span></div></div></header>
+<div class="shell"><aside class="sidebar panel"><h2 style="margin:0;font-size:17px">모니터링 품목</h2><div id="cats"></div><label for="newCat"><b>새 모니터링 품목 추가</b></label><div class="newcat"><input id="newCat" placeholder="예: 매트"><button onclick="addCategory()">추가 +</button></div><small>품목을 클릭하면 합계와 업체 순위가 함께 바뀝니다.</small></aside>
+<main class="main"><section class="top"><div class="panel"><div class="head"><h2 style="margin:0" id="calTitle">-</h2><span><button class="navbtn" onclick="moveMonth(-1)">◀</button> <button class="navbtn" onclick="moveMonth(1)">▶</button> <span class="pill">날짜별 집계 위치</span></span></div><div class="calendar" id="cal"></div></div>
+<div class="panel"><h3>수집 상태</h3><div class="stats"><div class="stat">등록 상품<b id="stProducts">-</b><small id="stLinks"></small></div><div class="stat">정상 수집<b id="stOk">-</b><small id="stOkDay"></small></div></div><p class="muted">마지막 데이터 기록<br><b id="stLast">-</b></p><small id="stSource"></small></div></section>
+<section class="panel"><div class="head"><div><h2 style="margin:0" id="catTitle">-</h2><small id="catSub">품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지</small></div><div class="tabs"><button onclick="toggleOrder()" id="orderBtn">가나다순 보기</button><button onclick="openManage('stores')" data-open="stores">업체 관리</button><button onclick="openManage('urls')" data-open="urls">상품 URL 관리</button><button onclick="openManage('status')" data-open="status">수집 상태</button></div></div>
+<div id="manage" hidden><div class="mtabs" id="mtabs"><button data-t="cats">품목 관리</button><button data-t="stores">업체 관리</button><button data-t="urls">상품 URL 관리</button><button data-t="status">수집 상태</button><button data-t="close" style="margin-left:auto">닫기 ✕</button></div>
+<div id="mbody"></div>
+<div class="savebar" id="savebar"></div></div>
+<div class="totals" id="totals"></div><div class="stores" id="stores"><div class="loader">기존 상품목록과 판매량 기록을 불러오는 중…</div></div>
+<p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 품목·업체·상품 URL을 바꾸면 <b>깃허브에 저장</b> 후 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
+<script>
+// ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
+const APP_VERSION = 'V2.4';
+const SCREEN_UPDATED = '2026-10-16 05:27 KST';
+
+// ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
+const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
+const RAW_BASE = 'https://raw.githubusercontent.com/ds4eqm-lgtm/commerce-insight/main/';
+const STORES_FILE = 'stores.json'; // 업체 등록 정보 (새 파일, 수집 기록과 별개)
+// 단위: 기존 대시보드와 동일 (데코타일 1개=1박스, 장판 1개=10cm, products.txt 링크 뒤 '9장' '20cm' '1m' 지정 가능)
+const CAT_UNITS = { 장판: { div: 10, label: 'm' } };
+const DEFAULT_UNIT = { div: 1, label: '박스' };
+const UNIT_ORDER = ['박스', 'm'];
+const RESERVED = ['휴무일', '근무일'];
+
+let ghToken = '';
+try { ghToken = localStorage.getItem('ghToken') || ''; } catch (e) { /* 무시 */ }
+let bridgeToken = ''; // 탬퍼몽키가 깔린 관리용 컴퓨터에서 받는 토큰 (메모리에만)
+
+// 목록 (products.txt 를 해석한 결과)
+let listOrder = [], linkLines = 0, linkOf = {}, prodCat = {}, unitDiv = {}, fileCats = [];
+// 원본과 작업본
+let baseText = '', workText = '';
+let baseStores = {}, workStores = {};
+let rawLatest = {};
+let items = [];
+let hiddenProducts = 0;
+let approved = new Set();
+let lastRecord = '';
+let sourceLabel = '';
+let loadedAt = null;
+let collectedName = {}; // slug → 수집된 업체명
+
+let active = null;
+let selDay = null;
+let calMonth = null;
+let agg = {};   // agg[day][cat][slug] = {박스: n, m: n}
+let cover = {}; // cover[day][cat][slug] = true
+let allDays = [];
+let dayCount = {};
+let fullDay = null;
+let mtab = 'cats';
+let editing = null; // 수정 중인 항목
+
+const pad = (n) => String(n).padStart(2, '0');
+const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const toD = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = toD(s); d.setDate(d.getDate() + n); return ymd(d); };
+const fmtNum = (n) => (Math.round(n * 10) / 10).toLocaleString('ko-KR');
+function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+const slugOfUrl = (u) => { const m = String(u).match(/naver\.com\/([^/?#]+)\/products\//); return m ? m[1] : ''; };
+
+// ---------------- 판매량 계산 (index.html 과 동일한 코드, 바꿀 때는 두 파일을 같이 고칠 것) ----------------
+const DAY_START_HOUR = 7;
+const SPLIT_HOUR = 17;
+const LONG_GAP_HOURS = 16;
+const DETECT = { BIG_DROP: 1000, BIG_RISE: 1000 };
+const KR_HOLIDAYS = [
+  '2026-01-01', '2026-02-16', '2026-02-17', '2026-02-18', '2026-03-02', '2026-05-01', '2026-05-05', '2026-05-25',
+  '2026-06-03', '2026-07-17', '2026-08-17', '2026-09-24', '2026-09-25', '2026-10-05', '2026-10-09', '2026-12-25',
+  '2027-01-01', '2027-02-08', '2027-02-09', '2027-03-01', '2027-05-03', '2027-05-05', '2027-05-13', '2027-07-19',
+  '2027-08-16', '2027-09-14', '2027-09-15', '2027-09-16', '2027-10-04', '2027-10-11', '2027-12-27',
+];
+let historyData = {};
+let flagsAll = {};
+let dayData = {};
+let currentDay = '';
+let extraOff = new Set();
+let extraWork = new Set();
+
+function toDate(key) {
+  const [d, t = '00:00'] = key.split('T');
+  const [y, m, day] = d.split('-').map(Number);
+  const [hh, mm] = t.split(':').map(Number);
+  return new Date(y, m - 1, day, hh || 0, mm || 0);
+}
+function bizDayOf(dt) {
+  const d = new Date(dt);
+  if (d.getHours() < DAY_START_HOUR) d.setDate(d.getDate() - 1);
+  return ymd(d);
+}
+function dayWindow(day) {
+  const start = toDate(day);
+  start.setHours(DAY_START_HOUR, 0, 0, 0);
+  const split = new Date(start);
+  split.setHours(SPLIT_HOUR, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start, split, end };
+}
+function computeDay(rec, day, flags, now) {
+  flags = flags || {};
+  const { start, split, end } = dayWindow(day);
+  const es = Object.keys(rec).map((t) => ({ t, dt: toDate(t), v: rec[t] })).sort((a, b) => a.dt - b.dt);
+  const mk = () => ({ s: 0, u: 0, x: 0, ev: [], up: 0, upEv: [], uEv: [] });
+  const all = mk();
+  const t1 = mk();
+  const t2 = mk();
+  let k = null;
+  let any = false;
+  let base = false;
+  for (let i = 0; i < es.length; i++) {
+    const e = es[i];
+    if (e.dt < start) { base = true; continue; }
+    if (e.dt >= end || (now && e.dt > now)) break;
+    any = true;
+    k = e.v;
+    const nx = es[i + 1];
+    if (!nx || (now && nx.dt > now)) continue;
+    const d = e.v - nx.v;
+    const per = e.dt < split ? t2 : t1;
+    if (d < 0) {
+      if (-d >= DETECT.BIG_RISE) [per, all].forEach((p) => { p.up += -d; p.upEv.push([nx.t, -d, e.v, nx.v]); });
+      continue;
+    }
+    if (d === 0) continue;
+    const f = flags[nx.t];
+    const gapH = (nx.dt - e.dt) / 3600000;
+    [per, all].forEach((p) => {
+      if (f) { p.x += d; p.ev.push([nx.t, d, f.why.join(', ')]); }
+      else if (gapH > LONG_GAP_HOURS) { p.u += d; p.uEv.push([e.t, nx.t, d]); }
+      else p.s += d;
+    });
+  }
+  if (!any) return null;
+  return Object.assign(all, { k, base, t1, t2 });
+}
+function detectSuspicious(history) {
+  const out = {};
+  Object.keys(history).forEach((key) => {
+    const rec = history[key] || {};
+    const ts = Object.keys(rec).sort();
+    for (let i = 1; i < ts.length; i++) {
+      const d = rec[ts[i - 1]] - rec[ts[i]];
+      if (d >= DETECT.BIG_DROP) (out[key] = out[key] || {})[ts[i]] = { d, why: [`한 번에 ${d.toLocaleString()}개 줄어듦`] };
+    }
+  });
+  return out;
+}
+function isWorkday(day) {
+  if (extraWork.has(day)) return true;
+  if (extraOff.has(day) || KR_HOLIDAYS.includes(day)) return false;
+  const w = toDate(day).getDay();
+  return w !== 0 && w !== 6;
+}
+function prevWorkday(day) { let d = addDays(day, -1); for (let i = 0; i < 40 && !isWorkday(d); i++) d = addDays(d, -1); return d; }
+function nextWorkday(day) { let d = addDays(day, 1); for (let i = 0; i < 40 && !isWorkday(d); i++) d = addDays(d, 1); return d; }
+function workPeriod(day) {
+  const start = toDate(prevWorkday(day)); start.setHours(SPLIT_HOUR, 0, 0, 0);
+  const split = toDate(day); split.setHours(DAY_START_HOUR, 0, 0, 0);
+  const end = toDate(day); end.setHours(SPLIT_HOUR, 0, 0, 0);
+  return { start, split, end };
+}
+function workdayOf(dt) {
+  const d = new Date(dt);
+  const day = ymd(d);
+  if (isWorkday(day) && d.getHours() < SPLIT_HOUR) return day;
+  return nextWorkday(day);
+}
+function mergeParts(parts, end) {
+  const o = { s: 0, u: 0, x: 0, ev: [], up: 0, upEv: [] };
+  parts.forEach((p) => {
+    if (!p) return;
+    let moved = 0;
+    if (end) (p.uEv || []).forEach(([, bT, d]) => { if (toDate(bT) <= end) moved += d; });
+    o.s += (p.s || 0) + moved; o.u += (p.u || 0) - moved; o.x += p.x || 0; o.up += p.up || 0;
+    (p.ev || []).forEach((e) => o.ev.push(e));
+    (p.upEv || []).forEach((e) => o.upEv.push(e));
+  });
+  return o;
+}
+function stockAtOrBefore(rec, dt) {
+  let best = null;
+  Object.keys(rec).forEach((t) => { const d = toDate(t); if (d <= dt && (!best || d > best.d)) best = { d, v: rec[t] }; });
+  return best ? best.v : null;
+}
+function buildDayData(now) {
+  dayData = {};
+  currentDay = workdayOf(now);
+  items.forEach((it) => {
+    const rec = historyData[it.key] || {};
+    const archive = it.daily || {};
+    const seg = {};
+    const days = new Set(Object.keys(archive));
+    const keys = Object.keys(rec).sort();
+    const today = ymd(now);
+    if (keys.length) {
+      let d = addDays(bizDayOf(toDate(keys[0])), -1);
+      for (let g = 0; g < 400 && d <= today; g++) { days.add(d); d = addDays(d, 1); }
+    }
+    days.forEach((day) => {
+      const r = computeDay(rec, day, flagsAll[it.key], now);
+      if (r && (r.base || !archive[day] || !archive[day].t1)) seg[day] = r;
+      else if (archive[day] && archive[day].t1) seg[day] = Object.assign({ archived: true }, archive[day]);
+    });
+    const segDays = Object.keys(seg).sort();
+    if (!segDays.length) return;
+    let w = isWorkday(segDays[0]) ? segDays[0] : nextWorkday(segDays[0]);
+    for (let g = 0; g < 400 && w <= currentDay; g++, w = nextWorkday(w)) {
+      const pw = prevWorkday(w);
+      const nightParts = [];
+      const dayParts = [];
+      for (let c = pw; c < w; c = addDays(c, 1)) {
+        if (!seg[c]) continue;
+        nightParts.push(seg[c].t1);
+        if (c !== pw) dayParts.push(seg[c].t2);
+      }
+      const { end } = workPeriod(w);
+      const t1 = mergeParts(nightParts.concat(dayParts), end);
+      const t2 = seg[w] ? mergeParts([seg[w].t2], end) : mergeParts([]);
+      const hasAny = nightParts.some(Boolean) || dayParts.some(Boolean) || !!seg[w];
+      if (!hasAny) continue;
+      const all = mergeParts([t1, t2]);
+      let k = stockAtOrBefore(rec, end < now ? end : now);
+      if (k === null) { const last = seg[w] || seg[pw]; k = last ? last.k : 0; }
+      all.k = k;
+      all.t1 = t1;
+      all.t2 = t2;
+      (dayData[w] = dayData[w] || {})[it.key] = all;
+    }
+  });
+}
+
+// ---------------- products.txt 해석 ----------------
+function parseProducts(text) {
+  listOrder = []; linkLines = 0; linkOf = {}; prodCat = {}; unitDiv = {}; fileCats = []; extraOff = new Set(); extraWork = new Set();
+  let current = null;
+  text.replace(/^﻿/, '').split(/\r?\n/).forEach((raw) => {
+    const l = raw.trim();
+    const h = l.match(/^\[(.+)\]$/);
+    if (h) {
+      current = h[1].trim();
+      if (!RESERVED.includes(current) && !fileCats.includes(current)) fileCats.push(current);
+      return;
+    }
+    if (RESERVED.includes(current)) {
+      const dm = l.match(/^(\d{4})[-.\/](\d{1,2})[-.\/](\d{1,2})/);
+      if (dm) (current === '휴무일' ? extraOff : extraWork).add(`${dm[1]}-${dm[2].padStart(2, '0')}-${dm[3].padStart(2, '0')}`);
+      return;
+    }
+    const m = l.match(/products\/(\d+)/);
+    if (!m) return;
+    linkLines++;
+    const no = m[1];
+    if (!(no in linkOf)) { listOrder.push(no); linkOf[no] = l.split(/\s+/)[0]; }
+    const tail = l.slice(l.indexOf(m[0]) + m[0].length);
+    const uj = tail.match(/(\d+)\s*장/);
+    const ucm = tail.match(/(\d+(?:\.\d+)?)\s*cm/i);
+    const um = tail.match(/(\d+(?:\.\d+)?)\s*m(?![a-z])/i);
+    if (uj && Number(uj[1]) > 1) unitDiv[no] = { div: Number(uj[1]), label: '박스' };
+    else if (ucm && Number(ucm[1]) > 0) unitDiv[no] = { div: 100 / Number(ucm[1]), label: 'm' };
+    else if (um && !ucm && Number(um[1]) > 0) unitDiv[no] = { div: 1 / Number(um[1]), label: 'm' };
+    if (current && !(no in prodCat)) prodCat[no] = current;
+  });
+  if (!fileCats.length) fileCats = ['데코타일', '장판'];
+}
+function catOfProduct(no) { return prodCat[no] || fileCats[0]; }
+function unitOf(it) { return unitDiv[it.product] || CAT_UNITS[it.cat] || DEFAULT_UNIT; }
+function mainUnit(cat) { return (CAT_UNITS[cat] || DEFAULT_UNIT).label; }
+function soldOf(it, v) {
+  let n = v.s || 0;
+  (v.ev || []).forEach(([t, d]) => { if (approved.has(`${it.key}|${t}`)) n += d; });
+  return n / unitOf(it).div;
+}
+function storeName(slug) {
+  const r = workStores[slug];
+  return (r && r.name) || collectedName[slug] || slug;
+}
+
+// ---------------- 불러오기 ----------------
+async function fetchRepoFile(path) {
+  const token = ghToken || bridgeToken;
+  try {
+    const headers = { Accept: 'application/vnd.github.raw+json' };
+    if (token) headers.Authorization = `token ${token}`;
+    const res = await fetch(REPO_API + path + '?t=' + Date.now(), { headers, cache: 'no-store' });
+    if (res.ok) return { text: await res.text(), source: '깃허브 원본' };
+    if (res.status === 404) return null;
+  } catch (e) { /* 다음 방법 */ }
+  try {
+    const res = await fetch(RAW_BASE + path + '?t=' + Date.now(), { cache: 'no-store' });
+    if (res.ok) return { text: await res.text(), source: '깃허브 원본(최대 5분 지연)' };
+    if (res.status === 404) return null;
+  } catch (e) { /* 다음 방법 */ }
+  try {
+    const res = await fetch(path + '?_=' + Date.now());
+    if (res.ok) return { text: await res.text(), source: '이 폴더의 파일' };
+  } catch (e) { /* 실패 */ }
+  return null;
+}
+
+function useData(productsText, latestText, historyText, approvedText, storesText) {
+  baseText = workText = productsText;
+  rawLatest = JSON.parse(latestText);
+  approved = new Set(Object.keys(approvedText ? (JSON.parse(approvedText) || {}) : {}));
+  baseStores = storesText ? (JSON.parse(storesText) || {}) : {};
+  workStores = JSON.parse(JSON.stringify(baseStores));
+  historyData = historyText ? JSON.parse(historyText) : {};
+  lastRecord = '';
+  Object.values(historyData).forEach((rec) => Object.keys(rec).forEach((t) => { if (t > lastRecord) lastRecord = t; }));
+  flagsAll = detectSuspicious(historyData);
+  loadedAt = new Date();
+  recompute(true);
+}
+
+// 목록(작업본)이 바뀌면 다시 계산
+function recompute(first) {
+  parseProducts(workText);
+  const rank = {};
+  listOrder.forEach((p, i) => { rank[p] = i; });
+  const hidden = new Set();
+  items = [];
+  collectedName = {};
+  Object.entries(rawLatest).forEach(([key, it], i) => {
+    const p = String(it.product);
+    if (!(p in rank)) { hidden.add(p); return; } // 목록에서 뺀 상품: 기록은 그대로, 화면에서만 제외
+    const slug = slugOfUrl(linkOf[p]);
+    if (it.store && !collectedName[slug]) collectedName[slug] = it.store;
+    items.push({ key, slug, store: it.store, product: p, productName: it.productName || '', optionName: it.optionName || '', daily: it.daily || {}, cat: catOfProduct(p), site: rank[p] * 100000 + i });
+  });
+  hiddenProducts = hidden.size;
+  items.sort((a, b) => a.site - b.site);
+
+  buildDayData(new Date());
+  agg = {}; cover = {}; dayCount = {};
+  const byKey = {};
+  items.forEach((it) => { byKey[it.key] = it; });
+  Object.entries(dayData).forEach(([day, rows]) => {
+    const seen = new Set();
+    Object.entries(rows).forEach(([key, v]) => {
+      const it = byKey[key];
+      const lb = unitOf(it).label;
+      const a = ((agg[day] = agg[day] || {})[it.cat] = agg[day][it.cat] || {});
+      const s = (a[it.slug] = a[it.slug] || {});
+      s[lb] = (s[lb] || 0) + soldOf(it, v);
+      ((cover[day] = cover[day] || {})[it.cat] = cover[day][it.cat] || {})[it.slug] = true;
+      seen.add(it.product);
+    });
+    dayCount[day] = seen.size;
+  });
+  allDays = Object.keys(agg).sort();
+  fullDay = allDays.filter((d) => d < currentDay && dayCount[d] >= listOrder.length / 2).pop() || null;
+
+  if (!active || !fileCats.includes(active)) active = fileCats[0];
+  if (first || !selDay) {
+    selDay = fullDay || allDays[allDays.length - 1] || ymd(new Date());
+    const sd = toD(selDay);
+    calMonth = new Date(sd.getFullYear(), sd.getMonth(), 1);
+  }
+  renderVersion();
+  renderStatus();
+  render();
+  renderManage();
+}
+
+async function load() {
+  const [p, l, h, a, s] = await Promise.all(['products.txt', 'data/latest.json', 'data/history.json', 'data/approved.json', STORES_FILE].map(fetchRepoFile));
+  if (!p || !l) { showFilePicker(); return; }
+  sourceLabel = '출처: ' + l.source;
+  try { useData(p.text, l.text, h && h.text, a && a.text, s && s.text); } catch (e) { showError(e); }
+}
+function showError(e) {
+  document.getElementById('stores').innerHTML = `<div class="muted">기록을 읽는 중 오류가 났습니다: ${escapeHtml(e.message || e)}</div>`;
+}
+// 인터넷이 안 되거나 파일을 직접 열었을 때: 저장소 폴더의 파일을 골라서 읽기 (읽기만 함)
+function showFilePicker() {
+  document.getElementById('stores').innerHTML = `<div class="filepick"><b>저장된 기록을 자동으로 불러오지 못했습니다.</b><br>
+    competitor-sales-dashboard 폴더의 <b>products.txt</b> 와 data 폴더의 <b>latest.json</b> (가능하면 history.json, approved.json, stores.json 도) 을 함께 선택하세요. 파일은 읽기만 합니다.<br><br>
+    <input type="file" id="pick" multiple accept=".txt,.json"></div>`;
+  document.getElementById('pick').addEventListener('change', async (ev) => {
+    const files = {};
+    for (const f of ev.target.files) files[f.name.toLowerCase()] = await f.text();
+    if (!files['products.txt'] || !files['latest.json']) { alert('products.txt 와 latest.json 은 꼭 함께 선택해야 합니다.'); return; }
+    sourceLabel = '출처: 직접 선택한 파일';
+    try { useData(files['products.txt'], files['latest.json'], files['history.json'], files['approved.json'], files['stores.json']); } catch (e) { showError(e); }
+  });
+}
+
+// ---------------- 집계 ----------------
+function weekStart(day) { const d = toD(day); const w = (d.getDay() + 6) % 7; d.setDate(d.getDate() - w); return ymd(d); }
+function monthStart(day) { return day.slice(0, 8) + '01'; }
+function yearStart(day) { return day.slice(0, 5) + '01-01'; }
+function sameDayPrevMonth(day) {
+  const d = toD(day); const t = new Date(d.getFullYear(), d.getMonth() - 1, 1);
+  const last = new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate();
+  t.setDate(Math.min(d.getDate(), last)); return ymd(t);
+}
+function periods(day) { return [[day, day], [weekStart(day), day], [monthStart(day), day], [yearStart(day), day]]; }
+function comparePeriods(day) {
+  // 전일 = 직전 근무일 (토·일·공휴일 판매는 다음 근무일에 합쳐지므로)
+  const pd = prevWorkday(day), pw = addDays(day, -7), pm = sameDayPrevMonth(day);
+  return [[[pd, pd], [day, day]], [[weekStart(pw), pw], [weekStart(day), day]], [[monthStart(pm), pm], [monthStart(day), day]]];
+}
+function sumRange(cat, slugs, from, to) {
+  const o = {}; let covered = false;
+  for (let d = from; d <= to; d = addDays(d, 1)) {
+    const a = agg[d] && agg[d][cat]; if (!a) continue;
+    Object.entries(a).forEach(([sl, u]) => {
+      if (slugs && !slugs.includes(sl)) return;
+      if (cover[d][cat][sl]) covered = true;
+      Object.entries(u).forEach(([lb, n]) => { o[lb] = (o[lb] || 0) + n; });
+    });
+  }
+  return { o, covered };
+}
+function fmtSums(o) {
+  const ks = Object.keys(o).sort((a, b) => UNIT_ORDER.indexOf(a) - UNIT_ORDER.indexOf(b));
+  if (!ks.length) return '0';
+  return ks.map((k) => `${fmtNum(o[k])}${k}`).join(' · ');
+}
+
+// ---------------- 화면 ----------------
+function slugsOf(cat) { return [...new Set(items.filter((it) => it.cat === cat).map((it) => it.slug))]; }
+function listSlugsOf(cat) { return [...new Set(listOrder.filter((p) => catOfProduct(p) === cat).map((p) => slugOfUrl(linkOf[p])))]; }
+function lastDoneDay() { return allDays.filter((d) => d < currentDay).pop() || null; }
+function okProducts(day) {
+  const rows = (day && dayData[day]) || {};
+  return new Set(items.filter((it) => rows[it.key]).map((it) => it.product));
+}
+const fmtDT = (d) => `${ymd(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+function renderVersion() {
+  document.getElementById('verNo').textContent = APP_VERSION;
+  document.getElementById('verScreen').textContent = SCREEN_UPDATED;
+  const vd = document.getElementById('verData');
+  vd.textContent = lastRecord ? lastRecord.replace('T', ' ') : '기록 없음';
+  vd.title = loadedAt ? `이 화면이 데이터를 불러온 시각 ${fmtDT(loadedAt)}` : '';
+  document.title = `커머스 인사이트 05 · ${APP_VERSION} (화면 ${SCREEN_UPDATED})`;
+  setModeLabel();
+}
+
+function renderStatus() {
+  document.getElementById('stProducts').textContent = listOrder.length.toLocaleString('ko-KR');
+  const dup = linkLines - listOrder.length;
+  document.getElementById('stLinks').textContent = `products.txt 링크 ${linkLines}줄${dup > 0 ? ` (같은 상품 ${dup}줄 중복)` : ''}`;
+  const lastDay = lastDoneDay();
+  document.getElementById('stOk').textContent = `${okProducts(lastDay).size} / ${listOrder.length}`;
+  document.getElementById('stOkDay').textContent = lastDay ? `${lastDay} 마감 기록 기준` : '';
+  document.getElementById('stLast').innerHTML = escapeHtml(lastRecord ? lastRecord.replace('T', ' ') : '기록 없음')
+    + (fullDay ? `<br><span style="font-weight:400">마지막 전체 수집일 ${fullDay} (${dayCount[fullDay]}개 상품)${fullDay !== lastDay ? ' · 이후는 일부 상품만 수집됨' : ''}</span>` : '');
+  document.getElementById('stSource').textContent = `${sourceLabel}${hiddenProducts ? ` · 목록에서 뺀 ${hiddenProducts}개 상품의 기록은 보존(화면 제외)` : ''}`;
+}
+
+function renderCalendar() {
+  const y = calMonth.getFullYear(), m = calMonth.getMonth();
+  document.getElementById('calTitle').textContent = `${y}년 ${m + 1}월`;
+  let html = ['일', '월', '화', '수', '목', '금', '토'].map((x) => `<div style="text-align:center;color:#64748b">${x}</div>`).join('');
+  for (let i = 0; i < calMonth.getDay(); i++) html += '<div></div>';
+  const last = new Date(y, m + 1, 0).getDate();
+  for (let d = 1; d <= last; d++) {
+    const day = `${y}-${pad(m + 1)}-${pad(d)}`;
+    const has = !!(cover[day] && cover[day][active]);
+    const total = has ? sumRange(active, null, day, day).o : null;
+    const note = day === currentDay ? '<small>진행중</small>' : has && dayCount[day] < listOrder.length / 2 ? `<small class="na">일부 ${dayCount[day]}개</small>` : '';
+    html += `<div class="day ${has ? 'has' : 'nodata'} ${day === selDay ? 'sel today' : ''}" ${has ? `data-day="${day}"` : ''}>${d}${has ? `<b>${fmtSums(total)}</b>` : ''}${note}</div>`;
+  }
+  const cal = document.getElementById('cal');
+  cal.innerHTML = html;
+  cal.querySelectorAll('[data-day]').forEach((el) => el.addEventListener('click', () => { selDay = el.dataset.day; render(); }));
+}
+
+function cumulHtml(slugs) {
+  const labels = ['일 누적', '주 누적', '월 누적', '연 누적'];
+  return `<div class="cumul">${periods(selDay).map(([a, b], i) => `<div><small>${labels[i]}</small><strong>${fmtSums(sumRange(active, slugs, a, b).o)}</strong></div>`).join('')}</div>`;
+}
+function comparisonHtml(slugs) {
+  const lb = mainUnit(active);
+  const titles = [`전일(${prevWorkday(selDay).slice(5).replace('-', '/')}) 대비`, '전주 대비', '전월 대비'];
+  return `<div class="compare">${comparePeriods(selDay).map(([prev, cur], i) => {
+    const p = sumRange(active, slugs, prev[0], prev[1]);
+    const c = sumRange(active, slugs, cur[0], cur[1]);
+    if (!p.covered || !c.covered) return `<div class="delta"><span class="dt">${titles[i]}</span><strong class="na">비교 불가</strong><em>기록 없음</em></div>`;
+    const old = p.o[lb] || 0, now = c.o[lb] || 0, diff = Math.round((now - old) * 10) / 10;
+    const rate = old ? `${diff >= 0 ? '+' : ''}${(diff / old * 100).toFixed(1)}%` : '—';
+    return `<div class="delta"><span class="dt">${titles[i]}</span><strong class="${diff > 0 ? 'positive' : diff < 0 ? 'negative' : 'neutral'}">${diff > 0 ? '▲ +' : diff < 0 ? '▼ ' : '– '}${fmtNum(diff)}${lb}</strong><em>${rate}</em></div>`;
+  }).join('')}</div>`;
+}
+
+function render() {
+  if (!active) return;
+  document.getElementById('cats').innerHTML = fileCats.map((c) => `<button class="cat ${c === active ? 'active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)} <small>${listSlugsOf(c).length}개 업체 · ${listOrder.filter((p) => catOfProduct(p) === c).length}개 상품</small></button>`).join('');
+  document.querySelectorAll('#cats [data-cat]').forEach((el) => el.addEventListener('click', () => { active = el.dataset.cat; render(); if (mtab === 'urls') renderManage(); }));
+  const partial = dayCount[selDay] < listOrder.length / 2;
+  document.getElementById('catTitle').textContent = `${active} · 업체별 현황`;
+  document.getElementById('catSub').textContent = `품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지 · ${selDay} 기준${partial ? ` (${dayCount[selDay] || 0}개 상품만 수집된 날)` : ''}`;
+  document.getElementById('orderBtn').textContent = order === 'sales' ? '가나다순 보기' : '판매량순 보기';
+  renderCalendar();
+  const lb = mainUnit(active);
+  const hasCat = listSlugsOf(active).length > 0;
+  document.getElementById('totals').innerHTML = ['전체 일 누적 판매량', '전체 주 누적 판매량', '전체 월 누적 판매량', '전체 연 누적 판매량'].map((label, i) => {
+    const [a, b] = periods(selDay)[i];
+    const today = i === 0 ? `<small style="margin-top:4px">오늘(진행중) ${fmtSums(sumRange(active, null, currentDay, currentDay).o)}</small>` : '';
+    return `<div class="total"><small>${label}</small><strong>${hasCat ? fmtSums(sumRange(active, null, a, b).o) : '데이터 없음'}</strong>${hasCat ? today : ''}</div>`;
+  }).join('');
+
+  // 순위 = 선택일(일간) 판매량. 정렬은 '판매량순(1위부터)' 또는 '가나다순'
+  let list = listSlugsOf(active).map((slug) => ({
+    slug, name: storeName(slug),
+    sales: sumRange(active, [slug], selDay, selDay).o[lb] || 0,
+    today: sumRange(active, [slug], currentDay, currentDay).o,
+  }));
+  const ranked = list.slice().sort((a, b) => b.sales - a.sales || a.name.localeCompare(b.name, 'ko-KR'));
+  ranked.forEach((x, i) => { x.rank = i + 1; });
+  list = order === 'name' ? list.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR')) : ranked;
+  const max = Math.max(1, ...list.map((x) => x.sales));
+  document.getElementById('stores').innerHTML = list.length ? list.map((s) => {
+    const memo = workStores[s.slug] && workStores[s.slug].memo;
+    return `<div class="store"><div class="storeName"><span class="rank ${s.rank === 1 ? 'first' : s.rank === 2 ? 'second' : s.rank === 3 ? 'third' : ''}">${s.rank}위</span><div><b>${escapeHtml(s.name)}</b>${memo ? `<small style="display:block">${escapeHtml(memo)}</small>` : ''}</div></div>${cumulHtml([s.slug])}${comparisonHtml([s.slug])}<div><div class="sales">${fmtNum(s.sales)}${lb}</div><div class="bar"><i style="width:${Math.round(s.sales / max * 100)}%"></i></div><small style="display:block;text-align:right">일간 · ${selDay.slice(5).replace('-', '/')}</small><small class="today">오늘 ${fmtSums(s.today)}</small></div></div>`;
+  }).join('') : '<div class="muted">아직 등록된 업체가 없습니다. 상품 URL 관리에서 상품 URL을 등록하면 다음 정각 수집부터 이곳에 표시됩니다.</div>';
+}
+
+let order = 'sales';
+function toggleOrder() { order = order === 'sales' ? 'name' : 'sales'; try { localStorage.setItem('c05order', order); } catch (e) { /* 무시 */ } render(); }
+try { if (localStorage.getItem('c05order') === 'name') order = 'name'; } catch (e) { /* 무시 */ }
+function addCategory() {
+  const i = document.getElementById('newCat');
+  const v = i.value.trim();
+  if (!v) return;
+  const before = fileCats.length;
+  ops.addCat(v);
+  if (fileCats.length > before) { active = v; i.value = ''; render(); openManage('cats'); }
+}
+// 관리 칸 열기/닫기 (같은 버튼을 다시 누르면 닫힘)
+function openManage(t) {
+  const box = document.getElementById('manage');
+  if (t === 'close' || (!box.hidden && mtab === t)) { box.hidden = true; editing = null; }
+  else { box.hidden = false; mtab = t; editing = null; }
+  document.querySelectorAll('[data-open]').forEach((b) => b.classList.toggle('on', !box.hidden && b.dataset.open === mtab));
+  renderManage();
+}
+function moveMonth(n) { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + n, 1); renderCalendar(); }
+
+// ---------------- 관리: products.txt 작업본 편집 (줄 단위로 고쳐서 휴무일·메모 줄 등은 그대로 둠) ----------------
+const EOL = () => (baseText.includes('\r\n') ? '\r\n' : '\n');
+function linesOf(text) { return text.split(/\r?\n/); }
+function joinLines(lines) { return lines.join(EOL()); }
+function sectionsOf(lines) {
+  const secs = [];
+  let cur = { name: null, h: -1, from: 0 };
+  lines.forEach((raw, i) => {
+    const m = raw.replace(/^﻿/, '').trim().match(/^\[(.+)\]$/);
+    if (m) { cur.to = i; secs.push(cur); cur = { name: m[1].trim(), h: i, from: i + 1 }; }
+  });
+  cur.to = lines.length; secs.push(cur);
+  return secs;
+}
+// 링크 줄 목록 [{idx, no, url, unit, cat}]
+function linkRows() {
+  const lines = linesOf(workText);
+  const out = [];
+  sectionsOf(lines).forEach((sec) => {
+    if (RESERVED.includes(sec.name)) return;
+    for (let i = sec.from; i < sec.to; i++) {
+      const l = lines[i].replace(/^﻿/, '').trim();
+      const m = l.match(/products\/(\d+)/);
+      if (!m) continue;
+      const url = l.split(/\s+/)[0];
+      out.push({ idx: i, no: m[1], url, unit: l.slice(url.length).trim(), cat: sec.name || fileCats[0], slug: slugOfUrl(url) });
+    }
+  });
+  return out;
+}
+function insertIntoCat(lines, cat, newLines) {
+  let secs = sectionsOf(lines);
+  let sec = secs.find((s) => s.name === cat) || (cat === fileCats[0] && !secs.some((s) => s.name === cat) ? secs[0] : null);
+  if (!sec) { lines = addCatLines(lines, cat); secs = sectionsOf(lines); sec = secs.find((s) => s.name === cat); }
+  let at = sec.from;
+  for (let i = sec.from; i < sec.to; i++) if (lines[i].trim()) at = i + 1;
+  lines.splice(at, 0, ...newLines);
+  return lines;
+}
+function addCatLines(lines, name) {
+  const secs = sectionsOf(lines);
+  const res = secs.find((s) => RESERVED.includes(s.name));
+  if (res) { lines.splice(res.h, 0, `[${name}]`, ''); return lines; }
+  while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+  lines.push('', `[${name}]`, '');
+  return lines;
+}
+function normalizeUrl(u) {
+  const m = String(u).trim().match(/^(https?:\/\/(?:smartstore|brand)\.naver\.com\/[^/?#\s]+\/products\/\d+)/i);
+  return m ? m[1].replace(/^http:/i, 'https:') : null;
+}
+function checkCatName(name, except) {
+  if (!name) return '이름을 입력하세요.';
+  if (/[\[\]]/.test(name)) return '[ ] 는 이름에 쓸 수 없습니다.';
+  if (RESERVED.includes(name)) return `'${name}' 은 휴무일 목록용 이름이라 쓸 수 없습니다.`;
+  if (name !== except && fileCats.includes(name)) return '같은 이름의 품목이 이미 있습니다.';
+  return '';
+}
+function applyText(lines) { workText = joinLines(lines); recompute(false); }
+
+const ops = {
+  addCat(name) {
+    const err = checkCatName(name); if (err) return alert(err);
+    applyText(addCatLines(linesOf(workText), name));
+  },
+  renameCat(old) {
+    const name = (prompt(`'${old}' 품목의 새 이름`, old) || '').trim();
+    if (!name || name === old) return;
+    const err = checkCatName(name, old); if (err) return alert(err);
+    if (old === '장판' && !confirm("'장판' 이름을 바꾸면 기본 단위(10cm=1개, m 표시)가 박스로 바뀝니다. 링크마다 '10cm' 처럼 단위를 적어 두지 않았다면 수량 표시가 달라집니다. 계속할까요?")) return;
+    const lines = linesOf(workText);
+    const sec = sectionsOf(lines).find((s) => s.name === old);
+    if (!sec) return;
+    lines[sec.h] = `[${name}]`;
+    if (active === old) active = name;
+    applyText(lines);
+  },
+  deleteCat(name) {
+    const rows = linkRows().filter((r) => r.cat === name);
+    let moveTo = null;
+    if (rows.length) {
+      const others = fileCats.filter((c) => c !== name);
+      const ans = prompt(`'${name}' 품목에 상품 링크 ${rows.length}개가 있습니다.\n옮길 품목 이름을 입력하세요 (${others.join(', ')}).\n비워 두면 링크도 목록에서 뺍니다 (판매 기록은 보존).`, others[0] || '');
+      if (ans === null) return;
+      moveTo = ans.trim() || null;
+      if (moveTo && !others.includes(moveTo)) return alert('없는 품목입니다.');
+      if (!moveTo && !confirm(`링크 ${rows.length}개를 목록에서 뺄까요? 수집은 멈추지만 지금까지의 판매 기록은 지워지지 않습니다.`)) return;
+    } else if (!confirm(`'${name}' 품목을 삭제할까요?`)) return;
+    let lines = linesOf(workText);
+    const sec = sectionsOf(lines).find((s) => s.name === name);
+    const moved = rows.map((r) => lines[r.idx].trim());
+    if (sec) lines.splice(sec.h, sec.to - sec.h);
+    else rows.slice().reverse().forEach((r) => lines.splice(r.idx, 1)); // 제목 줄 없는 첫 품목
+    if (moveTo && moved.length) lines = insertIntoCat(lines, moveTo, moved);
+    applyText(lines);
+  },
+  saveUrl(form) {
+    const url = normalizeUrl(form.url);
+    if (!url) return alert('스마트스토어 또는 브랜드스토어 상품 주소를 넣어주세요.\n예) https://smartstore.naver.com/스토어/products/1234567890');
+    const unit = form.unit.trim();
+    if (unit && !/^(\d+\s*장|\d+(\.\d+)?\s*cm|\d+(\.\d+)?\s*m)$/i.test(unit)) return alert("단위는 '9장', '20cm', '1m' 처럼 적어주세요. (비워 두면 품목 기본 단위)");
+    const no = url.match(/products\/(\d+)/)[1];
+    const dup = linkRows().find((r) => r.no === no && (!editing || r.idx !== editing.idx));
+    if (dup) return alert(`이미 등록된 상품입니다 (${dup.cat}).`);
+    let lines = linesOf(workText);
+    const line = url + (unit ? ' ' + unit : '');
+    if (editing && editing.type === 'url') {
+      const old = linkRows().find((r) => r.idx === editing.idx);
+      if (old && old.cat === form.cat) lines[editing.idx] = line;
+      else { lines.splice(editing.idx, 1); lines = insertIntoCat(lines, form.cat, [line]); }
+    } else lines = insertIntoCat(lines, form.cat, [line]);
+    editing = null;
+    applyText(lines);
+  },
+  deleteUrl(idx) {
+    const r = linkRows().find((x) => x.idx === idx);
+    if (!r || !confirm(`이 링크를 목록에서 뺄까요?\n${r.url}\n수집은 멈추지만 지금까지의 판매 기록은 지워지지 않습니다.`)) return;
+    const lines = linesOf(workText);
+    lines.splice(idx, 1);
+    applyText(lines);
+  },
+  saveStore(form) {
+    let slug = form.slug.trim();
+    const fromUrl = slugOfUrl(slug + (slug.includes('/products/') ? '' : '/products/0'));
+    if (/naver\.com\//.test(slug)) slug = fromUrl || (slug.match(/naver\.com\/([^/?#]+)/) || [])[1] || '';
+    if (!/^[A-Za-z0-9_-]+$/.test(slug)) return alert('스토어 주소를 넣어주세요. 예) smartstore.naver.com/tilelab 또는 tilelab');
+    const oldSlug = editing && editing.type === 'store' ? editing.slug : null;
+    if (slug !== oldSlug && workStores[slug]) return alert('이미 등록된 업체입니다.');
+    if (oldSlug && slug !== oldSlug) {
+      if (linkRows().some((r) => r.slug === oldSlug)) return alert('상품 링크가 있는 업체는 스토어 주소를 바꿀 수 없습니다. 표시 이름과 메모만 바꿀 수 있습니다.');
+      delete workStores[oldSlug];
+    }
+    workStores[slug] = { name: form.name.trim(), memo: form.memo.trim(), added: (workStores[slug] && workStores[slug].added) || ymd(new Date()) };
+    editing = null;
+    recompute(false);
+  },
+  deleteStore(slug) {
+    const rows = linkRows().filter((r) => r.slug === slug);
+    const msg = rows.length
+      ? `'${storeName(slug)}' 업체를 삭제하면 이 업체 상품 링크 ${rows.length}개도 목록에서 빠집니다.\n수집은 멈추지만 지금까지의 판매 기록은 지워지지 않습니다. 계속할까요?`
+      : `'${storeName(slug)}' 업체 등록을 삭제할까요?`;
+    if (!confirm(msg)) return;
+    const lines = linesOf(workText);
+    rows.slice().reverse().forEach((r) => lines.splice(r.idx, 1));
+    delete workStores[slug];
+    applyText(lines);
+  },
+};
+
+function renderManage() {
+  document.querySelectorAll('#mtabs button').forEach((b) => b.classList.toggle('on', b.dataset.t === mtab));
+  const body = document.getElementById('mbody');
+  const rows = linkRows();
+  if (mtab === 'cats') {
+    body.innerHTML = `<div class="mform"><b>품목 추가</b><input id="fCat" placeholder="예: 매트"><button class="mbtn primary" id="bAddCat">추가</button><small class="muted">products.txt 에 [품목명] 제목 줄로 저장됩니다.</small></div>
+    <div class="list"><table><tr><th>품목</th><th>업체 수</th><th>상품 수</th><th>기본 단위</th><th></th></tr>${fileCats.map((c) => `<tr><td><b>${escapeHtml(c)}</b></td><td>${listSlugsOf(c).length}</td><td>${rows.filter((r) => r.cat === c).length}</td><td>${CAT_UNITS[c] ? '1개=10cm (m)' : '1개=1박스'}</td>
+      <td style="text-align:right"><button class="mbtn" data-op="renameCat" data-v="${escapeHtml(c)}">이름 수정</button> <button class="mbtn danger" data-op="deleteCat" data-v="${escapeHtml(c)}">삭제</button></td></tr>`).join('')}</table></div>`;
+    document.getElementById('bAddCat').onclick = () => { ops.addCat(document.getElementById('fCat').value.trim()); };
+  } else if (mtab === 'stores') {
+    const slugs = [...new Set(Object.keys(workStores).concat(rows.map((r) => r.slug)))].filter(Boolean)
+      .sort((a, b) => storeName(a).localeCompare(storeName(b), 'ko-KR'));
+    const e = editing && editing.type === 'store' ? editing : null;
+    const er = e ? workStores[e.slug] || {} : {};
+    body.innerHTML = `<div class="mform"><b>${e ? '업체 수정' : '업체 등록'}</b><input id="fSlug" placeholder="스토어 주소 (예: smartstore.naver.com/tilelab)" style="min-width:260px" value="${e ? escapeHtml(e.slug) : ''}"><input id="fName" placeholder="표시 이름 (비우면 수집된 이름)" value="${escapeHtml(e ? (er.name || '') : '')}"><input id="fMemo" placeholder="메모" value="${escapeHtml(e ? (er.memo || '') : '')}"><button class="mbtn primary" id="bSaveStore">${e ? '수정 반영' : '등록'}</button>${e ? '<button class="mbtn" id="bCancel">취소</button>' : ''}<small class="muted">업체를 등록한 뒤 상품 URL 관리에서 그 업체 상품 링크를 넣으세요.</small></div>
+    <div class="list"><table><tr><th>업체</th><th>스토어 주소</th><th>품목</th><th>상품 수</th><th>메모</th><th>상태</th><th></th></tr>${slugs.map((s) => {
+      const rs = rows.filter((r) => r.slug === s);
+      const reg = workStores[s];
+      return `<tr><td><b>${escapeHtml(storeName(s))}</b>${reg && reg.name && collectedName[s] && reg.name !== collectedName[s] ? `<small class="muted" style="display:block">수집 이름: ${escapeHtml(collectedName[s])}</small>` : ''}</td><td>${escapeHtml(s)}</td><td>${escapeHtml([...new Set(rs.map((r) => r.cat))].join(', ') || '-')}</td><td>${rs.length}</td><td>${escapeHtml((reg && reg.memo) || '')}</td><td>${reg ? '등록됨' : '<span class="muted">목록에서 자동 인식</span>'}</td>
+        <td style="text-align:right;white-space:nowrap"><button class="mbtn" data-op="editStore" data-v="${escapeHtml(s)}">수정</button> <button class="mbtn danger" data-op="deleteStore" data-v="${escapeHtml(s)}">삭제</button></td></tr>`;
+    }).join('')}</table></div>`;
+    document.getElementById('bSaveStore').onclick = () => ops.saveStore({ slug: document.getElementById('fSlug').value, name: document.getElementById('fName').value, memo: document.getElementById('fMemo').value });
+    const c = document.getElementById('bCancel'); if (c) c.onclick = () => { editing = null; renderManage(); };
+  } else if (mtab === 'urls') {
+    const e = editing && editing.type === 'url' ? rows.find((r) => r.idx === editing.idx) : null;
+    const info = {};
+    items.forEach((it) => { if (!info[it.product]) info[it.product] = it; });
+    const shown = rows.filter((r) => r.cat === active);
+    body.innerHTML = `<div class="mform"><b>${e ? '상품 URL 수정' : '상품 URL 등록'}</b><input id="fUrl" placeholder="https://smartstore.naver.com/스토어/products/번호" style="min-width:330px;flex:1" value="${e ? escapeHtml(e.url) : ''}">
+      <select id="fCatSel">${fileCats.map((c) => `<option ${c === (e ? e.cat : active) ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}</select>
+      <input id="fUnit" placeholder="단위 (예: 9장, 20cm)" style="width:150px" value="${e ? escapeHtml(e.unit) : ''}"><button class="mbtn primary" id="bSaveUrl">${e ? '수정 반영' : '등록'}</button>${e ? '<button class="mbtn" id="bCancel">취소</button>' : ''}</div>
+    <p class="muted" style="margin:8px 0 0;font-size:13px">왼쪽에서 고른 품목(<b>${escapeHtml(active)}</b>)의 링크 ${shown.length}개 · 전체 ${rows.length}줄</p>
+    <div class="list"><table><tr><th>#</th><th>업체</th><th>상품명</th><th>링크</th><th>단위</th><th>최근 수집</th><th></th></tr>${shown.map((r, i) => {
+      const it = info[r.no];
+      const last = items.filter((x) => x.product === r.no).map((x) => Object.keys(historyData[x.key] || {}).sort().pop() || '').sort().pop();
+      return `<tr><td>${i + 1}</td><td>${escapeHtml(storeName(r.slug))}</td><td>${escapeHtml(it ? it.productName : '아직 수집 기록 없음')}</td><td><a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.url)}</a></td><td>${escapeHtml(r.unit || '기본')}</td><td>${last ? escapeHtml(last.replace('T', ' ')) : '<span class="na">없음</span>'}</td>
+        <td style="text-align:right;white-space:nowrap"><button class="mbtn" data-op="editUrl" data-v="${r.idx}">수정</button> <button class="mbtn danger" data-op="deleteUrl" data-v="${r.idx}">삭제</button></td></tr>`;
+    }).join('') || '<tr><td colspan="7">이 품목에 등록된 링크가 없습니다.</td></tr>'}</table></div>`;
+    document.getElementById('bSaveUrl').onclick = () => ops.saveUrl({ url: document.getElementById('fUrl').value, cat: document.getElementById('fCatSel').value, unit: document.getElementById('fUnit').value });
+    const c = document.getElementById('bCancel'); if (c) c.onclick = () => { editing = null; renderManage(); };
+  } else {
+    const lastDay = lastDoneDay();
+    const ok = okProducts(lastDay);
+    const seen = new Set(items.map((it) => it.product));
+    const miss = listOrder.filter((p) => !ok.has(p));
+    body.innerHTML = `<p class="muted" style="font-size:13px">${lastDay || ''} 마감 기준 기록이 없는 상품 ${miss.length}개 (전체 ${listOrder.length}개). 자동 수집은 관리용 컴퓨터의 작업 스케줄러(CompetitorStockHourly)가 매시 정각에 products.txt 의 링크를 열어 탬퍼몽키 수집기로 기록합니다.</p>
+    <div class="list"><table><tr><th>품목</th><th>업체</th><th>상품번호</th><th>상태</th><th>링크</th></tr>${miss.map((p) => `<tr><td>${escapeHtml(catOfProduct(p))}</td><td>${escapeHtml(storeName(slugOfUrl(linkOf[p])))}</td><td>${p}</td><td>${seen.has(p) ? `${lastDay} 기록 없음` : '수집 기록 없음'}</td><td><a href="${escapeHtml(linkOf[p])}" target="_blank" rel="noopener">${escapeHtml(linkOf[p])}</a></td></tr>`).join('') || '<tr><td colspan="5">모든 상품이 정상 수집되었습니다.</td></tr>'}</table></div>`;
+  }
+  body.querySelectorAll('[data-op]').forEach((b) => b.addEventListener('click', () => {
+    const op = b.dataset.op, v = b.dataset.v;
+    if (op === 'editStore') { editing = { type: 'store', slug: v }; renderManage(); return; }
+    if (op === 'editUrl') { editing = { type: 'url', idx: Number(v) }; renderManage(); return; }
+    ops[op](op === 'deleteUrl' ? Number(v) : v);
+  }));
+  renderSaveBar();
+}
+document.querySelectorAll('#mtabs button').forEach((b) => b.addEventListener('click', () => {
+  if (b.dataset.t === 'close') { openManage('close'); return; }
+  if (mtab !== b.dataset.t) openManage(b.dataset.t);
+}));
+
+// ---------------- 저장 ----------------
+const isDirtyList = () => workText !== baseText;
+const isDirtyStores = () => JSON.stringify(workStores) !== JSON.stringify(baseStores);
+function changeSummary() {
+  const nos = (t) => new Set((t.match(/products\/\d+/g) || []));
+  const a = nos(baseText), b = nos(workText);
+  const add = [...b].filter((x) => !a.has(x)).length, del = [...a].filter((x) => !b.has(x)).length;
+  const parts = [];
+  if (add) parts.push(`링크 +${add}`);
+  if (del) parts.push(`링크 -${del}`);
+  if (isDirtyList() && !add && !del) parts.push('목록 수정');
+  if (isDirtyStores()) parts.push('업체 정보 수정');
+  return parts.join(', ');
+}
+function renderSaveBar() {
+  const bar = document.getElementById('savebar');
+  const dirty = isDirtyList() || isDirtyStores();
+  const tok = ghToken || bridgeToken;
+  bar.className = 'savebar' + (dirty ? ' dirty' : '');
+  bar.innerHTML = dirty
+    ? `<b>저장 안 된 변경: ${escapeHtml(changeSummary())}</b><button class="mbtn primary" id="bSave" ${tok ? '' : 'disabled'}>깃허브에 저장</button><button class="mbtn" id="bUndo">변경 취소</button><button class="mbtn" id="bDown">products.txt 내려받기</button>${tok ? '' : '<span>저장하려면 오른쪽 위 <b>편집 켜기</b>에서 깃허브 토큰을 넣으세요.</span>'}`
+    : `<span>변경 없음 · 저장된 목록과 같습니다.</span><button class="mbtn" id="bDown">products.txt 내려받기</button>`;
+  const s = document.getElementById('bSave'); if (s) s.onclick = saveAll;
+  const u = document.getElementById('bUndo'); if (u) u.onclick = () => { if (confirm('저장하지 않은 변경을 모두 취소할까요?')) { workText = baseText; workStores = JSON.parse(JSON.stringify(baseStores)); editing = null; recompute(false); } };
+  document.getElementById('bDown').onclick = () => {
+    const blob = new Blob([workText], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'products.txt';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+}
+
+function ghHeaders() { return { Authorization: `token ${ghToken || bridgeToken}`, Accept: 'application/vnd.github+json' }; }
+function b64ToUtf8(b64) { return decodeURIComponent(escape(atob(b64.replace(/\n/g, '')))); }
+function utf8ToB64(str) { return btoa(unescape(encodeURIComponent(str))); }
+async function ghGet(path) {
+  const r = await fetch(`${REPO_API}${path}?t=${Date.now()}`, { headers: ghHeaders(), cache: 'no-store' });
+  if (r.status === 404) return { sha: undefined, text: null };
+  if (r.status === 401 || r.status === 403) throw new Error('토큰 권한 오류 (' + r.status + ')');
+  if (!r.ok) throw new Error('읽기 실패 ' + r.status);
+  const j = await r.json();
+  return { sha: j.sha, text: b64ToUtf8(j.content || '') };
+}
+async function ghPut(path, text, sha, message) {
+  const r = await fetch(REPO_API + path, { method: 'PUT', headers: Object.assign({ 'Content-Type': 'application/json' }, ghHeaders()), body: JSON.stringify({ message, content: utf8ToB64(text), sha }) });
+  if (!r.ok) throw new Error(`${path} 저장 실패 (${r.status})`);
+}
+// 다른 곳(다른 컴퓨터, products_upload.bat)에서 먼저 바뀌었으면 덮어쓰지 않고 멈춤
+async function saveAll() {
+  const msg = `커머스05 ${APP_VERSION} 관리: ${changeSummary()}`;
+  const btn = document.getElementById('bSave');
+  btn.disabled = true; btn.textContent = '저장 중…';
+  try {
+    if (isDirtyList()) {
+      const cur = await ghGet('products.txt');
+      if ((cur.text || '').replace(/^﻿/, '') !== baseText.replace(/^﻿/, '')) throw new Error('그 사이 다른 곳에서 products.txt 가 바뀌었습니다. 덮어쓰지 않았습니다. 변경 내용을 기억해 두고 새로고침한 뒤 다시 해주세요.');
+      await ghPut('products.txt', workText, cur.sha, msg);
+      baseText = workText;
+    }
+    if (isDirtyStores()) {
+      const cur = await ghGet(STORES_FILE);
+      if (JSON.stringify(cur.text ? JSON.parse(cur.text) : {}) !== JSON.stringify(baseStores)) throw new Error('그 사이 다른 곳에서 업체 정보가 바뀌었습니다. 새로고침한 뒤 다시 해주세요.');
+      await ghPut(STORES_FILE, JSON.stringify(workStores, null, 2) + '\n', cur.sha, msg);
+      baseStores = JSON.parse(JSON.stringify(workStores));
+    }
+    alert('저장했습니다. 다음 정각 자동 수집부터 바뀐 목록이 적용됩니다.');
+  } catch (e) {
+    alert('저장 실패: ' + (e.message || e));
+  }
+  renderSaveBar();
+}
+
+// ---------------- 편집 권한 (index.html 과 같은 방식: 토큰은 이 컴퓨터 브라우저에만 저장) ----------------
+function setModeLabel() {
+  const el = document.getElementById('mode');
+  if (bridgeToken && !ghToken) el.innerHTML = '관리용 컴퓨터 · 편집 가능';
+  else if (ghToken) el.innerHTML = '편집 가능 · <a href="#" id="editOff">편집 끄기</a>';
+  else el.innerHTML = '보기 전용 · <a href="#" id="editOn">편집 켜기</a>';
+  const on = document.getElementById('editOn'); if (on) on.onclick = (e) => { e.preventDefault(); enableEditing(); };
+  const off = document.getElementById('editOff'); if (off) off.onclick = (e) => { e.preventDefault(); disableEditing(); };
+}
+async function enableEditing() {
+  const t = prompt('관리 내용을 저장하려면 깃허브 토큰을 붙여넣어 주세요.\n(commerce-insight 저장소 쓰기 권한이 있는 github_pat_ 로 시작하는 값)\n토큰은 이 컴퓨터 브라우저에만 저장되고 파일에는 들어가지 않습니다.');
+  if (!t) return;
+  const token = t.trim().replace(/^["']|["']$/g, '');
+  try {
+    const r = await fetch('https://api.github.com/repos/ds4eqm-lgtm/commerce-insight', { headers: { Authorization: `token ${token}` } });
+    const j = await r.json();
+    if (!r.ok || !(j.permissions && j.permissions.push)) throw new Error(r.ok ? '쓰기 권한 없음' : '상태 ' + r.status);
+  } catch (e) { alert('토큰 확인 실패: ' + e.message); return; }
+  ghToken = token;
+  try { localStorage.setItem('ghToken', token); } catch (e) { /* 무시 */ }
+  setModeLabel(); renderSaveBar();
+}
+function disableEditing() {
+  if (!confirm('이 컴퓨터의 편집 기능을 끌까요? (저장된 토큰을 지워요)')) return;
+  ghToken = '';
+  try { localStorage.removeItem('ghToken'); } catch (e) { /* 무시 */ }
+  setModeLabel(); renderSaveBar();
+}
+// 탬퍼몽키 수집기가 깔린 관리용 컴퓨터면 토큰을 받아 씀 (메모리에만)
+window.addEventListener('message', (ev) => {
+  const m = ev.data;
+  if (!m || m.from !== 'cs-tracker' || m.type !== 'pong' || !m.token) return;
+  bridgeToken = m.token;
+  setModeLabel(); renderSaveBar();
+});
+window.addEventListener('beforeunload', (e) => { if (isDirtyList() || isDirtyStores()) { e.preventDefault(); e.returnValue = ''; } });
+
+renderVersion();
+load();
+setTimeout(() => window.postMessage({ from: 'cs-dashboard', type: 'ping' }, '*'), 800);
+</script></html>

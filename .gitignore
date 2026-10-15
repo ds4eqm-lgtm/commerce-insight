@@ -1,0 +1,4 @@
+# auto_open.bat 이 매시 깃허브에서 받아 쓰는 임시 목록
+products_live.txt
+# 미리보기용 로컬 설정
+.claude/

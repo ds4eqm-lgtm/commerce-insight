@@ -9,7 +9,7 @@ for /f "usebackq tokens=1" %%u in (`findstr /b /i "http" "products.txt"`) do (
 )
 timeout /t 30 /nobreak >nul
 echo Uploading all results at once...
-start "" "chrome.exe" "https://yongki9156.github.io/competitor-stock/#flush"
+start "" "chrome.exe" "https://ds4eqm-lgtm.github.io/commerce-insight/#flush"
 
 echo Waiting for background sync to finish...
 timeout /t 45 /nobreak >nul
