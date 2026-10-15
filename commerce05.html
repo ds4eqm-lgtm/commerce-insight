@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>커머스 인사이트 05 · V2.4</title><style>
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>커머스 인사이트 05 · V2.5</title><style>
 *{box-sizing:border-box}body{margin:0;background:#f4f6fa;font:15px/1.5 'Malgun Gothic',Arial,sans-serif;color:#182335}header{background:#fff;border-bottom:1px solid #e0e5ec;padding:15px 22px;display:flex;justify-content:space-between;align-items:center}h1{font-size:21px;margin:0}small{color:#64748b}.shell{display:grid;grid-template-columns:290px 1fr;gap:16px;max-width:1600px;margin:18px auto;padding:0 18px}.panel{background:white;border:1px solid #e1e7ee;border-radius:14px;padding:18px;box-shadow:0 2px 9px #0d22330b}.sidebar{display:flex;flex-direction:column;gap:12px}.cat{border:1px solid #dce4ee;border-radius:12px;background:#fff;text-align:left;padding:16px;font-weight:700;font-size:17px;cursor:pointer}.cat.active{border-color:#207a64;background:#e8f6f0;color:#106e54}.cat small{display:block;font-weight:400}.newcat{display:flex;gap:6px}.newcat input{min-width:0;flex:1}.newcat button,.btn{border:0;background:#16866a;color:white;border-radius:8px;padding:10px 13px;cursor:pointer}input{border:1px solid #d1d9e3;border-radius:8px;padding:10px}.main{display:grid;grid-template-rows:auto 1fr;gap:16px}.top{display:grid;grid-template-columns:1fr 220px;gap:16px}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:12px}.day{border:1px solid #e2e8f0;background:#f8fafc;border-radius:7px;min-height:48px;padding:5px;text-align:left;font-size:12px}.day.today{border:2px solid #16866a;background:#e8f6f0}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.stat{background:#f6f8fb;padding:13px;border-radius:9px}.stat b{display:block;font-size:22px}.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:15px}.total{border:1px solid #dce9e4;background:#eff8f4;border-radius:10px;padding:13px 15px}.total small{display:block;color:#506b62}.total strong{display:block;font-size:23px;margin-top:3px}.stores{display:grid;gap:10px;margin-top:14px}.store{display:grid;grid-template-columns:minmax(145px,1.1fr) minmax(310px,2fr) minmax(250px,1.6fr) 105px;gap:14px;align-items:center;padding:14px;border:1px solid #e2e8f0;border-radius:10px}.store b{font-size:16px}.cumul{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.cumul>div{background:#eff7f4;border-radius:7px;padding:8px 4px;text-align:center}.cumul small{display:block;font-size:11px}.cumul strong{font-size:14px;white-space:nowrap}.rank{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:9px;background:#edf3fa;color:#28435f;font-weight:800;margin-right:10px}.rank.first{background:#fff2cf;color:#875900}.rank.second{background:#eef0f4;color:#526174}.rank.third{background:#f9e9dc;color:#986137}.store .sales{font-weight:800;text-align:right;font-size:22px}.compare{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.delta{background:#f5f7fa;border-radius:9px;padding:9px 7px;text-align:center}.delta .dt{display:block;font-size:11px;color:#64748b}.delta strong{font-size:15px}.delta em{display:block;font-style:normal;font-size:11px;color:#64748b}.positive{color:#087a57}.negative{color:#c44141}.neutral{color:#64748b}.store .bar{height:5px;background:#e8edf2;border-radius:4px;margin-top:7px;overflow:hidden}.store .bar i{display:block;height:100%;background:#16866a;border-radius:4px}.store .storeName{display:flex;align-items:center}.muted{color:#64748b}.pill{font-size:12px;background:#e9f2fb;padding:3px 8px;border-radius:50px}.notice{font-size:12px;color:#64748b;margin-top:12px}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{padding:7px 10px;border:1px solid #cbd5e1;background:white;border-radius:8px;cursor:pointer}@media(max-width:1150px){.store{grid-template-columns:1fr 1fr}.cumul{grid-column:1/-1;grid-row:2}.compare{grid-column:1/-1;grid-row:3}.store .sales{grid-column:2;grid-row:1}}@media(max-width:800px){.totals{grid-template-columns:repeat(2,minmax(0,1fr))}.shell{grid-template-columns:1fr}.top{grid-template-columns:1fr}.store{grid-template-columns:1fr 120px}.compare{grid-column:1/-1}.sidebar{display:grid;grid-template-columns:repeat(2,1fr)}.newcat{grid-column:1/-1}}
 
 /* 색상 개선: 전체 합계는 통일된 청록, 업체 누적은 파랑, 비교는 증감색 */
@@ -65,11 +65,11 @@ header .version-stamp{color:#d5e5f4}
 .mode a{color:#fff}
 </style>
 <header><div><h1>커머스 인사이트 <small>커머스 05</small></h1><small>품목별 시장 규모 · 업체별 판매 순위 · 기간별 누적 판매량</small></div>
-<div class="version-wrap"><span class="pill">실데이터 연결 · <span class="mode" id="mode">보기 전용</span></span><div class="version-stamp" aria-label="화면 버전 및 수정 일시"><b id="verNo">-</b><span>화면 수정 <span id="verScreen">-</span></span></div><div class="version-stamp" aria-label="데이터 수집 일시"><span>데이터 수집 <span id="verData">-</span></span></div></div></header>
+<div class="version-wrap"><span class="pill">실데이터 연결 · <span class="mode" id="mode">보기 전용</span></span><div class="version-stamp" aria-label="화면 버전 및 수정 일시"><b id="verNo">-</b><span>화면 수정 <span id="verScreen">-</span></span></div><div class="version-stamp" aria-label="데이터 수집 일시"><span>데이터 수집 <span id="verData">-</span></span> · <a href="#" onclick="downloadScreen();return false" style="color:#fff">화면 저장</a></div></div></header>
 <div class="shell"><aside class="sidebar panel"><h2 style="margin:0;font-size:17px">모니터링 품목</h2><div id="cats"></div><label for="newCat"><b>새 모니터링 품목 추가</b></label><div class="newcat"><input id="newCat" placeholder="예: 매트"><button onclick="addCategory()">추가 +</button></div><small>품목을 클릭하면 합계와 업체 순위가 함께 바뀝니다.</small></aside>
 <main class="main"><section class="top"><div class="panel"><div class="head"><h2 style="margin:0" id="calTitle">-</h2><span><button class="navbtn" onclick="moveMonth(-1)">◀</button> <button class="navbtn" onclick="moveMonth(1)">▶</button> <span class="pill">날짜별 집계 위치</span></span></div><div class="calendar" id="cal"></div></div>
 <div class="panel"><h3>수집 상태</h3><div class="stats"><div class="stat">등록 상품<b id="stProducts">-</b><small id="stLinks"></small></div><div class="stat">정상 수집<b id="stOk">-</b><small id="stOkDay"></small></div></div><p class="muted">마지막 데이터 기록<br><b id="stLast">-</b></p><small id="stSource"></small></div></section>
-<section class="panel"><div class="head"><div><h2 style="margin:0" id="catTitle">-</h2><small id="catSub">품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지</small></div><div class="tabs"><button onclick="toggleOrder()" id="orderBtn">가나다순 보기</button><button onclick="openManage('stores')" data-open="stores">업체 관리</button><button onclick="openManage('urls')" data-open="urls">상품 URL 관리</button><button onclick="openManage('status')" data-open="status">수집 상태</button></div></div>
+<section class="panel"><div class="head"><div><h2 style="margin:0" id="catTitle">-</h2><small id="catSub">품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지</small></div><div class="tabs"><button onclick="toggleOrder()" id="orderBtn">가나다순 보기</button><button onclick="openManage('stores')" data-open="stores">업체 관리</button><button onclick="openManage('urls')" data-open="urls">상품 URL 관리</button><button onclick="openManage('status')" data-open="status">수집 상태</button><button onclick="downloadSales()">엑셀 내려받기</button></div></div>
 <div id="manage" hidden><div class="mtabs" id="mtabs"><button data-t="cats">품목 관리</button><button data-t="stores">업체 관리</button><button data-t="urls">상품 URL 관리</button><button data-t="status">수집 상태</button><button data-t="close" style="margin-left:auto">닫기 ✕</button></div>
 <div id="mbody"></div>
 <div class="savebar" id="savebar"></div></div>
@@ -77,8 +77,8 @@ header .version-stamp{color:#d5e5f4}
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 품목·업체·상품 URL을 바꾸면 <b>깃허브에 저장</b> 후 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V2.4';
-const SCREEN_UPDATED = '2026-10-16 05:27 KST';
+const APP_VERSION = 'V2.5';
+const SCREEN_UPDATED = '2026-10-16 05:40 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -721,6 +721,39 @@ const ops = {
     editing = null;
     applyText(lines);
   },
+  // 여러 줄 붙여넣기: [품목] 제목 줄 아래 링크는 그 품목으로, 제목 없는 링크는 고른 품목으로
+  bulkAdd(text, defCat) {
+    const have = new Set(linkRows().map((r) => r.no));
+    const groups = {}; // 품목 → 새 줄
+    const order = [];
+    let cat = defCat, added = 0, dup = 0;
+    const bad = [];
+    text.split(/\r?\n/).forEach((raw) => {
+      const l = raw.trim();
+      if (!l || l.startsWith('#')) return;
+      const h = l.match(/^\[(.+)\]$/);
+      if (h) {
+        cat = h[1].trim();
+        if (RESERVED.includes(cat)) { bad.push(l); cat = defCat; }
+        return;
+      }
+      const url = normalizeUrl(l.split(/\s+/)[0]);
+      if (!url) { bad.push(l); return; }
+      const no = url.match(/products\/(\d+)/)[1];
+      if (have.has(no)) { dup++; return; }
+      have.add(no);
+      const unit = l.slice(l.split(/\s+/)[0].length).trim();
+      const okUnit = /^(\d+\s*장|\d+(\.\d+)?\s*cm|\d+(\.\d+)?\s*m)$/i.test(unit);
+      if (!groups[cat]) { groups[cat] = []; order.push(cat); }
+      groups[cat].push(url + (okUnit ? ' ' + unit : ''));
+      added++;
+    });
+    let lines = linesOf(workText);
+    order.forEach((c) => { lines = insertIntoCat(lines, c, groups[c]); });
+    if (added) applyText(lines);
+    alert(`새로 추가 ${added}개 · 이미 등록돼 있어 건너뜀 ${dup}개${bad.length ? ` · 주소가 아니라 건너뜀 ${bad.length}줄` : ''}${added ? '\n깃허브에 저장을 눌러야 반영됩니다.' : ''}`);
+    return { added, dup, bad: bad.length };
+  },
   deleteUrl(idx) {
     const r = linkRows().find((x) => x.idx === idx);
     if (!r || !confirm(`이 링크를 목록에서 뺄까요?\n${r.url}\n수집은 멈추지만 지금까지의 판매 기록은 지워지지 않습니다.`)) return;
@@ -787,6 +820,9 @@ function renderManage() {
     body.innerHTML = `<div class="mform"><b>${e ? '상품 URL 수정' : '상품 URL 등록'}</b><input id="fUrl" placeholder="https://smartstore.naver.com/스토어/products/번호" style="min-width:330px;flex:1" value="${e ? escapeHtml(e.url) : ''}">
       <select id="fCatSel">${fileCats.map((c) => `<option ${c === (e ? e.cat : active) ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}</select>
       <input id="fUnit" placeholder="단위 (예: 9장, 20cm)" style="width:150px" value="${e ? escapeHtml(e.unit) : ''}"><button class="mbtn primary" id="bSaveUrl">${e ? '수정 반영' : '등록'}</button>${e ? '<button class="mbtn" id="bCancel">취소</button>' : ''}</div>
+    ${e ? '' : `<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700;font-size:13px">여러 개 한꺼번에 붙여넣기</summary><div class="mform" style="flex-direction:column;align-items:stretch">
+      <textarea id="fBulk" rows="6" placeholder="[데코타일]&#10;https://brand.naver.com/doden/products/11763529292&#10;https://brand.naver.com/doden/products/6941645716 2장" style="font:13px monospace;padding:8px;border:1px solid #d1d9e3;border-radius:8px"></textarea>
+      <div><button class="mbtn primary" id="bBulk">한꺼번에 등록</button> <small class="muted">[품목] 제목 줄 아래 링크는 그 품목으로, 제목이 없으면 위에서 고른 품목으로 들어갑니다. 이미 등록된 상품은 건너뜁니다.</small></div></div></details>`}
     <p class="muted" style="margin:8px 0 0;font-size:13px">왼쪽에서 고른 품목(<b>${escapeHtml(active)}</b>)의 링크 ${shown.length}개 · 전체 ${rows.length}줄</p>
     <div class="list"><table><tr><th>#</th><th>업체</th><th>상품명</th><th>링크</th><th>단위</th><th>최근 수집</th><th></th></tr>${shown.map((r, i) => {
       const it = info[r.no];
@@ -795,6 +831,7 @@ function renderManage() {
         <td style="text-align:right;white-space:nowrap"><button class="mbtn" data-op="editUrl" data-v="${r.idx}">수정</button> <button class="mbtn danger" data-op="deleteUrl" data-v="${r.idx}">삭제</button></td></tr>`;
     }).join('') || '<tr><td colspan="7">이 품목에 등록된 링크가 없습니다.</td></tr>'}</table></div>`;
     document.getElementById('bSaveUrl').onclick = () => ops.saveUrl({ url: document.getElementById('fUrl').value, cat: document.getElementById('fCatSel').value, unit: document.getElementById('fUnit').value });
+    const bb = document.getElementById('bBulk'); if (bb) bb.onclick = () => ops.bulkAdd(document.getElementById('fBulk').value, document.getElementById('fCatSel').value);
     const c = document.getElementById('bCancel'); if (c) c.onclick = () => { editing = null; renderManage(); };
   } else {
     const lastDay = lastDoneDay();
@@ -837,18 +874,79 @@ function renderSaveBar() {
   const tok = ghToken || bridgeToken;
   bar.className = 'savebar' + (dirty ? ' dirty' : '');
   bar.innerHTML = dirty
-    ? `<b>저장 안 된 변경: ${escapeHtml(changeSummary())}</b><button class="mbtn primary" id="bSave" ${tok ? '' : 'disabled'}>깃허브에 저장</button><button class="mbtn" id="bUndo">변경 취소</button><button class="mbtn" id="bDown">products.txt 내려받기</button>${tok ? '' : '<span>저장하려면 오른쪽 위 <b>편집 켜기</b>에서 깃허브 토큰을 넣으세요.</span>'}`
-    : `<span>변경 없음 · 저장된 목록과 같습니다.</span><button class="mbtn" id="bDown">products.txt 내려받기</button>`;
+    ? `<b>저장 안 된 변경: ${escapeHtml(changeSummary())}</b><button class="mbtn primary" id="bSave" ${tok ? '' : 'disabled'}>깃허브에 저장</button><button class="mbtn" id="bUndo">변경 취소</button><button class="mbtn" id="bDown">상품목록 내려받기</button>${tok ? '' : '<span>저장하려면 오른쪽 위 <b>편집 켜기</b>에서 깃허브 토큰을 넣으세요.</span>'}`
+    : `<span>변경 없음 · 저장된 목록과 같습니다.</span><button class="mbtn" id="bDown">상품목록 내려받기</button>`;
   const s = document.getElementById('bSave'); if (s) s.onclick = saveAll;
   const u = document.getElementById('bUndo'); if (u) u.onclick = () => { if (confirm('저장하지 않은 변경을 모두 취소할까요?')) { workText = baseText; workStores = JSON.parse(JSON.stringify(baseStores)); editing = null; recompute(false); } };
-  document.getElementById('bDown').onclick = () => {
-    const blob = new Blob([workText], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'products.txt';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  document.getElementById('bDown').onclick = downloadList;
+}
+
+// ---------------- 내려받기 ----------------
+// 파일 이름: 커머스인사이트_종류_버전_날짜-시각_순번 (순번 = 이 컴퓨터에서 그날 몇 번째 내려받기인지)
+function nextSeq() {
+  const day = ymd(new Date());
+  let s = {};
+  try { s = JSON.parse(localStorage.getItem('c05dlseq') || '{}'); } catch (e) { /* 무시 */ }
+  const n = (s.day === day ? s.n : 0) + 1;
+  try { localStorage.setItem('c05dlseq', JSON.stringify({ day, n })); } catch (e) { /* 무시 */ }
+  return n;
+}
+function dlInfo(kind, ext) {
+  const d = new Date();
+  const n = nextSeq();
+  const stamp = `${ymd(d).replace(/-/g, '')}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+  return {
+    name: `커머스인사이트_${kind}_${APP_VERSION}_${stamp}_${String(n).padStart(3, '0')}.${ext}`,
+    header: `커머스 인사이트 ${APP_VERSION} · ${kind} · 내려받음 ${fmtDT(d)} (그날 ${n}번째) · 화면 수정 ${SCREEN_UPDATED} · 데이터 수집 ${lastRecord ? lastRecord.replace('T', ' ') : '기록 없음'}`,
   };
+}
+function saveFile(text, name, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+// 상품목록: products.txt 와 같은 형식 (# 줄은 수집기와 대시보드가 무시함)
+function downloadList() {
+  const info = dlInfo('상품목록', 'txt');
+  saveFile(`# ${info.header}${EOL()}${workText.replace(/^﻿/, '')}`, info.name, 'text/plain;charset=utf-8');
+}
+// 판매집계: 엑셀에서 바로 열리는 CSV (선택일 기준, 모든 품목)
+function compareVals(cat, slugs) {
+  const lb = mainUnit(cat);
+  return comparePeriods(selDay).map(([prev, cur]) => {
+    const p = sumRange(cat, slugs, prev[0], prev[1]);
+    const c = sumRange(cat, slugs, cur[0], cur[1]);
+    if (!p.covered || !c.covered) return '비교 불가';
+    return Math.round(((c.o[lb] || 0) - (p.o[lb] || 0)) * 10) / 10;
+  });
+}
+function downloadSales() {
+  const info = dlInfo('판매집계', 'csv');
+  const q = (v) => { const s = String(v == null ? '' : v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const r1 = (n) => Math.round((n || 0) * 10) / 10;
+  const rows = [[info.header], [`기준일 ${selDay} · 오늘(진행중) ${currentDay} · 수량 단위는 품목별 단위 열 참고`], [],
+    ['품목', '순위', '업체', '스토어 주소', '기준일', '일간', '주 누적', '월 누적', '연 누적', '전일 대비', '전주 대비', '전월 대비', '오늘(진행중)', '단위']];
+  fileCats.forEach((cat) => {
+    const lb = mainUnit(cat);
+    const list = listSlugsOf(cat).map((slug) => ({ slug, v: periods(selDay).map(([a, b]) => sumRange(cat, [slug], a, b).o[lb] || 0) }))
+      .sort((a, b) => b.v[0] - a.v[0] || storeName(a.slug).localeCompare(storeName(b.slug), 'ko-KR'));
+    const total = periods(selDay).map(([a, b]) => sumRange(cat, null, a, b).o[lb] || 0);
+    rows.push([cat, '전체', '품목 합계', '', selDay, ...total.map(r1), ...compareVals(cat, null), r1(sumRange(cat, null, currentDay, currentDay).o[lb]), lb]);
+    list.forEach((s, i) => rows.push([cat, i + 1, storeName(s.slug), s.slug, selDay, ...s.v.map(r1), ...compareVals(cat, [s.slug]), r1(sumRange(cat, [s.slug], currentDay, currentDay).o[lb]), lb]));
+  });
+  saveFile('﻿' + rows.map((r) => r.map(q).join(',')).join('\r\n'), info.name, 'text/csv;charset=utf-8');
+}
+// 화면 파일: 지금 보고 있는 버전의 html 을 이름에 버전·시각을 붙여 저장
+async function downloadScreen() {
+  const info = dlInfo('화면', 'html');
+  let html = '';
+  try { const r = await fetch(location.href.split('#')[0], { cache: 'no-store' }); if (r.ok) html = await r.text(); } catch (e) { /* 아래로 */ }
+  if (!html) html = '<!doctype html>\n' + document.documentElement.outerHTML;
+  saveFile(`<!-- ${info.header} -->\n` + html, info.name, 'text/html;charset=utf-8');
 }
 
 function ghHeaders() { return { Authorization: `token ${ghToken || bridgeToken}`, Accept: 'application/vnd.github+json' }; }
