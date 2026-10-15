@@ -491,7 +491,9 @@ function fmtDT(d) {
 const DETECT = {
   BIG_DROP: 1000, // 한 번(보통 1시간) 사이에 이 수량 이상 줄면 사람이 재고를 직접 고친 것으로 의심
   BIG_RISE: 1000, // 한 번에 이 수량 이상 늘면 '재고 대량 증가'로 표시 (입고 또는 사람이 숫자를 늘린 것, 판매량에는 영향 없음)
+  RESET_MIN_DROP: 100, // 이 수량 이상 줄면서 10,000·99,999 같은 리셋값이 되면 재고 리셋 의심 (수집기 v5.0 과 같은 값)
 };
+const isResetValue = (v) => v >= 1000 && (v % 1000 === 0 || /^9{4,}$/.test(String(v)));
 
 // 전체 기록에서 수동변경 의심 감소를 찾음
 // 결과: { 옵션키: { 시간키: { d: 감소량, why: [이유...] } } }
@@ -506,6 +508,11 @@ function detectSuspicious(history) {
         (out[key] = out[key] || {})[ts[i]] = {
           d,
           why: [`${rec[ts[i - 1]].toLocaleString()}개에서 ${rec[ts[i]].toLocaleString()}개로 한 번에 ${d.toLocaleString()}개 줄어듦 (${DETECT.BIG_DROP.toLocaleString()}개 이상)`],
+        };
+      } else if (d >= DETECT.RESET_MIN_DROP && isResetValue(rec[ts[i]])) {
+        (out[key] = out[key] || {})[ts[i]] = {
+          d,
+          why: [`${rec[ts[i - 1]].toLocaleString()}개에서 ${rec[ts[i]].toLocaleString()}개로 맞춰짐 (재고 리셋 의심)`],
         };
       }
     }

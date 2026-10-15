@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>커머스 인사이트 05 · V2.7</title><style>
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>커머스 인사이트 05 · V2.8</title><style>
 *{box-sizing:border-box}body{margin:0;background:#f4f6fa;font:15px/1.5 'Malgun Gothic',Arial,sans-serif;color:#182335}header{background:#fff;border-bottom:1px solid #e0e5ec;padding:15px 22px;display:flex;justify-content:space-between;align-items:center}h1{font-size:21px;margin:0}small{color:#64748b}.shell{display:grid;grid-template-columns:290px 1fr;gap:16px;max-width:1600px;margin:18px auto;padding:0 18px}.panel{background:white;border:1px solid #e1e7ee;border-radius:14px;padding:18px;box-shadow:0 2px 9px #0d22330b}.sidebar{display:flex;flex-direction:column;gap:12px}.cat{border:1px solid #dce4ee;border-radius:12px;background:#fff;text-align:left;padding:16px;font-weight:700;font-size:17px;cursor:pointer}.cat.active{border-color:#207a64;background:#e8f6f0;color:#106e54}.cat small{display:block;font-weight:400}.newcat{display:flex;gap:6px}.newcat input{min-width:0;flex:1}.newcat button,.btn{border:0;background:#16866a;color:white;border-radius:8px;padding:10px 13px;cursor:pointer}input{border:1px solid #d1d9e3;border-radius:8px;padding:10px}.main{display:grid;grid-template-rows:auto 1fr;gap:16px}.top{display:grid;grid-template-columns:1fr 220px;gap:16px}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:12px}.day{border:1px solid #e2e8f0;background:#f8fafc;border-radius:7px;min-height:48px;padding:5px;text-align:left;font-size:12px}.day.today{border:2px solid #16866a;background:#e8f6f0}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.stat{background:#f6f8fb;padding:13px;border-radius:9px}.stat b{display:block;font-size:22px}.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:15px}.total{border:1px solid #dce9e4;background:#eff8f4;border-radius:10px;padding:13px 15px}.total small{display:block;color:#506b62}.total strong{display:block;font-size:23px;margin-top:3px}.stores{display:grid;gap:10px;margin-top:14px}.store{display:grid;grid-template-columns:minmax(145px,1.1fr) minmax(310px,2fr) minmax(250px,1.6fr) 105px;gap:14px;align-items:center;padding:14px;border:1px solid #e2e8f0;border-radius:10px}.store b{font-size:16px}.cumul{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.cumul>div{background:#eff7f4;border-radius:7px;padding:8px 4px;text-align:center}.cumul small{display:block;font-size:11px}.cumul strong{font-size:14px;white-space:nowrap}.rank{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:9px;background:#edf3fa;color:#28435f;font-weight:800;margin-right:10px}.rank.first{background:#fff2cf;color:#875900}.rank.second{background:#eef0f4;color:#526174}.rank.third{background:#f9e9dc;color:#986137}.store .sales{font-weight:800;text-align:right;font-size:22px}.compare{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.delta{background:#f5f7fa;border-radius:9px;padding:9px 7px;text-align:center}.delta .dt{display:block;font-size:11px;color:#64748b}.delta strong{font-size:15px}.delta em{display:block;font-style:normal;font-size:11px;color:#64748b}.positive{color:#087a57}.negative{color:#c44141}.neutral{color:#64748b}.store .bar{height:5px;background:#e8edf2;border-radius:4px;margin-top:7px;overflow:hidden}.store .bar i{display:block;height:100%;background:#16866a;border-radius:4px}.store .storeName{display:flex;align-items:center}.muted{color:#64748b}.pill{font-size:12px;background:#e9f2fb;padding:3px 8px;border-radius:50px}.notice{font-size:12px;color:#64748b;margin-top:12px}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{padding:7px 10px;border:1px solid #cbd5e1;background:white;border-radius:8px;cursor:pointer}@media(max-width:1150px){.store{grid-template-columns:1fr 1fr}.cumul{grid-column:1/-1;grid-row:2}.compare{grid-column:1/-1;grid-row:3}.store .sales{grid-column:2;grid-row:1}}@media(max-width:800px){.totals{grid-template-columns:repeat(2,minmax(0,1fr))}.shell{grid-template-columns:1fr}.top{grid-template-columns:1fr}.store{grid-template-columns:1fr 120px}.compare{grid-column:1/-1}.sidebar{display:grid;grid-template-columns:repeat(2,1fr)}.newcat{grid-column:1/-1}}
 
 /* 색상 개선: 전체 합계는 통일된 청록, 업체 누적은 파랑, 비교는 증감색 */
@@ -77,8 +77,8 @@ header .version-stamp{color:#d5e5f4}
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V2.7';
-const SCREEN_UPDATED = '2026-10-16 06:41 KST';
+const APP_VERSION = 'V2.8';
+const SCREEN_UPDATED = '2026-10-16 06:49 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -93,6 +93,7 @@ const RESERVED = ['휴무일', '근무일'];
 // 이 화면은 토큰을 쓰지 않음: 깃허브는 읽기만 하고, 바꾼 목록은 파일로 내려받아
 // 상품목록_적용.bat 으로 저장소 폴더에 넣은 뒤 GitHub Desktop 에서 Push 함
 let downloadedAt = ''; // 바꾼 내용을 마지막으로 내려받은 시각
+let collectStatus = null; // data/status.json (수집기 v5.0 매시 수집 결과)
 
 // 목록 (products.txt 를 해석한 결과)
 let listOrder = [], linkLines = 0, linkOf = {}, prodCat = {}, unitDiv = {}, fileCats = [];
@@ -131,7 +132,9 @@ const slugOfUrl = (u) => { const m = String(u).match(/naver\.com\/([^/?#]+)\/pro
 const DAY_START_HOUR = 7;
 const SPLIT_HOUR = 17;
 const LONG_GAP_HOURS = 16;
-const DETECT = { BIG_DROP: 1000, BIG_RISE: 1000 };
+// 수집기 v5.0 과 같은 값: 1,000개 이상 한 번에 줄거나, 100개 이상 줄면서 10,000·99,999 같은 리셋값이 되면 수동변경 의심
+const DETECT = { BIG_DROP: 1000, BIG_RISE: 1000, RESET_MIN_DROP: 100 };
+const isResetValue = (v) => v >= 1000 && (v % 1000 === 0 || /^9{4,}$/.test(String(v)));
 const KR_HOLIDAYS = [
   '2026-01-01', '2026-02-16', '2026-02-17', '2026-02-18', '2026-03-02', '2026-05-01', '2026-05-05', '2026-05-25',
   '2026-06-03', '2026-07-17', '2026-08-17', '2026-09-24', '2026-09-25', '2026-10-05', '2026-10-09', '2026-12-25',
@@ -208,8 +211,11 @@ function detectSuspicious(history) {
     const rec = history[key] || {};
     const ts = Object.keys(rec).sort();
     for (let i = 1; i < ts.length; i++) {
-      const d = rec[ts[i - 1]] - rec[ts[i]];
-      if (d >= DETECT.BIG_DROP) (out[key] = out[key] || {})[ts[i]] = { d, why: [`한 번에 ${d.toLocaleString()}개 줄어듦`] };
+      const a = rec[ts[i - 1]], b = rec[ts[i]], d = a - b;
+      let why = null;
+      if (d >= DETECT.BIG_DROP) why = `한 번에 ${d.toLocaleString()}개 줄어듦`;
+      else if (d >= DETECT.RESET_MIN_DROP && isResetValue(b)) why = `${a.toLocaleString()}개에서 ${b.toLocaleString()}개로 맞춰짐 (재고 리셋 의심)`;
+      if (why) (out[key] = out[key] || {})[ts[i]] = { d, why: [why] };
     }
   });
   return out;
@@ -430,7 +436,8 @@ function recompute(first) {
 }
 
 async function load() {
-  const [p, l, h, a, s] = await Promise.all(['products.txt', 'data/latest.json', 'data/history.json', 'data/approved.json', STORES_FILE].map(fetchRepoFile));
+  const [p, l, h, a, s, st] = await Promise.all(['products.txt', 'data/latest.json', 'data/history.json', 'data/approved.json', STORES_FILE, 'data/status.json'].map(fetchRepoFile));
+  try { collectStatus = st ? JSON.parse(st.text) : null; } catch (e) { collectStatus = null; }
   if (!p || !l) { showFilePicker(); return; }
   sourceLabel = '출처: ' + l.source;
   try { useData(p.text, l.text, h && h.text, a && a.text, s && s.text); } catch (e) { showError(e); }
@@ -514,7 +521,10 @@ function renderStatus() {
   document.getElementById('stOkDay').textContent = lastDay ? `${lastDay} 마감 기록 기준` : '';
   document.getElementById('stLast').innerHTML = escapeHtml(lastRecord ? lastRecord.replace('T', ' ') : '기록 없음')
     + (fullDay ? `<br><span style="font-weight:400">마지막 전체 수집일 ${fullDay} (${dayCount[fullDay]}개 상품)${fullDay !== lastDay ? ' · 이후는 일부 상품만 수집됨' : ''}</span>` : '');
-  document.getElementById('stSource').textContent = `${sourceLabel}${hiddenProducts ? ` · 목록에서 뺀 ${hiddenProducts}개 상품의 기록은 보존(화면 제외)` : ''}`;
+  // 수집기 v5.0 이 매시 남기는 결과 (data/status.json). 없으면 v4 수집기라 표시만 생략
+  const run = collectStatus && collectStatus.last;
+  const runText = run ? `마지막 자동 수집 ${run.time.replace('T', ' ')} · ${run.collected}/${run.listed}개${run.uploaded ? '' : ' · 업로드 실패'} (수집기 v${run.collector}) · ` : '';
+  document.getElementById('stSource').textContent = `${runText}${sourceLabel}${hiddenProducts ? ` · 목록에서 뺀 ${hiddenProducts}개 상품의 기록은 보존(화면 제외)` : ''}`;
 }
 
 function renderCalendar() {
@@ -837,7 +847,11 @@ function renderManage() {
     const ok = okProducts(lastDay);
     const seen = new Set(items.map((it) => it.product));
     const miss = listOrder.filter((p) => !ok.has(p));
-    body.innerHTML = `<p class="muted" style="font-size:13px">${lastDay || ''} 마감 기준 기록이 없는 상품 ${miss.length}개 (전체 ${listOrder.length}개). 자동 수집은 관리용 컴퓨터의 작업 스케줄러(CommerceInsightHourly)가 매시 정각에 products.txt 의 링크를 열어 탬퍼몽키 수집기로 기록합니다.</p>
+    const run = collectStatus && collectStatus.last;
+    const runs = (collectStatus && collectStatus.runs) || [];
+    const runHtml = run ? `<p style="font-size:13px"><b>마지막 자동 수집</b> ${escapeHtml(run.time.replace('T', ' '))} · ${run.collected}/${run.listed}개 수집${run.uploaded ? ' · 업로드 완료' : ` · <span class="negative">업로드 실패 ${escapeHtml(run.error)}</span>`} · 수집기 v${escapeHtml(run.collector)}${run.missing && run.missing.length ? ` · 이번에 빠진 상품 ${run.missing.length}개: ${run.missing.slice(0, 20).map((p) => escapeHtml(storeName(slugOfUrl(linkOf[p] || '')) + ' ' + p)).join(', ')}${run.missing.length > 20 ? ' …' : ''}` : ''}<br><span class="muted">최근 ${Math.min(runs.length, 24)}회: ${runs.slice(0, 24).map((r) => `${r.time.slice(11)} ${r.collected}/${r.listed}${r.uploaded ? '' : '✕'}`).join(' · ')}</span></p>`
+      : '<p class="muted" style="font-size:13px">수집기 v5.0 을 설치하면 매시 수집 결과(몇 개 성공, 빠진 상품)가 여기에 표시됩니다.</p>';
+    body.innerHTML = `${runHtml}<p class="muted" style="font-size:13px">${lastDay || ''} 마감 기준 기록이 없는 상품 ${miss.length}개 (전체 ${listOrder.length}개). 자동 수집은 관리용 컴퓨터의 작업 스케줄러(CommerceInsightHourly)가 매시 정각에 products.txt 의 링크를 열어 탬퍼몽키 수집기로 기록합니다.</p>
     <div class="list"><table><tr><th>품목</th><th>업체</th><th>상품번호</th><th>상태</th><th>링크</th></tr>${miss.map((p) => `<tr><td>${escapeHtml(catOfProduct(p))}</td><td>${escapeHtml(storeName(slugOfUrl(linkOf[p])))}</td><td>${p}</td><td>${seen.has(p) ? `${lastDay} 기록 없음` : '수집 기록 없음'}</td><td><a href="${escapeHtml(linkOf[p])}" target="_blank" rel="noopener">${escapeHtml(linkOf[p])}</a></td></tr>`).join('') || '<tr><td colspan="5">모든 상품이 정상 수집되었습니다.</td></tr>'}</table></div>`;
   }
   body.querySelectorAll('[data-op]').forEach((b) => b.addEventListener('click', () => {
