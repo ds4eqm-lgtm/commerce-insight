@@ -35,7 +35,12 @@ header h1{font-size:24px;letter-spacing:-.6px}header small{color:#d5e5f4}header 
 .cumul>div{background:#eaf2ff;border:1px solid #d2e2fa;border-radius:9px;padding:11px 4px}
 .cumul strong{font-size:15px}.cumul small{font-size:11px}
 .delta{padding:10px 5px}.delta strong{font-size:15px}.store .sales{font-size:23px}
-.stats .stat:first-child{background:#eaf2ff}.stats .stat:last-child{background:#fff5e8}
+.stats .stat:first-child{background:#eaf2ff}.stats .stat:nth-child(2){background:#fff5e8}
+.stat.bad{grid-column:1/-1;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer;background:#fdecee}.stat.bad b{color:#c94050}.stat.bad.none{background:#f6f8fb;cursor:default}.stat.bad.none b{color:#087a57}.stat.bad:not(.none):hover{background:#fadadf}
+.won{display:block;font-size:12px;font-weight:700;color:#2369c7;white-space:nowrap}.won.part::after{content:'*';color:#c94050}.total .won{font-size:15px;margin-top:2px}.day .won{display:inline;font-size:11px;font-weight:600}
+.storeLink{background:none;border:0;padding:0;font:inherit;font-weight:700;font-size:16px;color:inherit;cursor:pointer;text-align:left}.storeLink:hover{color:#2369c7;text-decoration:underline}
+.abuse{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:10px;background:#f6f8fb;font-size:13px}.abuse.on{background:#fff4e5;border:1px solid #f5c98a}.abuse b{color:#b45309}.abuse .mbtn{padding:5px 9px}.abuselist{margin-top:8px}.abuselist table{width:100%;border-collapse:collapse;font-size:13px}.abuselist td,.abuselist th{padding:6px 8px;border-bottom:1px solid #eef1f5;text-align:left}
+.price{width:110px;text-align:right}.badlist{margin-top:10px;display:grid;gap:6px;max-height:420px;overflow:auto}.badlist a{display:block;padding:8px 10px;border:1px solid #f3c7cd;border-radius:8px;background:#fff;color:inherit;text-decoration:none;font-size:13px;line-height:1.35}.badlist a:hover{background:#fdecee}.badlist a b{display:block;font-size:13px}.badlist a small{display:block}
 .day.today{background:#dff6ed;border:2px solid #138a6e;font-weight:700}
 .tabs button{font-weight:700;color:#23415f}.tabs button:hover{background:#eaf2ff}
 .notice{background:#fff8e9;border:1px solid #f0dfb7;padding:12px 14px;border-radius:9px;line-height:1.7}
@@ -68,17 +73,17 @@ header .version-stamp{color:#d5e5f4}
 <div class="version-wrap"><span class="pill">실데이터 연결 · <span class="mode" id="mode">보기 전용</span></span><div class="version-stamp" aria-label="화면 버전 및 수정 일시"><b id="verNo">-</b><span>화면 수정 <span id="verScreen">-</span></span></div><div class="version-stamp" aria-label="데이터 수집 일시"><span>데이터 수집 <span id="verData">-</span></span> · <a href="#" onclick="downloadScreen();return false" style="color:#fff">화면 저장</a></div></div></header>
 <div class="shell"><aside class="sidebar panel"><h2 style="margin:0;font-size:17px">모니터링 품목</h2><div id="cats"></div><label for="newCat"><b>새 모니터링 품목 추가</b></label><div class="newcat"><input id="newCat" placeholder="예: 매트"><button onclick="addCategory()">추가 +</button></div><small>품목을 클릭하면 합계와 업체 순위가 함께 바뀝니다.</small></aside>
 <main class="main"><section class="top"><div class="panel"><div class="head"><h2 style="margin:0" id="calTitle">-</h2><span><button class="navbtn" onclick="moveMonth(-1)">◀</button> <button class="navbtn" onclick="moveMonth(1)">▶</button> <span class="pill">날짜별 집계 위치</span></span></div><div class="calendar" id="cal"></div></div>
-<div class="panel"><h3>수집 상태</h3><div class="stats"><div class="stat">등록 상품<b id="stProducts">-</b><small id="stLinks"></small></div><div class="stat">정상 수집<b id="stOk">-</b><small id="stOkDay"></small></div></div><p class="muted">마지막 데이터 기록<br><b id="stLast">-</b></p><small id="stSource"></small></div></section>
-<section class="panel"><div class="head"><div><h2 style="margin:0" id="catTitle">-</h2><small id="catSub">품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지</small></div><div class="tabs"><button onclick="toggleOrder()" id="orderBtn">가나다순 보기</button><button onclick="openManage('stores')" data-open="stores">업체 관리</button><button onclick="openManage('urls')" data-open="urls">상품 URL 관리</button><button onclick="openManage('status')" data-open="status">수집 상태</button><button onclick="downloadSales()">엑셀 내려받기</button></div></div>
-<div id="manage" hidden><div class="mtabs" id="mtabs"><button data-t="cats">품목 관리</button><button data-t="stores">업체 관리</button><button data-t="urls">상품 URL 관리</button><button data-t="status">수집 상태</button><button data-t="close" style="margin-left:auto">닫기 ✕</button></div>
+<div class="panel"><h3>수집 상태</h3><div class="stats"><div class="stat">등록 상품<b id="stProducts">-</b><small id="stLinks"></small></div><div class="stat">정상 수집<b id="stOk">-</b><small id="stOkDay"></small></div><button type="button" class="stat bad none" id="stBadBtn" onclick="toggleBadList()">수집 불가 (옵션 바뀜 의심)<b id="stBad">-</b><small id="stBadSub"></small></button></div><div class="badlist" id="badList" hidden></div><p class="muted">마지막 데이터 기록<br><b id="stLast">-</b></p><small id="stSource"></small></div></section>
+<section class="panel"><div class="head"><div><h2 style="margin:0" id="catTitle">-</h2><small id="catSub">품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지</small></div><div class="tabs"><button onclick="toggleOrder()" id="orderBtn">가나다순 보기</button><button onclick="openManage('stores')" data-open="stores">업체 관리</button><button onclick="openManage('urls')" data-open="urls">상품 URL 관리</button><button onclick="openManage('prices')" data-open="prices">단가 관리</button><button onclick="openManage('status')" data-open="status">수집 상태</button><button onclick="downloadSales()">엑셀 내려받기</button></div></div>
+<div id="manage" hidden><div class="mtabs" id="mtabs"><button data-t="cats">품목 관리</button><button data-t="stores">업체 관리</button><button data-t="urls">상품 URL 관리</button><button data-t="prices">단가 관리</button><button data-t="status">수집 상태</button><button data-t="close" style="margin-left:auto">닫기 ✕</button></div>
 <div id="mbody"></div>
 <div class="savebar" id="savebar"></div></div>
-<div class="totals" id="totals"></div><div class="stores" id="stores"><div class="loader">기존 상품목록과 판매량 기록을 불러오는 중…</div></div>
+<div class="abuse" id="abuse"></div><div class="totals" id="totals"></div><div class="stores" id="stores"><div class="loader">기존 상품목록과 판매량 기록을 불러오는 중…</div></div>
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V2.8';
-const SCREEN_UPDATED = '2026-10-16 06:49 KST';
+const APP_VERSION = 'V3.0';
+const SCREEN_UPDATED = '2026-10-17 10:30 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -113,6 +118,7 @@ let active = null;
 let selDay = null;
 let calMonth = null;
 let agg = {};   // agg[day][cat][slug] = {박스: n, m: n}
+let aggWon = {}; // aggWon[day][cat][slug] = {won: 원, miss: 단가 없는 판매 수량}
 let cover = {}; // cover[day][cat][slug] = true
 let allDays = [];
 let dayCount = {};
@@ -351,6 +357,31 @@ function storeName(slug) {
 }
 
 // ---------------- 불러오기 ----------------
+// ---------------- 옵션별 단가 (stores.json 의 업체마다 prices: {옵션키: 원}) ----------------
+// 단가는 그 상품의 표시 단위(박스 또는 m) 1개 값. 적용 파일 내려받기 → 상품목록_적용.bat 으로 stores.json 에 저장됨
+function priceOf(it) { const r = workStores[it.slug]; const v = r && r.prices && r.prices[it.key]; return v > 0 ? v : 0; }
+function setPrice(it, v) {
+  const n = Math.round(Number(String(v).replace(/[^\d.]/g, '')) || 0);
+  const r = (workStores[it.slug] = workStores[it.slug] || {});
+  r.prices = Object.assign({}, r.prices);
+  if (n > 0) r.prices[it.key] = n; else delete r.prices[it.key];
+  if (!Object.keys(r.prices).length) delete r.prices;
+  if (!Object.keys(r).length) delete workStores[it.slug];
+}
+// 금액 표시: 짧게(칸 안) 123.4만원 / 1.2억원, 길게(합계) 1,234,000원
+function wonShort(n) {
+  if (!n) return '0원';
+  if (n >= 1e8) return `${(Math.round(n / 1e7) / 10).toLocaleString('ko-KR')}억원`;
+  if (n >= 1e4) return `${(Math.round(n / 1e3) / 10).toLocaleString('ko-KR')}만원`;
+  return `${Math.round(n).toLocaleString('ko-KR')}원`;
+}
+function wonLong(n) { return `${Math.round(n || 0).toLocaleString('ko-KR')}원`; }
+function wonHtml(r, long) {
+  if (!r.won && !r.miss) return '';
+  if (!r.won) return '<span class="won" style="color:#94a3b8" title="이 기간 판매 상품에 단가가 아직 없습니다. 단가 관리에서 입력하세요">단가 미입력</span>';
+  return `<span class="won${r.miss ? ' part' : ''}" title="${r.miss ? `단가 없는 판매 ${fmtNum(r.miss)}개는 금액에서 빠짐 (*)` : '옵션별 단가 × 판매량'}">${long ? wonLong(r.won) : wonShort(r.won)}</span>`;
+}
+
 async function fetchRepoFile(path) {
   // 토큰 없이 공개 주소로만 읽음 (깃허브 API는 시간당 60번 제한이라 넘으면 raw 주소로 넘어감)
   try {
@@ -404,7 +435,7 @@ function recompute(first) {
   items.sort((a, b) => a.site - b.site);
 
   buildDayData(new Date());
-  agg = {}; cover = {}; dayCount = {};
+  agg = {}; aggWon = {}; cover = {}; dayCount = {};
   const byKey = {};
   items.forEach((it) => { byKey[it.key] = it; });
   Object.entries(dayData).forEach(([day, rows]) => {
@@ -414,7 +445,13 @@ function recompute(first) {
       const lb = unitOf(it).label;
       const a = ((agg[day] = agg[day] || {})[it.cat] = agg[day][it.cat] || {});
       const s = (a[it.slug] = a[it.slug] || {});
-      s[lb] = (s[lb] || 0) + soldOf(it, v);
+      const sold = soldOf(it, v);
+      s[lb] = (s[lb] || 0) + sold;
+      if (sold) {
+        const w = (((aggWon[day] = aggWon[day] || {})[it.cat] = aggWon[day][it.cat] || {})[it.slug] = aggWon[day][it.cat][it.slug] || { won: 0, miss: 0 });
+        const pr = priceOf(it);
+        if (pr) w.won += sold * pr; else w.miss += sold;
+      }
       ((cover[day] = cover[day] || {})[it.cat] = cover[day][it.cat] || {})[it.slug] = true;
       seen.add(it.product);
     });
@@ -475,16 +512,18 @@ function comparePeriods(day) {
   return [[[pd, pd], [day, day]], [[weekStart(pw), pw], [weekStart(day), day]], [[monthStart(pm), pm], [monthStart(day), day]]];
 }
 function sumRange(cat, slugs, from, to) {
-  const o = {}; let covered = false;
+  const o = {}; let covered = false, won = 0, miss = 0;
   for (let d = from; d <= to; d = addDays(d, 1)) {
     const a = agg[d] && agg[d][cat]; if (!a) continue;
     Object.entries(a).forEach(([sl, u]) => {
       if (slugs && !slugs.includes(sl)) return;
       if (cover[d][cat][sl]) covered = true;
       Object.entries(u).forEach(([lb, n]) => { o[lb] = (o[lb] || 0) + n; });
+      const w = aggWon[d] && aggWon[d][cat] && aggWon[d][cat][sl];
+      if (w) { won += w.won; miss += w.miss; }
     });
   }
-  return { o, covered };
+  return { o, covered, won, miss };
 }
 function fmtSums(o) {
   const ks = Object.keys(o).sort((a, b) => UNIT_ORDER.indexOf(a) - UNIT_ORDER.indexOf(b));
@@ -524,8 +563,55 @@ function renderStatus() {
   // 수집기 v5.0 이 매시 남기는 결과 (data/status.json). 없으면 v4 수집기라 표시만 생략
   const run = collectStatus && collectStatus.last;
   const runText = run ? `마지막 자동 수집 ${run.time.replace('T', ' ')} · ${run.collected}/${run.listed}개${run.uploaded ? '' : ' · 업로드 실패'} (수집기 v${run.collector}) · ` : '';
+  renderBad();
   document.getElementById('stSource').textContent = `${runText}${sourceLabel}${hiddenProducts ? ` · 목록에서 뺀 ${hiddenProducts}개 상품의 기록은 보존(화면 제외)` : ''}`;
 }
+
+// ---------------- 수집 불가 상품 ----------------
+// 기준 시각(목록의 절반 이상이 기록된 가장 최근 정각)에 기록이 없는 상품 = 페이지는 열리는데 재고를 못 읽은 상품
+// 대부분 경쟁사가 옵션 구성을 바꾼 경우라서, 상품마다 마지막으로 수집된 시각을 함께 보여줌
+// (상품 하나를 직접 열어서 올린 기록만 있는 시각은 기준으로 삼지 않음)
+let badListOpen = false;
+let badRefHour = '';
+function badProducts() {
+  const last = {}, perHour = {};
+  Object.entries(historyData).forEach(([key, rec]) => {
+    const m = key.match(/^[^_]+_(\d+)_/); if (!m) return;
+    Object.keys(rec).forEach((t) => {
+      if (!last[m[1]] || t > last[m[1]]) last[m[1]] = t;
+      (perHour[t] = perHour[t] || new Set()).add(m[1]);
+    });
+  });
+  badRefHour = Object.keys(perHour).filter((t) => perHour[t].size >= listOrder.length / 2).sort().pop() || '';
+  if (!badRefHour) return [];
+  const nameOf = {}, dateOf = {};
+  Object.values(rawLatest).forEach((it) => {
+    const p = String(it.product);
+    if (it.productName && !nameOf[p]) nameOf[p] = it.productName;
+    if (it.date && (!dateOf[p] || it.date > dateOf[p])) dateOf[p] = it.date;
+  });
+  return listOrder.filter((p) => (last[p] || '') < badRefHour).map((p) => ({
+    p, last: last[p] || '', lastDate: dateOf[p] || '', name: nameOf[p] || '', cat: catOfProduct(p), store: storeName(slugOfUrl(linkOf[p] || '')), url: linkOf[p] || '',
+  })).sort((a, b) => (a.last || a.lastDate).localeCompare(b.last || b.lastDate));
+}
+function shortName(n) { const t = String(n).replace(/\s+/g, ' ').trim(); return t.length > 30 ? t.slice(0, 30) + '…' : t; }
+function fmtLast(b) {
+  if (b.last) { const [d, t] = b.last.split('T'); return `${Number(d.slice(5, 7))}/${Number(d.slice(8))} ${t}`; }
+  return b.lastDate ? `${Number(b.lastDate.slice(5, 7))}/${Number(b.lastDate.slice(8))} (시각 기록 지남)` : '수집된 적 없음';
+}
+function renderBad() {
+  const bad = badProducts();
+  const btn = document.getElementById('stBadBtn');
+  document.getElementById('stBad').textContent = bad.length ? `${bad.length}개` : '0';
+  document.getElementById('stBadSub').textContent = bad.length
+    ? `${badRefHour.replace('T', ' ')} 수집에서 빠짐 · 눌러서 목록 ${badListOpen ? '닫기' : '보기'}`
+    : `${badRefHour ? badRefHour.replace('T', ' ') + ' 수집 기준 ' : ''}모두 정상`;
+  btn.classList.toggle('none', !bad.length);
+  const box = document.getElementById('badList');
+  box.hidden = !(badListOpen && bad.length);
+  box.innerHTML = bad.map((b) => `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" title="${escapeHtml(b.name || b.url)}"><b>${escapeHtml(b.store)} · ${escapeHtml(shortName(b.name) || b.p)}</b><small>마지막 수집 ${escapeHtml(fmtLast(b))} · ${escapeHtml(b.cat)} · ${b.p}</small></a>`).join('');
+}
+function toggleBadList() { if (!badProducts().length) return; badListOpen = !badListOpen; renderBad(); }
 
 function renderCalendar() {
   const y = calMonth.getFullYear(), m = calMonth.getMonth();
@@ -536,9 +622,10 @@ function renderCalendar() {
   for (let d = 1; d <= last; d++) {
     const day = `${y}-${pad(m + 1)}-${pad(d)}`;
     const has = !!(cover[day] && cover[day][active]);
-    const total = has ? sumRange(active, null, day, day).o : null;
+    const tr = has ? sumRange(active, null, day, day) : null;
+    const total = tr ? tr.o : null;
     const note = day === currentDay ? '<small>진행중</small>' : has && dayCount[day] < listOrder.length / 2 ? `<small class="na">일부 ${dayCount[day]}개</small>` : '';
-    html += `<div class="day ${has ? 'has' : 'nodata'} ${day === selDay ? 'sel today' : ''}" ${has ? `data-day="${day}"` : ''}>${d}${has ? `<b>${fmtSums(total)}</b>` : ''}${note}</div>`;
+    html += `<div class="day ${has ? 'has' : 'nodata'} ${day === selDay ? 'sel today' : ''}" ${has ? `data-day="${day}"` : ''}>${d}${has ? `<b>${fmtSums(total)}</b>${tr.won ? ` <span class="won${tr.miss ? ' part' : ''}">(${wonShort(tr.won)})</span>` : ''}` : ''}${note}</div>`;
   }
   const cal = document.getElementById('cal');
   cal.innerHTML = html;
@@ -547,7 +634,7 @@ function renderCalendar() {
 
 function cumulHtml(slugs) {
   const labels = ['일 누적', '주 누적', '월 누적', '연 누적'];
-  return `<div class="cumul">${periods(selDay).map(([a, b], i) => `<div><small>${labels[i]}</small><strong>${fmtSums(sumRange(active, slugs, a, b).o)}</strong></div>`).join('')}</div>`;
+  return `<div class="cumul">${periods(selDay).map(([a, b], i) => `<div><small>${labels[i]}</small>${((r) => `<strong>${fmtSums(r.o)}</strong>${wonHtml(r)}`)(sumRange(active, slugs, a, b))}</div>`).join('')}</div>`;
 }
 function comparisonHtml(slugs) {
   const lb = mainUnit(active);
@@ -565,7 +652,7 @@ function comparisonHtml(slugs) {
 function render() {
   if (!active) return;
   document.getElementById('cats').innerHTML = fileCats.map((c) => `<button class="cat ${c === active ? 'active' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)} <small>${listSlugsOf(c).length}개 업체 · ${listOrder.filter((p) => catOfProduct(p) === c).length}개 상품</small></button>`).join('');
-  document.querySelectorAll('#cats [data-cat]').forEach((el) => el.addEventListener('click', () => { active = el.dataset.cat; render(); if (mtab === 'urls') renderManage(); }));
+  document.querySelectorAll('#cats [data-cat]').forEach((el) => el.addEventListener('click', () => { active = el.dataset.cat; render(); if (mtab === 'urls' || mtab === 'prices') renderManage(); }));
   const partial = dayCount[selDay] < listOrder.length / 2;
   document.getElementById('catTitle').textContent = `${active} · 업체별 현황`;
   document.getElementById('catSub').textContent = `품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지 · ${selDay} 기준${partial ? ` (${dayCount[selDay] || 0}개 상품만 수집된 날)` : ''}`;
@@ -576,13 +663,15 @@ function render() {
   document.getElementById('totals').innerHTML = ['전체 일 누적 판매량', '전체 주 누적 판매량', '전체 월 누적 판매량', '전체 연 누적 판매량'].map((label, i) => {
     const [a, b] = periods(selDay)[i];
     const today = i === 0 ? `<small style="margin-top:4px">오늘(진행중) ${fmtSums(sumRange(active, null, currentDay, currentDay).o)}</small>` : '';
-    return `<div class="total"><small>${label}</small><strong>${hasCat ? fmtSums(sumRange(active, null, a, b).o) : '데이터 없음'}</strong>${hasCat ? today : ''}</div>`;
+    const r = sumRange(active, null, a, b);
+    return `<div class="total"><small>${label}</small><strong>${hasCat ? fmtSums(r.o) : '데이터 없음'}</strong>${hasCat ? wonHtml(r, true) + today : ''}</div>`;
   }).join('');
 
   // 순위 = 선택일(일간) 판매량. 정렬은 '판매량순(1위부터)' 또는 '가나다순'
   let list = listSlugsOf(active).map((slug) => ({
     slug, name: storeName(slug),
     sales: sumRange(active, [slug], selDay, selDay).o[lb] || 0,
+    day: sumRange(active, [slug], selDay, selDay),
     today: sumRange(active, [slug], currentDay, currentDay).o,
   }));
   const ranked = list.slice().sort((a, b) => b.sales - a.sales || a.name.localeCompare(b.name, 'ko-KR'));
@@ -591,8 +680,46 @@ function render() {
   const max = Math.max(1, ...list.map((x) => x.sales));
   document.getElementById('stores').innerHTML = list.length ? list.map((s) => {
     const memo = workStores[s.slug] && workStores[s.slug].memo;
-    return `<div class="store"><div class="storeName"><span class="rank ${s.rank === 1 ? 'first' : s.rank === 2 ? 'second' : s.rank === 3 ? 'third' : ''}">${s.rank}위</span><div><b>${escapeHtml(s.name)}</b>${memo ? `<small style="display:block">${escapeHtml(memo)}</small>` : ''}</div></div>${cumulHtml([s.slug])}${comparisonHtml([s.slug])}<div><div class="sales">${fmtNum(s.sales)}${lb}</div><div class="bar"><i style="width:${Math.round(s.sales / max * 100)}%"></i></div><small style="display:block;text-align:right">일간 · ${selDay.slice(5).replace('-', '/')}</small><small class="today">오늘 ${fmtSums(s.today)}</small></div></div>`;
+    return `<div class="store"><div class="storeName"><span class="rank ${s.rank === 1 ? 'first' : s.rank === 2 ? 'second' : s.rank === 3 ? 'third' : ''}">${s.rank}위</span><div><button class="storeLink" data-store="${escapeHtml(s.slug)}" title="눌러서 이 업체 상품의 단가 보기·수정, 상품 페이지 열기">${escapeHtml(s.name)}</button>${memo ? `<small style="display:block">${escapeHtml(memo)}</small>` : ''}</div></div>${cumulHtml([s.slug])}${comparisonHtml([s.slug])}<div><div class="sales">${fmtNum(s.sales)}${lb}</div>${wonHtml(s.day) ? `<div style="text-align:right">${wonHtml(s.day, true)}</div>` : ''}<div class="bar"><i style="width:${Math.round(s.sales / max * 100)}%"></i></div><small style="display:block;text-align:right">일간 · ${selDay.slice(5).replace('-', '/')}</small><small class="today">오늘 ${fmtSums(s.today)}</small></div></div>`;
   }).join('') : '<div class="muted">아직 등록된 업체가 없습니다. 상품 URL 관리에서 상품 URL을 등록하면 다음 정각 수집부터 이곳에 표시됩니다.</div>';
+  document.querySelectorAll('#stores [data-store]').forEach((el) => el.addEventListener('click', () => { priceStore = el.dataset.store; openManage('prices', true); }));
+  renderAbuse();
+}
+
+// ---------------- 어뷰징 · 가매출 알림 ----------------
+// 한 시간 사이 재고가 기준(평) 이상 한 번에 줄면 알림. 1박스 = 1평, 장판 1m = 0.55평(폭 1.83m 기준)으로 환산
+// 알림만 띄우고 판매량 계산은 그대로 둠 (이미 수동변경 의심으로 빠진 건은 따로 표시)
+const ABUSE_STEPS = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500];
+const PYEONG_PER = { 박스: 1, m: 0.55 };
+let abuseLimit = 100, abuseOpen = false;
+try { const v = localStorage.getItem('c05abuse'); if (v !== null) abuseLimit = Number(v); } catch (e) { /* 무시 */ }
+function abuseEvents() {
+  if (!abuseLimit) return [];
+  const out = [];
+  items.filter((it) => it.cat === active).forEach((it) => {
+    const rec = historyData[it.key]; if (!rec) return;
+    const u = unitOf(it), per = PYEONG_PER[u.label] || 1;
+    const ts = Object.keys(rec).sort();
+    for (let i = 1; i < ts.length; i++) {
+      const d = rec[ts[i - 1]] - rec[ts[i]];
+      if (d <= 0) continue;
+      const qty = d / u.div, py = qty * per;
+      if (py < abuseLimit) continue;
+      const f = flagsAll[it.key] && flagsAll[it.key][ts[i]];
+      out.push({ it, from: ts[i - 1], t: ts[i], qty, py, lb: u.label, a: rec[ts[i - 1]], b: rec[ts[i]], excluded: !!f && !approved.has(`${it.key}|${ts[i]}`) });
+    }
+  });
+  return out.sort((x, y) => y.t.localeCompare(x.t));
+}
+function renderAbuse() {
+  const box = document.getElementById('abuse');
+  const ev = abuseEvents();
+  const sel = `<label>어뷰징·가매출 알림 기준 <select id="abuseSel"><option value="0">끄기</option>${ABUSE_STEPS.map((n) => `<option value="${n}" ${n === abuseLimit ? 'selected' : ''}>${n}평 이상</option>`).join('')}</select></label>`;
+  box.className = 'abuse' + (ev.length ? ' on' : '');
+  box.innerHTML = `${sel}<span>${!abuseLimit ? '알림 꺼짐' : ev.length ? `<b>⚠ ${escapeHtml(active)}에서 한 번에 ${abuseLimit}평 이상 줄어든 재고 ${ev.length}건</b> (최근 14일 시간별 기록)` : `${escapeHtml(active)} · 최근 14일 동안 ${abuseLimit}평 이상 한 번에 줄어든 재고 없음`}</span>${ev.length ? `<button class="mbtn" id="abuseBtn">${abuseOpen ? '목록 닫기' : '목록 보기'}</button>` : ''}
+    ${ev.length && abuseOpen ? `<div class="abuselist" style="flex-basis:100%"><table><tr><th>시각</th><th>업체</th><th>상품 · 옵션</th><th>줄어든 양</th><th>재고</th><th>판매량 반영</th></tr>${ev.map((e) => `<tr><td>${escapeHtml(e.from.slice(5).replace('T', ' '))} → ${escapeHtml(e.t.slice(0, 10) === e.from.slice(0, 10) ? e.t.slice(11) : e.t.slice(5).replace('T', ' '))}</td><td>${escapeHtml(storeName(e.it.slug))}</td><td><a href="${escapeHtml(linkOf[e.it.product] || '#')}" target="_blank" rel="noopener">${escapeHtml(shortName(e.it.productName))}</a> · ${escapeHtml(e.it.optionName)}</td><td><b>${fmtNum(e.qty)}${e.lb}</b> (약 ${fmtNum(e.py)}평)</td><td>${e.a.toLocaleString('ko-KR')} → ${e.b.toLocaleString('ko-KR')}</td><td>${e.excluded ? '빠짐 (수동변경 의심)' : '<span class="negative">판매로 포함됨</span>'}</td></tr>`).join('')}</table></div>` : ''}`;
+  document.getElementById('abuseSel').onchange = (e) => { abuseLimit = Number(e.target.value); try { localStorage.setItem('c05abuse', String(abuseLimit)); } catch (er) { /* 무시 */ } renderAbuse(); };
+  const b = document.getElementById('abuseBtn'); if (b) b.onclick = () => { abuseOpen = !abuseOpen; renderAbuse(); };
 }
 
 let order = 'sales';
@@ -607,12 +734,15 @@ function addCategory() {
   if (fileCats.length > before) { active = v; i.value = ''; render(); openManage('cats'); }
 }
 // 관리 칸 열기/닫기 (같은 버튼을 다시 누르면 닫힘)
-function openManage(t) {
+let priceStore = ''; // 단가 관리에서 보고 있는 업체 ('' = 전체)
+function openManage(t, keep) {
   const box = document.getElementById('manage');
-  if (t === 'close' || (!box.hidden && mtab === t)) { box.hidden = true; editing = null; }
+  if (t === 'prices' && !keep) priceStore = '';
+  if (t === 'close' || (!keep && !box.hidden && mtab === t)) { box.hidden = true; editing = null; }
   else { box.hidden = false; mtab = t; editing = null; }
   document.querySelectorAll('[data-open]').forEach((b) => b.classList.toggle('on', !box.hidden && b.dataset.open === mtab));
   renderManage();
+  if (keep && !box.hidden) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function moveMonth(n) { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + n, 1); renderCalendar(); }
 
@@ -781,7 +911,9 @@ const ops = {
       if (linkRows().some((r) => r.slug === oldSlug)) return alert('상품 링크가 있는 업체는 스토어 주소를 바꿀 수 없습니다. 표시 이름과 메모만 바꿀 수 있습니다.');
       delete workStores[oldSlug];
     }
+    const keepPrices = workStores[slug] && workStores[slug].prices;
     workStores[slug] = { name: form.name.trim(), memo: form.memo.trim(), added: (workStores[slug] && workStores[slug].added) || ymd(new Date()) };
+    if (keepPrices) workStores[slug].prices = keepPrices;
     editing = null;
     recompute(false);
   },
@@ -821,6 +953,34 @@ function renderManage() {
     }).join('')}</table></div>`;
     document.getElementById('bSaveStore').onclick = () => ops.saveStore({ slug: document.getElementById('fSlug').value, name: document.getElementById('fName').value, memo: document.getElementById('fMemo').value });
     const c = document.getElementById('bCancel'); if (c) c.onclick = () => { editing = null; renderManage(); };
+  } else if (mtab === 'prices') {
+    const list = items.filter((it) => it.cat === active && (!priceStore || it.slug === priceStore));
+    const slugsHere = [...new Set(items.filter((it) => it.cat === active).map((it) => it.slug))].sort((a, b) => storeName(a).localeCompare(storeName(b), 'ko-KR'));
+    const noPrice = list.filter((it) => !priceOf(it)).length;
+    let prev = '';
+    body.innerHTML = `<div class="mform"><b>옵션별 단가</b><select id="fPriceStore"><option value="">${escapeHtml(active)} 전체 업체</option>${slugsHere.map((sl) => `<option value="${escapeHtml(sl)}" ${sl === priceStore ? 'selected' : ''}>${escapeHtml(storeName(sl))}</option>`).join('')}</select>
+      <small class="muted">단가는 ${escapeHtml(mainUnit(active))} 1개 값(원)입니다. 칸에 숫자를 넣고 Enter 또는 다른 곳을 누르면 바로 금액에 반영되고, 아래 [적용 파일 내려받기]로 저장합니다. 상품명을 누르면 상품 페이지가 열립니다.</small></div>
+    <p class="muted" style="margin:8px 0 0;font-size:13px">옵션 ${list.length}개 · 단가 미입력 ${noPrice}개</p>
+    <div class="list"><table><tr><th>업체</th><th>상품</th><th>옵션</th><th>단위</th><th>단가(원)</th><th></th></tr>${list.map((it) => {
+      const first = it.product !== prev; prev = it.product;
+      return `<tr${first ? ' style="border-top:2px solid #e2e8f0"' : ''}><td>${first ? escapeHtml(storeName(it.slug)) : ''}</td><td>${first ? `<a href="${escapeHtml(linkOf[it.product] || '#')}" target="_blank" rel="noopener" title="${escapeHtml(it.productName)}">${escapeHtml(shortName(it.productName) || it.product)}</a>` : ''}</td><td>${escapeHtml(it.optionName)}</td><td>${escapeHtml(unitOf(it).label)}</td>
+        <td><input class="price" data-key="${escapeHtml(it.key)}" inputmode="numeric" placeholder="미입력" value="${priceOf(it) ? priceOf(it).toLocaleString('ko-KR') : ''}"></td>
+        <td>${first ? `<button class="mbtn" data-same="${escapeHtml(it.key)}" title="이 옵션의 단가를 같은 상품의 모든 옵션에 넣기">같은 상품 모두</button>` : ''}</td></tr>`;
+    }).join('') || '<tr><td colspan="6">이 품목에 수집된 상품이 없습니다.</td></tr>'}</table></div>`;
+    const byKey = {}; list.forEach((it) => { byKey[it.key] = it; });
+    document.getElementById('fPriceStore').onchange = (e) => { priceStore = e.target.value; renderManage(); };
+    body.querySelectorAll('input.price').forEach((inp) => {
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
+      inp.addEventListener('change', () => { setPrice(byKey[inp.dataset.key], inp.value); recompute(false); });
+    });
+    body.querySelectorAll('[data-same]').forEach((b) => b.addEventListener('click', () => {
+      const src = byKey[b.dataset.same];
+      const inp = body.querySelector(`input.price[data-key="${CSS.escape(src.key)}"]`);
+      const v = inp ? inp.value : priceOf(src);
+      if (!Number(String(v).replace(/[^\d.]/g, ''))) return alert('먼저 첫 옵션의 단가를 넣어 주세요.');
+      items.filter((x) => x.product === src.product).forEach((x) => setPrice(x, v));
+      recompute(false);
+    }));
   } else if (mtab === 'urls') {
     const e = editing && editing.type === 'url' ? rows.find((r) => r.idx === editing.idx) : null;
     const info = {};
@@ -878,7 +1038,12 @@ function changeSummary() {
   if (add) parts.push(`링크 +${add}`);
   if (del) parts.push(`링크 -${del}`);
   if (isDirtyList() && !add && !del) parts.push('목록 수정');
-  if (isDirtyStores()) parts.push('업체 정보 수정');
+  if (isDirtyStores()) {
+    const strip = (o) => JSON.stringify(Object.fromEntries(Object.entries(o).map(([k, v]) => { const c = Object.assign({}, v); delete c.prices; return [k, c]; }).filter(([, c]) => Object.keys(c).length)));
+    const pr = (o) => JSON.stringify(Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v.prices || {}])));
+    if (strip(workStores) !== strip(baseStores)) parts.push('업체 정보 수정');
+    if (pr(workStores) !== pr(baseStores)) parts.push('단가 수정');
+  }
   return parts.join(', ');
 }
 function renderSaveBar() {
