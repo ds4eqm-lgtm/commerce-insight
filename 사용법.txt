@@ -1,17 +1,7 @@
-커머스 인사이트 화면 V3.0 적용 프로그램
+커머스 인사이트 화면 V3.1 + 본드 6개 적용
 
-[처음 한 번]
-1. 이 압축 파일을 commerce-insight 저장소 폴더(index.html, products.txt 가 있는 폴더)에 그대로 풀기
-   - commerce05.html, 화면_적용.bat, tools\apply_screen.ps1 이 들어갑니다
-   - 같은 이름 파일이 있다고 하면 "바꾸기"
-2. GitHub Desktop 에서 Summary 에 "화면 V3.0" 입력 → Commit to main → Push origin
-3. 1~2분 뒤 대시보드에서 Ctrl+F5, 오른쪽 위 버전이 V3.0 이면 끝
-
-[다음부터 새 화면을 받았을 때]
-1. 받은 commerce05.html 을 다운로드 폴더에 두기
-2. 저장소 폴더의 화면_적용.bat 더블클릭 → 버전 확인 후 Y
-   (지금 화면은 backups 폴더에 자동 보관, 수집기·데이터·상품목록은 안 건드림)
-3. 자동으로 열리는 GitHub Desktop 에서 Commit to main → Push origin
-
-[되돌리기]
-backups 폴더의 commerce05_버전_날짜.html 을 저장소 폴더에 commerce05.html 이름으로 다시 넣고 Push
+1. 이 압축 파일을 commerce-insight 저장소 폴더에 풀어 넣고, 덮어쓸지 물으면 "예"를 누릅니다.
+   (GitHub Desktop 의 Show in Explorer 로 열리는 폴더)
+   commerce05.html (화면 V3.1) 과 products.txt (상품 131개) 가 바로 바뀝니다.
+2. GitHub Desktop 에서 Summary 에 "화면 V3.1, 본드 6개 추가" 입력 → Commit to main → Push origin
+3. 1~2분 뒤 대시보드에서 Ctrl+F5, 오른쪽 위 버전이 V3.1 이고 본드가 8개 업체 · 11개 상품이면 끝

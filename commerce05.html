@@ -40,7 +40,7 @@ header h1{font-size:24px;letter-spacing:-.6px}header small{color:#d5e5f4}header 
 .won{display:block;font-size:12px;font-weight:700;color:#2369c7;white-space:nowrap}.won.part::after{content:'*';color:#c94050}.total .won{font-size:15px;margin-top:2px}.day .won{display:inline;font-size:11px;font-weight:600}
 .storeLink{background:none;border:0;padding:0;font:inherit;font-weight:700;font-size:16px;color:inherit;cursor:pointer;text-align:left}.storeLink:hover{color:#2369c7;text-decoration:underline}
 .abuse{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:10px;background:#f6f8fb;font-size:13px}.abuse.on{background:#fff4e5;border:1px solid #f5c98a}.abuse b{color:#b45309}.abuse .mbtn{padding:5px 9px}.abuselist{margin-top:8px}.abuselist table{width:100%;border-collapse:collapse;font-size:13px}.abuselist td,.abuselist th{padding:6px 8px;border-bottom:1px solid #eef1f5;text-align:left}
-.price{width:110px;text-align:right}.badlist{margin-top:10px;display:grid;gap:6px;max-height:420px;overflow:auto}.badlist a{display:block;padding:8px 10px;border:1px solid #f3c7cd;border-radius:8px;background:#fff;color:inherit;text-decoration:none;font-size:13px;line-height:1.35}.badlist a:hover{background:#fdecee}.badlist a b{display:block;font-size:13px}.badlist a small{display:block}
+.price{width:110px;text-align:right}.badlist{margin-top:10px;display:grid;gap:6px;max-height:420px;overflow:auto}.badlist a{display:block;padding:8px 10px;border:1px solid #f3c7cd;border-radius:8px;background:#fff;color:inherit;text-decoration:none;font-size:13px;line-height:1.35}.badlist a:hover{background:#fdecee}.badlist a b{display:block;font-size:13px}.badlist a small{display:block}.main{grid-template-rows:auto}.badpanel .badlist{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));max-height:none}
 .day.today{background:#dff6ed;border:2px solid #138a6e;font-weight:700}
 .tabs button{font-weight:700;color:#23415f}.tabs button:hover{background:#eaf2ff}
 .notice{background:#fff8e9;border:1px solid #f0dfb7;padding:12px 14px;border-radius:9px;line-height:1.7}
@@ -73,7 +73,8 @@ header .version-stamp{color:#d5e5f4}
 <div class="version-wrap"><span class="pill">실데이터 연결 · <span class="mode" id="mode">보기 전용</span></span><div class="version-stamp" aria-label="화면 버전 및 수정 일시"><b id="verNo">-</b><span>화면 수정 <span id="verScreen">-</span></span></div><div class="version-stamp" aria-label="데이터 수집 일시"><span>데이터 수집 <span id="verData">-</span></span> · <a href="#" onclick="downloadScreen();return false" style="color:#fff">화면 저장</a></div></div></header>
 <div class="shell"><aside class="sidebar panel"><h2 style="margin:0;font-size:17px">모니터링 품목</h2><div id="cats"></div><label for="newCat"><b>새 모니터링 품목 추가</b></label><div class="newcat"><input id="newCat" placeholder="예: 매트"><button onclick="addCategory()">추가 +</button></div><small>품목을 클릭하면 합계와 업체 순위가 함께 바뀝니다.</small></aside>
 <main class="main"><section class="top"><div class="panel"><div class="head"><h2 style="margin:0" id="calTitle">-</h2><span><button class="navbtn" onclick="moveMonth(-1)">◀</button> <button class="navbtn" onclick="moveMonth(1)">▶</button> <span class="pill">날짜별 집계 위치</span></span></div><div class="calendar" id="cal"></div></div>
-<div class="panel"><h3>수집 상태</h3><div class="stats"><div class="stat">등록 상품<b id="stProducts">-</b><small id="stLinks"></small></div><div class="stat">정상 수집<b id="stOk">-</b><small id="stOkDay"></small></div><button type="button" class="stat bad none" id="stBadBtn" onclick="toggleBadList()">수집 불가 (옵션 바뀜 의심)<b id="stBad">-</b><small id="stBadSub"></small></button></div><div class="badlist" id="badList" hidden></div><p class="muted">마지막 데이터 기록<br><b id="stLast">-</b></p><small id="stSource"></small></div></section>
+<div class="panel"><h3>수집 상태</h3><div class="stats"><div class="stat">등록 상품<b id="stProducts">-</b><small id="stLinks"></small></div><div class="stat">정상 수집<b id="stOk">-</b><small id="stOkDay"></small></div><button type="button" class="stat bad none" id="stBadBtn" onclick="toggleBadList()">수집 불가 (옵션 바뀜 의심)<b id="stBad">-</b><small id="stBadSub"></small></button></div><p class="muted">마지막 데이터 기록<br><b id="stLast">-</b></p><small id="stSource"></small></div></section>
+<section class="panel badpanel" id="badPanel" hidden><div class="head"><h3 style="margin:0">수집 불가 상품 <span class="muted" id="badCount"></span></h3><button class="navbtn" onclick="toggleBadList()">닫기 ✕</button></div><div class="badlist" id="badList"></div></section>
 <section class="panel"><div class="head"><div><h2 style="margin:0" id="catTitle">-</h2><small id="catSub">품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지</small></div><div class="tabs"><button onclick="toggleOrder()" id="orderBtn">가나다순 보기</button><button onclick="openManage('stores')" data-open="stores">업체 관리</button><button onclick="openManage('urls')" data-open="urls">상품 URL 관리</button><button onclick="openManage('prices')" data-open="prices">단가 관리</button><button onclick="openManage('status')" data-open="status">수집 상태</button><button onclick="downloadSales()">엑셀 내려받기</button></div></div>
 <div id="manage" hidden><div class="mtabs" id="mtabs"><button data-t="cats">품목 관리</button><button data-t="stores">업체 관리</button><button data-t="urls">상품 URL 관리</button><button data-t="prices">단가 관리</button><button data-t="status">수집 상태</button><button data-t="close" style="margin-left:auto">닫기 ✕</button></div>
 <div id="mbody"></div>
@@ -82,8 +83,8 @@ header .version-stamp{color:#d5e5f4}
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V3.0';
-const SCREEN_UPDATED = '2026-10-17 10:30 KST';
+const APP_VERSION = 'V3.1';
+const SCREEN_UPDATED = '2026-10-17 13:30 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -608,10 +609,16 @@ function renderBad() {
     : `${badRefHour ? badRefHour.replace('T', ' ') + ' 수집 기준 ' : ''}모두 정상`;
   btn.classList.toggle('none', !bad.length);
   const box = document.getElementById('badList');
-  box.hidden = !(badListOpen && bad.length);
+  document.getElementById('badPanel').hidden = !(badListOpen && bad.length);
+  document.getElementById('badCount').textContent = bad.length ? `${bad.length}개 · ${badRefHour.replace('T', ' ')} 수집에서 빠짐` : '';
   box.innerHTML = bad.map((b) => `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" title="${escapeHtml(b.name || b.url)}"><b>${escapeHtml(b.store)} · ${escapeHtml(shortName(b.name) || b.p)}</b><small>마지막 수집 ${escapeHtml(fmtLast(b))} · ${escapeHtml(b.cat)} · ${b.p}</small></a>`).join('');
 }
-function toggleBadList() { if (!badProducts().length) return; badListOpen = !badListOpen; renderBad(); }
+function toggleBadList() {
+  if (!badProducts().length) return;
+  badListOpen = !badListOpen;
+  renderBad();
+  if (badListOpen) document.getElementById('badPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
 function renderCalendar() {
   const y = calMonth.getFullYear(), m = calMonth.getMonth();
