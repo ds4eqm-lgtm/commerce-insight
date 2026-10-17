@@ -40,7 +40,7 @@ header h1{font-size:24px;letter-spacing:-.6px}header small{color:#d5e5f4}header 
 .won{display:block;font-size:12px;font-weight:700;color:#2369c7;white-space:nowrap}.won.part::after{content:'*';color:#c94050}.total .won{font-size:15px;margin-top:2px}.day .won{display:inline;font-size:11px;font-weight:600}
 .storeLink{background:none;border:0;padding:0;font:inherit;font-weight:700;font-size:16px;color:inherit;cursor:pointer;text-align:left}.storeLink:hover{color:#2369c7;text-decoration:underline}
 .abuse{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:10px;background:#f6f8fb;font-size:13px}.abuse.on{background:#fff4e5;border:1px solid #f5c98a}.abuse b{color:#b45309}.abuse .mbtn{padding:5px 9px}.abuselist{margin-top:8px}.abuselist table{width:100%;border-collapse:collapse;font-size:13px}.abuselist td,.abuselist th{padding:6px 8px;border-bottom:1px solid #eef1f5;text-align:left}
-.price{width:110px;text-align:right}.badlist{margin-top:10px;display:grid;gap:6px;max-height:420px;overflow:auto}.badlist a{display:block;padding:8px 10px;border:1px solid #f3c7cd;border-radius:8px;background:#fff;color:inherit;text-decoration:none;font-size:13px;line-height:1.35}.badlist a:hover{background:#fdecee}.badlist a b{display:block;font-size:13px}.badlist a small{display:block}.main{grid-template-rows:auto}.badpanel .badlist{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));max-height:none}
+.price{width:110px;text-align:right}.badlist{margin-top:10px;display:grid;gap:6px;max-height:420px;overflow:auto}.badlist a{display:block;padding:8px 10px;border:1px solid #f3c7cd;border-radius:8px;background:#fff;color:inherit;text-decoration:none;font-size:13px;line-height:1.35}.badlist a:hover{background:#fdecee}.badlist a b{display:block;font-size:13px}.badlist a small{display:block}.main{grid-template-rows:auto}@media(min-width:801px){.top{grid-template-columns:minmax(0,1fr) 300px}}.badpanel .badlist{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));max-height:none}
 .day.today{background:#dff6ed;border:2px solid #138a6e;font-weight:700}
 .tabs button{font-weight:700;color:#23415f}.tabs button:hover{background:#eaf2ff}
 .notice{background:#fff8e9;border:1px solid #f0dfb7;padding:12px 14px;border-radius:9px;line-height:1.7}
@@ -83,8 +83,8 @@ header .version-stamp{color:#d5e5f4}
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V3.1';
-const SCREEN_UPDATED = '2026-10-17 13:30 KST';
+const APP_VERSION = 'V3.2';
+const SCREEN_UPDATED = '2026-10-17 13:35 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -572,7 +572,7 @@ function renderStatus() {
 // 기준 시각(목록의 절반 이상이 기록된 가장 최근 정각)에 기록이 없는 상품 = 페이지는 열리는데 재고를 못 읽은 상품
 // 대부분 경쟁사가 옵션 구성을 바꾼 경우라서, 상품마다 마지막으로 수집된 시각을 함께 보여줌
 // (상품 하나를 직접 열어서 올린 기록만 있는 시각은 기준으로 삼지 않음)
-let badListOpen = false;
+let badListOpen = true;
 let badRefHour = '';
 function badProducts() {
   const last = {}, perHour = {};
