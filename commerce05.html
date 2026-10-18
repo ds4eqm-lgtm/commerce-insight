@@ -83,7 +83,7 @@ header .version-stamp{color:#d5e5f4}
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V3.2';
+const APP_VERSION = 'V3.3';
 const SCREEN_UPDATED = '2026-10-17 13:35 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
@@ -745,6 +745,7 @@ let priceStore = ''; // 단가 관리에서 보고 있는 업체 ('' = 전체)
 function openManage(t, keep) {
   const box = document.getElementById('manage');
   if (t === 'prices' && !keep) priceStore = '';
+  manageView = ''; // 탭을 새로 열면 목록은 맨 위부터
   if (t === 'close' || (!keep && !box.hidden && mtab === t)) { box.hidden = true; editing = null; }
   else { box.hidden = false; mtab = t; editing = null; }
   document.querySelectorAll('[data-open]').forEach((b) => b.classList.toggle('on', !box.hidden && b.dataset.open === mtab));
@@ -937,9 +938,15 @@ const ops = {
   },
 };
 
+let manageView = '';
 function renderManage() {
   document.querySelectorAll('#mtabs button').forEach((b) => b.classList.toggle('on', b.dataset.t === mtab));
   const body = document.getElementById('mbody');
+  // 같은 화면을 다시 그릴 때(단가 입력, 같은 상품 모두 등) 목록 스크롤 위치를 그대로 둔다
+  const view = mtab + '|' + active + '|' + priceStore;
+  const oldList = body.querySelector('.list');
+  const keepScroll = view === manageView && oldList ? oldList.scrollTop : 0;
+  manageView = view;
   const rows = linkRows();
   if (mtab === 'cats') {
     body.innerHTML = `<div class="mform"><b>품목 추가</b><input id="fCat" placeholder="예: 매트"><button class="mbtn primary" id="bAddCat">추가</button><small class="muted">products.txt 에 [품목명] 제목 줄로 저장됩니다.</small></div>
@@ -1027,6 +1034,8 @@ function renderManage() {
     if (op === 'editUrl') { editing = { type: 'url', idx: Number(v) }; renderManage(); return; }
     ops[op](op === 'deleteUrl' ? Number(v) : v);
   }));
+  const newList = body.querySelector('.list');
+  if (newList && keepScroll) newList.scrollTop = keepScroll;
   renderSaveBar();
 }
 document.querySelectorAll('#mtabs button').forEach((b) => b.addEventListener('click', () => {

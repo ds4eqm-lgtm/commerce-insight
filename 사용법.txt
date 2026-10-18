@@ -1,7 +1,7 @@
-커머스 인사이트 화면 V3.1 + 본드 6개 적용
+커머스 인사이트 화면 V3.3
 
-1. 이 압축 파일을 commerce-insight 저장소 폴더에 풀어 넣고, 덮어쓸지 물으면 "예"를 누릅니다.
-   (GitHub Desktop 의 Show in Explorer 로 열리는 폴더)
-   commerce05.html (화면 V3.1) 과 products.txt (상품 131개) 가 바로 바뀝니다.
-2. GitHub Desktop 에서 Summary 에 "화면 V3.1, 본드 6개 추가" 입력 → Commit to main → Push origin
-3. 1~2분 뒤 대시보드에서 Ctrl+F5, 오른쪽 위 버전이 V3.1 이고 본드가 8개 업체 · 11개 상품이면 끝
+1. 이 압축 파일 안의 commerce05.html 을 commerce-insight 저장소 폴더에 복사해 붙여 넣고, 바꿀지 물으면 "덮어쓰기"를 누릅니다.
+2. GitHub Desktop 에서 Summary 에 "화면 V3.3" 입력 → Commit to main → Push origin
+3. 1~2분 뒤 대시보드에서 Ctrl+F5, 오른쪽 위 버전이 V3.3 이면 끝
+
+바뀐 점: 단가 관리에서 단가를 넣거나 [같은 상품 모두]를 눌러도 목록이 맨 위로 올라가지 않고 보던 자리에 그대로 있습니다.
