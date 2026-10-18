@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         커머스 인사이트 수집기
 // @namespace    commerce-insight
-// @version      5.0.0
+// @version      5.1.0
 // @description  커머스 인사이트: 상품페이지가 스스로 불러오는 옵션별 재고를 읽어 깃허브(ds4eqm-lgtm/commerce-insight)에 기록
 // @match        https://smartstore.naver.com/*/products/*
 // @match        https://brand.naver.com/*/products/*
@@ -18,6 +18,8 @@
 // @downloadURL  none
 // ==/UserScript==
 
+// 5.1.0: 상품 페이지가 이미 불러온 같은 데이터에서 판매가(정가)·할인가·옵션 추가금도 함께 기록 (네이버에 더 접속하지 않음)
+//        latest.json 각 옵션에 sale(정가), disc(할인가), add(옵션 추가금), pd(금액 확인 날짜) 추가. 화면의 [금액 불러오기]가 읽음
 // 4.x 대비 바뀐 점
 // 1. 재고 리셋 감지: 한 번에 100개 이상 줄면서 10,000·99,999 처럼 딱 떨어지는 수가 되면 판매가 아니라 '수동변경 의심'으로 분리
 //    (엑셀 '99999로 리셋할 경우 집계 하루 미룸' 규칙. 1,000개 이상 한 번에 주는 기존 규칙도 그대로)
@@ -34,7 +36,7 @@
   // -------------------------------------------------------------------------------------------
   const GITHUB_OWNER = 'ds4eqm-lgtm';
   const GITHUB_REPO = 'commerce-insight';
-  const VERSION = '5.0.0';
+  const VERSION = '5.1.0';
 
   const DAY_START_HOUR = 7;  // 하루 시작 (07:00 ~ 다음날 07:00)
   const SPLIT_HOUR = 17;     // 2타임(07~17) / 1타임(17~다음날 07) 나누는 시각
@@ -210,20 +212,31 @@
           .map((k) => o[k])
           .filter(Boolean);
         const name = parts.length ? parts.join(' / ') : String(o.id);
-        results.push({ id: String(o.id), name, stock: o.stockQuantity });
+        results.push({ id: String(o.id), name, stock: o.stockQuantity, add: numOrNull(o.price) });
       }
     });
     if (!results.length) {
       (data.simpleOptions || []).forEach((o) => {
         if (o.stockQuantity != null) {
-          results.push({ id: String(o.id || o.optionName1 || 'default'), name: o.optionName1 || o.name || '기본옵션', stock: o.stockQuantity });
+          results.push({ id: String(o.id || o.optionName1 || 'default'), name: o.optionName1 || o.name || '기본옵션', stock: o.stockQuantity, add: numOrNull(o.price) });
         }
       });
     }
     if (!results.length && data.stockQuantity != null) {
-      results.push({ id: 'default', name: '기본', stock: data.stockQuantity });
+      results.push({ id: 'default', name: '기본', stock: data.stockQuantity, add: 0 });
     }
     return results;
+  }
+  function numOrNull(v) { const n = Number(v); return v != null && v !== '' && Number.isFinite(n) ? n : null; }
+  // 판매가(정가)와 할인가. 할인가가 없거나 정가보다 크면 정가와 같게 둠. 못 읽으면 null (화면에서 '금액 정보 없음')
+  function extractPrices(data) {
+    const sale = numOrNull(data.salePrice);
+    const b = data.benefitsView || {};
+    let disc = numOrNull(b.discountedSalePrice);
+    if (disc == null) disc = numOrNull(data.discountedSalePrice);
+    if (sale == null) return { sale: null, disc: null };
+    if (disc == null || disc <= 0 || disc > sale) disc = sale;
+    return { sale, disc };
   }
   function extractProductName(data) { return data.name || data.productName || document.title || `상품 ${productNo}`; }
   function extractStoreName(data) { return (data.channel && data.channel.channelName) || storeSlug; }
@@ -351,7 +364,11 @@
           // 기준 기록이 남아 있는 날은 새로 계산한 값으로, 아니면 기존 보관값 유지
           if (r.base || !daily[day] || !daily[day].t1) daily[day] = compactDay(r);
         });
-        latest[key] = { store: en.storeName, product: en.productNo, productName: en.productName, optionName: opt.name, date: en.today, stock: opt.stock, daily };
+        const rec = { store: en.storeName, product: en.productNo, productName: en.productName, optionName: opt.name, date: en.today, stock: opt.stock, daily };
+        // 금액: 이번에 읽었으면 새 값, 못 읽었으면(예전 대기열 등) 지난 값 유지
+        if (en.sale != null && opt.add != null) Object.assign(rec, { sale: en.sale, disc: en.disc, add: opt.add, pd: en.today });
+        else if (old.sale != null) ['sale', 'disc', 'add', 'pd'].forEach((f) => { if (old[f] != null) rec[f] = old[f]; });
+        latest[key] = rec;
       }));
       return latest;
     }, `판매량 업데이트 ${label} ${stamp.slice(0, 10)}`);
@@ -393,7 +410,8 @@
 
     const now = new Date();
     const today = ymd(now);
-    const entry = { channelId, productNo, storeName: extractStoreName(data), productName: extractProductName(data), nowKey: `${today}T${pad(now.getHours())}:00`, today, options };
+    const prices = extractPrices(data);
+    const entry = { channelId, productNo, storeName: extractStoreName(data), productName: extractProductName(data), nowKey: `${today}T${pad(now.getHours())}:00`, today, options, sale: prices.sale, disc: prices.disc };
 
     if (autoMode) {
       // 자동조회 탭: 탬퍼몽키 저장소에만 넣고 바로 닫음 → 정리용 페이지(#flush)가 한꺼번에 올림

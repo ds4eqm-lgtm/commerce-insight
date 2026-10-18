@@ -37,7 +37,7 @@ header h1{font-size:24px;letter-spacing:-.6px}header small{color:#d5e5f4}header 
 .delta{padding:10px 5px}.delta strong{font-size:15px}.store .sales{font-size:23px}
 .stats .stat:first-child{background:#eaf2ff}.stats .stat:nth-child(2){background:#fff5e8}
 .stat.bad{grid-column:1/-1;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer;background:#fdecee}.stat.bad b{color:#c94050}.stat.bad.none{background:#f6f8fb;cursor:default}.stat.bad.none b{color:#087a57}.stat.bad:not(.none):hover{background:#fadadf}
-.won{display:block;font-size:12px;font-weight:700;color:#2369c7;white-space:nowrap}.won.part::after{content:'*';color:#c94050}.total .won{font-size:15px;margin-top:2px}.day .won{display:inline;font-size:11px;font-weight:600}
+.won{display:block;font-size:12px;font-weight:700;color:#2369c7;white-space:nowrap}.won.part::after{content:'*';color:#c94050}.total .won{font-size:15px;margin-top:2px}.total .basis{display:block;margin-top:4px;font-size:12px;color:#475569;line-height:1.45}.price.diff{border-color:#f59e0b;background:#fffbeb}.npr{font-size:12px;line-height:1.4;white-space:nowrap}.npr small{display:block}.basisPick{display:inline-flex;gap:10px;align-items:center;font-size:14px}.basisPick label{display:inline-flex;gap:4px;align-items:center;cursor:pointer}.day .won{display:inline;font-size:11px;font-weight:600}
 .storeLink{background:none;border:0;padding:0;font:inherit;font-weight:700;font-size:16px;color:inherit;cursor:pointer;text-align:left}.storeLink:hover{color:#2369c7;text-decoration:underline}
 .abuse{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:10px;background:#f6f8fb;font-size:13px}.abuse.on{background:#fff4e5;border:1px solid #f5c98a}.abuse b{color:#b45309}.abuse .mbtn{padding:5px 9px}.abuselist{margin-top:8px}.abuselist table{width:100%;border-collapse:collapse;font-size:13px}.abuselist td,.abuselist th{padding:6px 8px;border-bottom:1px solid #eef1f5;text-align:left}
 .price{width:110px;text-align:right}.badlist{margin-top:10px;display:grid;gap:6px;max-height:420px;overflow:auto}.badlist a{display:block;padding:8px 10px;border:1px solid #f3c7cd;border-radius:8px;background:#fff;color:inherit;text-decoration:none;font-size:13px;line-height:1.35}.badlist a:hover{background:#fdecee}.badlist a b{display:block;font-size:13px}.badlist a small{display:block}.main{grid-template-rows:auto}@media(min-width:801px){.top{grid-template-columns:minmax(0,1fr) 300px}}.badpanel .badlist{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));max-height:none}
@@ -83,8 +83,8 @@ header .version-stamp{color:#d5e5f4}
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V3.3';
-const SCREEN_UPDATED = '2026-10-17 13:35 KST';
+const APP_VERSION = 'V3.5';
+const SCREEN_UPDATED = '2026-10-19 06:40 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -369,6 +369,15 @@ function setPrice(it, v) {
   if (!Object.keys(r.prices).length) delete r.prices;
   if (!Object.keys(r).length) delete workStores[it.slug];
 }
+// 수집기 5.1 이 상품 페이지에서 함께 읽은 네이버 판매가 (sale 정가, disc 할인가, add 옵션 추가금)
+// 표시 단위(박스·m) 1개 값 = (기본가 + 옵션 추가금) × 단위 환산. 금액 정보가 없으면 0
+function autoPrice(it, basis) {
+  if (it.sale == null) return 0;
+  const base = basis === 'sale' ? it.sale : (it.disc != null ? it.disc : it.sale);
+  return Math.round((base + (it.add || 0)) * unitOf(it).div);
+}
+let priceBasis = 'disc'; // 금액 불러오기 기준: 'disc' 할인가 / 'sale' 정가 (이 컴퓨터에 기억)
+try { if (localStorage.getItem('ci_priceBasis') === 'sale') priceBasis = 'sale'; } catch (e) { /* 무시 */ }
 // 금액 표시: 짧게(칸 안) 123.4만원 / 1.2억원, 길게(합계) 1,234,000원
 function wonShort(n) {
   if (!n) return '0원';
@@ -430,7 +439,7 @@ function recompute(first) {
     if (!(p in rank)) { hidden.add(p); return; } // 목록에서 뺀 상품: 기록은 그대로, 화면에서만 제외
     const slug = slugOfUrl(linkOf[p]);
     if (it.store && !collectedName[slug]) collectedName[slug] = it.store;
-    items.push({ key, slug, store: it.store, product: p, productName: it.productName || '', optionName: it.optionName || '', daily: it.daily || {}, cat: catOfProduct(p), site: rank[p] * 100000 + i });
+    items.push({ key, slug, store: it.store, product: p, productName: it.productName || '', optionName: it.optionName || '', daily: it.daily || {}, cat: catOfProduct(p), site: rank[p] * 100000 + i, sale: it.sale, disc: it.disc, add: it.add, pd: it.pd });
   });
   hiddenProducts = hidden.size;
   items.sort((a, b) => a.site - b.site);
@@ -449,9 +458,12 @@ function recompute(first) {
       const sold = soldOf(it, v);
       s[lb] = (s[lb] || 0) + sold;
       if (sold) {
-        const w = (((aggWon[day] = aggWon[day] || {})[it.cat] = aggWon[day][it.cat] || {})[it.slug] = aggWon[day][it.cat][it.slug] || { won: 0, miss: 0 });
+        const w = (((aggWon[day] = aggWon[day] || {})[it.cat] = aggWon[day][it.cat] || {})[it.slug] = aggWon[day][it.cat][it.slug] || { won: 0, miss: 0, ws: 0, wd: 0 });
         const pr = priceOf(it);
         if (pr) w.won += sold * pr; else w.miss += sold;
+        // 정가 기준·할인가 기준 매출 (네이버 판매가, 없으면 입력한 단가)
+        w.ws += sold * (autoPrice(it, 'sale') || pr);
+        w.wd += sold * (autoPrice(it, 'disc') || pr);
       }
       ((cover[day] = cover[day] || {})[it.cat] = cover[day][it.cat] || {})[it.slug] = true;
       seen.add(it.product);
@@ -513,7 +525,7 @@ function comparePeriods(day) {
   return [[[pd, pd], [day, day]], [[weekStart(pw), pw], [weekStart(day), day]], [[monthStart(pm), pm], [monthStart(day), day]]];
 }
 function sumRange(cat, slugs, from, to) {
-  const o = {}; let covered = false, won = 0, miss = 0;
+  const o = {}; let covered = false, won = 0, miss = 0, ws = 0, wd = 0;
   for (let d = from; d <= to; d = addDays(d, 1)) {
     const a = agg[d] && agg[d][cat]; if (!a) continue;
     Object.entries(a).forEach(([sl, u]) => {
@@ -521,10 +533,10 @@ function sumRange(cat, slugs, from, to) {
       if (cover[d][cat][sl]) covered = true;
       Object.entries(u).forEach(([lb, n]) => { o[lb] = (o[lb] || 0) + n; });
       const w = aggWon[d] && aggWon[d][cat] && aggWon[d][cat][sl];
-      if (w) { won += w.won; miss += w.miss; }
+      if (w) { won += w.won; miss += w.miss; ws += w.ws || 0; wd += w.wd || 0; }
     });
   }
-  return { o, covered, won, miss };
+  return { o, covered, won, miss, ws, wd };
 }
 function fmtSums(o) {
   const ks = Object.keys(o).sort((a, b) => UNIT_ORDER.indexOf(a) - UNIT_ORDER.indexOf(b));
@@ -671,7 +683,8 @@ function render() {
     const [a, b] = periods(selDay)[i];
     const today = i === 0 ? `<small style="margin-top:4px">오늘(진행중) ${fmtSums(sumRange(active, null, currentDay, currentDay).o)}</small>` : '';
     const r = sumRange(active, null, a, b);
-    return `<div class="total"><small>${label}</small><strong>${hasCat ? fmtSums(r.o) : '데이터 없음'}</strong>${hasCat ? wonHtml(r, true) + today : ''}</div>`;
+    const basis = hasCat && (r.ws || r.wd) && items.some((it) => it.sale != null) ? `<small class="basis" title="네이버 판매가(기본가 + 옵션 추가금) × 판매량. 판매가를 못 읽은 옵션은 입력한 단가로 계산">할인가 기준 ${wonLong(Math.round(r.wd))}<br>정가 기준 ${wonLong(Math.round(r.ws))}</small>` : '';
+    return `<div class="total"><small>${label}</small><strong>${hasCat ? fmtSums(r.o) : '데이터 없음'}</strong>${hasCat ? wonHtml(r, true) + basis + today : ''}</div>`;
   }).join('');
 
   // 순위 = 선택일(일간) 판매량. 정렬은 '판매량순(1위부터)' 또는 '가나다순'
@@ -971,29 +984,65 @@ function renderManage() {
     const list = items.filter((it) => it.cat === active && (!priceStore || it.slug === priceStore));
     const slugsHere = [...new Set(items.filter((it) => it.cat === active).map((it) => it.slug))].sort((a, b) => storeName(a).localeCompare(storeName(b), 'ko-KR'));
     const noPrice = list.filter((it) => !priceOf(it)).length;
+    const hasAuto = list.filter((it) => it.sale != null).length;
+    const nprHtml = (it) => {
+      if (it.sale == null) return '<span class="muted npr">금액 정보 없음</span>';
+      const add = it.add || 0, u = unitOf(it);
+      const part = (b) => `${b.toLocaleString('ko-KR')}${add ? ` + ${add.toLocaleString('ko-KR')}` : ''}`;
+      const conv = u.div !== 1 ? ` <small class="muted">${u.label} 1개 = ${autoPrice(it, priceBasis).toLocaleString('ko-KR')}원</small>` : '';
+      return `<div class="npr" title="기본가 + 옵션 추가금 (${escapeHtml(it.pd || '')} 확인)"><span${priceBasis === 'disc' ? ' style="font-weight:700"' : ''}>할인 ${part(it.disc != null ? it.disc : it.sale)}</span><small${priceBasis === 'sale' ? ' style="font-weight:700;color:inherit"' : ''}>정가 ${part(it.sale)}</small>${conv}</div>`;
+    };
     let prev = '';
     body.innerHTML = `<div class="mform"><b>옵션별 단가</b><select id="fPriceStore"><option value="">${escapeHtml(active)} 전체 업체</option>${slugsHere.map((sl) => `<option value="${escapeHtml(sl)}" ${sl === priceStore ? 'selected' : ''}>${escapeHtml(storeName(sl))}</option>`).join('')}</select>
-      <small class="muted">단가는 ${escapeHtml(mainUnit(active))} 1개 값(원)입니다. 칸에 숫자를 넣고 Enter 또는 다른 곳을 누르면 바로 금액에 반영되고, 아래 [적용 파일 내려받기]로 저장합니다. 상품명을 누르면 상품 페이지가 열립니다.</small></div>
-    <p class="muted" style="margin:8px 0 0;font-size:13px">옵션 ${list.length}개 · 단가 미입력 ${noPrice}개</p>
-    <div class="list"><table><tr><th>업체</th><th>상품</th><th>옵션</th><th>단위</th><th>단가(원)</th><th></th></tr>${list.map((it) => {
+      <span class="basisPick"><b>금액 기준</b><label><input type="radio" name="pbasis" value="disc" ${priceBasis === 'disc' ? 'checked' : ''}>할인가</label><label><input type="radio" name="pbasis" value="sale" ${priceBasis === 'sale' ? 'checked' : ''}>정가</label></span><button class="mbtn primary" id="bLoadPrices" title="수집기가 상품 페이지에서 읽어 둔 네이버 판매가(기본가 + 옵션 추가금)를 단가 칸에 채웁니다. 네이버에 새로 접속하지 않습니다.">금액 불러오기</button>
+      <small class="muted">[금액 불러오기]를 누르면 위에서 고른 기준(할인가·정가)으로 '기본가 + 옵션 추가금'이 단가 칸에 채워집니다. 틀린 칸만 고치세요. 네이버 값과 다른 칸은 노란색입니다. 단가는 ${escapeHtml(mainUnit(active))} 1개 값(원)입니다. 칸에 숫자를 넣고 Enter 또는 다른 곳을 누르면 바로 금액에 반영되고, 아래 [적용 파일 내려받기]로 저장합니다. 상품명을 누르면 상품 페이지가 열립니다.</small></div>
+    <p class="muted" style="margin:8px 0 0;font-size:13px">옵션 ${list.length}개 · 단가 미입력 ${noPrice}개 · 네이버 판매가 확인 ${hasAuto}개${hasAuto ? '' : ' (수집기 5.1.0 설치 후 다음 정각 수집부터 채워집니다)'}</p>
+    <div class="list"><table><tr><th>업체</th><th>상품</th><th>옵션</th><th>네이버 판매가<br><small class="muted">기본가 + 옵션 추가금</small></th><th>단위</th><th>단가(원)</th><th></th></tr>${list.map((it) => {
+      const ap = autoPrice(it, priceBasis), pv = priceOf(it);
       const first = it.product !== prev; prev = it.product;
-      return `<tr${first ? ' style="border-top:2px solid #e2e8f0"' : ''}><td>${first ? escapeHtml(storeName(it.slug)) : ''}</td><td>${first ? `<a href="${escapeHtml(linkOf[it.product] || '#')}" target="_blank" rel="noopener" title="${escapeHtml(it.productName)}">${escapeHtml(shortName(it.productName) || it.product)}</a>` : ''}</td><td>${escapeHtml(it.optionName)}</td><td>${escapeHtml(unitOf(it).label)}</td>
-        <td><input class="price" data-key="${escapeHtml(it.key)}" inputmode="numeric" placeholder="미입력" value="${priceOf(it) ? priceOf(it).toLocaleString('ko-KR') : ''}"></td>
+      return `<tr${first ? ' style="border-top:2px solid #e2e8f0"' : ''}><td>${first ? escapeHtml(storeName(it.slug)) : ''}</td><td>${first ? `<a href="${escapeHtml(linkOf[it.product] || '#')}" target="_blank" rel="noopener" title="${escapeHtml(it.productName)}">${escapeHtml(shortName(it.productName) || it.product)}</a>` : ''}</td><td>${escapeHtml(it.optionName)}</td><td>${nprHtml(it)}</td><td>${escapeHtml(unitOf(it).label)}</td>
+        <td><input class="price${ap && pv && ap !== pv ? ' diff' : ''}"${ap && pv && ap !== pv ? ` title="네이버 ${priceBasis === 'disc' ? '할인가' : '정가'} 기준 ${ap.toLocaleString('ko-KR')}원과 다름"` : ''} data-key="${escapeHtml(it.key)}" inputmode="numeric" placeholder="미입력" value="${priceOf(it) ? priceOf(it).toLocaleString('ko-KR') : ''}"></td>
         <td>${first ? `<button class="mbtn" data-same="${escapeHtml(it.key)}" title="이 옵션의 단가를 같은 상품의 모든 옵션에 넣기">같은 상품 모두</button>` : ''}</td></tr>`;
-    }).join('') || '<tr><td colspan="6">이 품목에 수집된 상품이 없습니다.</td></tr>'}</table></div>`;
+    }).join('') || '<tr><td colspan="7">이 품목에 수집된 상품이 없습니다.</td></tr>'}</table></div>`;
     const byKey = {}; list.forEach((it) => { byKey[it.key] = it; });
     document.getElementById('fPriceStore').onchange = (e) => { priceStore = e.target.value; renderManage(); };
+    body.querySelectorAll('input[name="pbasis"]').forEach((r) => r.addEventListener('change', () => {
+      priceBasis = r.value;
+      try { localStorage.setItem('ci_priceBasis', priceBasis); } catch (e) { /* 무시 */ }
+      renderManage();
+    }));
+    document.getElementById('bLoadPrices').onclick = () => {
+      const can = list.filter((it) => autoPrice(it, priceBasis));
+      if (!can.length) return alert('아직 불러올 네이버 판매가가 없습니다.\n수집기 5.1.0 을 설치하면 다음 정각 수집부터 상품마다 판매가·옵션 추가금이 기록됩니다.');
+      const changed = can.filter((it) => priceOf(it) && priceOf(it) !== autoPrice(it, priceBasis));
+      let overwrite = true;
+      if (changed.length) overwrite = confirm(`이미 입력한 단가 중 ${changed.length}개가 네이버 ${priceBasis === 'disc' ? '할인가' : '정가'}와 다릅니다.\n\n확인: 이것도 네이버 값으로 바꾸기\n취소: 빈 칸만 채우기`);
+      let n = 0;
+      can.forEach((it) => { if (!priceOf(it) || (overwrite && priceOf(it) !== autoPrice(it, priceBasis))) { setPrice(it, autoPrice(it, priceBasis)); n++; } });
+      keepPlace(() => recompute(false));
+      const skip = list.length - can.length;
+      alert(`${n}개 옵션 단가를 채웠습니다 (${priceBasis === 'disc' ? '할인가' : '정가'} 기준).${skip ? `\n네이버 판매가가 없는 ${skip}개는 그대로입니다.` : ''}\n틀린 칸만 고친 뒤 아래 [적용 파일 내려받기]로 저장하세요.`);
+    };
+    // 단가를 반영해도 보던 줄이 화면에서 움직이지 않게: 위쪽 카드 높이가 바뀌면 그만큼 페이지 스크롤을 보정
+    const keepPlace = (fn) => {
+      const box = document.getElementById('manage');
+      const top = box.getBoundingClientRect().top;
+      fn();
+      const moved = box.getBoundingClientRect().top - top;
+      if (moved) window.scrollBy(0, moved);
+    };
     body.querySelectorAll('input.price').forEach((inp) => {
       inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
-      inp.addEventListener('change', () => { setPrice(byKey[inp.dataset.key], inp.value); recompute(false); });
+      inp.addEventListener('change', () => { if (!inp.isConnected) return; keepPlace(() => { setPrice(byKey[inp.dataset.key], inp.value); recompute(false); }); });
     });
+    // 단가 칸에 입력한 채 바로 [같은 상품 모두]를 눌러도 한 번에 적용되게 (칸에서 포커스가 먼저 빠지면 버튼이 다시 그려져 클릭이 사라짐)
+    body.querySelectorAll('[data-same]').forEach((b) => b.addEventListener('mousedown', (e) => e.preventDefault()));
     body.querySelectorAll('[data-same]').forEach((b) => b.addEventListener('click', () => {
       const src = byKey[b.dataset.same];
       const inp = body.querySelector(`input.price[data-key="${CSS.escape(src.key)}"]`);
       const v = inp ? inp.value : priceOf(src);
       if (!Number(String(v).replace(/[^\d.]/g, ''))) return alert('먼저 첫 옵션의 단가를 넣어 주세요.');
-      items.filter((x) => x.product === src.product).forEach((x) => setPrice(x, v));
-      recompute(false);
+      keepPlace(() => { items.filter((x) => x.product === src.product).forEach((x) => setPrice(x, v)); recompute(false); });
     }));
   } else if (mtab === 'urls') {
     const e = editing && editing.type === 'url' ? rows.find((r) => r.idx === editing.idx) : null;
