@@ -83,8 +83,8 @@ header .version-stamp{color:#d5e5f4}
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V3.6';
-const SCREEN_UPDATED = '2026-10-20 06:55 KST';
+const APP_VERSION = 'V3.7';
+const SCREEN_UPDATED = '2026-10-20 07:00 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -376,6 +376,7 @@ function autoPrice(it, basis) {
   const base = basis === 'sale' ? it.sale : (it.disc != null ? it.disc : it.sale);
   return Math.round((base + (it.add || 0)) * unitOf(it).div);
 }
+let nextPriceKey = null; // 단가 칸에서 엔터를 친 뒤 옮겨 갈 칸
 let priceBasis = 'disc'; // 금액 불러오기 기준: 'disc' 할인가 / 'sale' 정가 (이 컴퓨터에 기억)
 try { if (localStorage.getItem('ci_priceBasis') === 'sale') priceBasis = 'sale'; } catch (e) { /* 무시 */ }
 // 금액 표시: 짧게(칸 안) 123.4만원 / 1.2억원, 길게(합계) 1,234,000원
@@ -1038,8 +1039,22 @@ function renderManage() {
       const moved = box.getBoundingClientRect().top - top;
       if (moved) window.scrollBy(0, moved);
     };
+    // 엔터: 지금 칸을 반영하고 바로 아래 칸으로 (반영하면 표가 다시 그려지므로 다음 칸 키를 기억했다가 그린 뒤 이동)
+    const goPrice = (key) => {
+      const el = key && body.querySelector(`input.price[data-key="${CSS.escape(key)}"]`);
+      if (el) { el.focus(); el.select(); el.scrollIntoView({ block: 'nearest' }); }
+    };
+    if (nextPriceKey) { const k = nextPriceKey; nextPriceKey = null; goPrice(k); }
     body.querySelectorAll('input.price').forEach((inp) => {
-      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
+      inp.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        const all = [...body.querySelectorAll('input.price')];
+        const next = all[all.indexOf(inp) + (e.shiftKey ? -1 : 1)];
+        nextPriceKey = next ? next.dataset.key : null;
+        inp.blur(); // 값이 바뀌었으면 change → 다시 그린 뒤 위에서 이동
+        if (nextPriceKey) { const k = nextPriceKey; nextPriceKey = null; goPrice(k); } // 값이 그대로면 다시 그리지 않으므로 여기서 이동
+      });
       inp.addEventListener('change', () => { if (!inp.isConnected) return; keepPlace(() => { setPrice(byKey[inp.dataset.key], inp.value); recompute(false, true); }); });
     });
     // 단가 칸에 입력한 채 바로 [같은 상품 모두]를 눌러도 한 번에 적용되게 (칸에서 포커스가 먼저 빠지면 버튼이 다시 그려져 클릭이 사라짐)
