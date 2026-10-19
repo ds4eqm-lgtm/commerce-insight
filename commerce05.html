@@ -83,8 +83,8 @@ header .version-stamp{color:#d5e5f4}
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V3.5';
-const SCREEN_UPDATED = '2026-10-19 06:40 KST';
+const APP_VERSION = 'V3.6';
+const SCREEN_UPDATED = '2026-10-20 06:55 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -427,7 +427,12 @@ function useData(productsText, latestText, historyText, approvedText, storesText
 }
 
 // 목록(작업본)이 바뀌면 다시 계산
-function recompute(first) {
+// pricesOnly: 단가만 바뀐 경우. 판매 수량(dayData)은 그대로라 기록 전체를 다시 훑지 않고 금액 합계만 다시 냄
+function recompute(first, pricesOnly) {
+  if (!(pricesOnly && items.length)) rebuildItems();
+  aggregate(first);
+}
+function rebuildItems() {
   parseProducts(workText);
   const rank = {};
   listOrder.forEach((p, i) => { rank[p] = i; });
@@ -445,6 +450,8 @@ function recompute(first) {
   items.sort((a, b) => a.site - b.site);
 
   buildDayData(new Date());
+}
+function aggregate(first) {
   agg = {}; aggWon = {}; cover = {}; dayCount = {};
   const byKey = {};
   items.forEach((it) => { byKey[it.key] = it; });
@@ -1019,7 +1026,7 @@ function renderManage() {
       if (changed.length) overwrite = confirm(`이미 입력한 단가 중 ${changed.length}개가 네이버 ${priceBasis === 'disc' ? '할인가' : '정가'}와 다릅니다.\n\n확인: 이것도 네이버 값으로 바꾸기\n취소: 빈 칸만 채우기`);
       let n = 0;
       can.forEach((it) => { if (!priceOf(it) || (overwrite && priceOf(it) !== autoPrice(it, priceBasis))) { setPrice(it, autoPrice(it, priceBasis)); n++; } });
-      keepPlace(() => recompute(false));
+      keepPlace(() => recompute(false, true));
       const skip = list.length - can.length;
       alert(`${n}개 옵션 단가를 채웠습니다 (${priceBasis === 'disc' ? '할인가' : '정가'} 기준).${skip ? `\n네이버 판매가가 없는 ${skip}개는 그대로입니다.` : ''}\n틀린 칸만 고친 뒤 아래 [적용 파일 내려받기]로 저장하세요.`);
     };
@@ -1033,7 +1040,7 @@ function renderManage() {
     };
     body.querySelectorAll('input.price').forEach((inp) => {
       inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
-      inp.addEventListener('change', () => { if (!inp.isConnected) return; keepPlace(() => { setPrice(byKey[inp.dataset.key], inp.value); recompute(false); }); });
+      inp.addEventListener('change', () => { if (!inp.isConnected) return; keepPlace(() => { setPrice(byKey[inp.dataset.key], inp.value); recompute(false, true); }); });
     });
     // 단가 칸에 입력한 채 바로 [같은 상품 모두]를 눌러도 한 번에 적용되게 (칸에서 포커스가 먼저 빠지면 버튼이 다시 그려져 클릭이 사라짐)
     body.querySelectorAll('[data-same]').forEach((b) => b.addEventListener('mousedown', (e) => e.preventDefault()));
@@ -1042,7 +1049,7 @@ function renderManage() {
       const inp = body.querySelector(`input.price[data-key="${CSS.escape(src.key)}"]`);
       const v = inp ? inp.value : priceOf(src);
       if (!Number(String(v).replace(/[^\d.]/g, ''))) return alert('먼저 첫 옵션의 단가를 넣어 주세요.');
-      keepPlace(() => { items.filter((x) => x.product === src.product).forEach((x) => setPrice(x, v)); recompute(false); });
+      keepPlace(() => { items.filter((x) => x.product === src.product).forEach((x) => setPrice(x, v)); recompute(false, true); });
     }));
   } else if (mtab === 'urls') {
     const e = editing && editing.type === 'url' ? rows.find((r) => r.idx === editing.idx) : null;
