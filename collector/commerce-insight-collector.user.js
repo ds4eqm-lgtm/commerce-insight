@@ -19,6 +19,7 @@
 // @downloadURL  none
 // ==/UserScript==
 
+// 5.2.0: 토큰을 탬퍼몽키 저장소에도 보관 → 다음 업데이트부터는 토큰을 옮겨 넣지 않아도 됨
 // 5.2.0: 정리(#flush) 때 이번 시간에 빠진 상품을 앞쪽 탭으로 하나씩 다시 열어 재고를 받음 (최대 15개, 상품당 20초)
 //        뒤에 숨은 탭에서는 재고를 늦게 주는 상품(새로고침 600 NPT 등)이 10/8부터 계속 빠졌기 때문
 // 5.1.0: 상품 페이지가 이미 불러온 같은 데이터에서 판매가(정가)·할인가·옵션 추가금도 함께 기록 (네이버에 더 접속하지 않음)
@@ -37,6 +38,13 @@
   // ---------------- 토큰은 여기 따옴표 안에만 넣기 (다른 곳에 붙여넣지 말 것) ----------------
   const GITHUB_TOKEN = "";
   // -------------------------------------------------------------------------------------------
+  // 5.2.0부터 토큰을 탬퍼몽키 저장소에도 보관함. 한 번 넣고 저장하면, 다음 업데이트 때 위 칸이 비어 있어도 보관된 토큰을 씀
+  const TOKEN = (() => {
+    try {
+      if (GITHUB_TOKEN) { GM_setValue('ci_github_token', GITHUB_TOKEN); return GITHUB_TOKEN; }
+      return GM_getValue('ci_github_token', '');
+    } catch (e) { return GITHUB_TOKEN; }
+  })();
   const GITHUB_OWNER = 'ds4eqm-lgtm';
   const GITHUB_REPO = 'commerce-insight';
   const VERSION = '5.2.0';
@@ -252,7 +260,7 @@
         method,
         url: `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}${bust}`,
         headers: {
-          Authorization: `token ${GITHUB_TOKEN}`,
+          Authorization: `token ${TOKEN}`,
           Accept: accept || 'application/vnd.github+json',
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache',
@@ -305,7 +313,7 @@
 
   // 여러 탭이 동시에 같은 파일을 고치면 충돌이 나므로 성공할 때까지 다시 읽고 다시 씀
   async function updateJsonFile(path, mutateFn, message) {
-    if (!GITHUB_TOKEN) throw new Error('토큰이 비어 있음 (스크립트의 GITHUB_TOKEN 따옴표 안에 넣어 주세요)');
+    if (!TOKEN) throw new Error('토큰이 비어 있음 (스크립트의 GITHUB_TOKEN 따옴표 안에 넣어 주세요)');
     const MAX_ATTEMPTS = 20;
     let lastError = '';
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
@@ -494,7 +502,7 @@
 
     const keys = pendingKeys();
     const entries = keys.map((k) => GM_getValue(k)).filter(Boolean);
-    if (!GITHUB_TOKEN) {
+    if (!TOKEN) {
       box.style.background = '#b91c1c';
       say(`토큰이 비어 있어 올리지 못했습니다. 결과 ${entries.length}개는 보관해 두고 다음 정각에 다시 올립니다. 탬퍼몽키에서 이 스크립트의 GITHUB_TOKEN 따옴표 안에 토큰을 넣어 주세요.`);
       setTimeout(() => window.close(), 600000);
