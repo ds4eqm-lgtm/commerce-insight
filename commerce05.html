@@ -42,6 +42,7 @@ header h1{font-size:24px;letter-spacing:-.6px}header small{color:#d5e5f4}header 
 .prank{grid-column:1/-1;border:1px solid #cfe3da;background:#f7fbf9;border-radius:12px;padding:14px 16px;margin-top:-4px}
 .prank .phead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}.prank .phead b{font-size:16px;margin-right:auto}
 .prank .phead button{border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font:inherit;font-size:13px}.prank .phead button.on{background:#16866a;border-color:#16866a;color:#fff}
+.pnav{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.pnav button{border:1px solid #cbd5e1;background:#fff;border-radius:16px;padding:4px 11px;cursor:pointer;font:inherit;font-size:12px}.pnav button.on{background:#16866a;border-color:#16866a;color:#fff}
 .prow{display:grid;grid-template-columns:46px minmax(0,1fr) 110px 110px;gap:10px;align-items:center;padding:9px 4px;border-top:1px solid #e3eee9}
 .prow .pr{font-weight:800;color:#28435f;text-align:center}.prow a{color:inherit;font-weight:700;text-decoration:none}.prow a:hover{color:#2369c7;text-decoration:underline}
 .prow .pq{text-align:right;font-weight:800}.prow .pw{text-align:right;color:#1d4ed8;font-size:13px}.prow small{display:block;color:#64748b;font-size:12px}
@@ -720,12 +721,19 @@ function render() {
   }).join('') : '<div class="muted">아직 등록된 업체가 없습니다. 상품 URL 관리에서 상품 URL을 등록하면 다음 정각 수집부터 이곳에 표시됩니다.</div>';
   document.querySelectorAll('#stores [data-store]').forEach((el) => el.addEventListener('click', () => {
     openStore = openStore === el.dataset.store ? '' : el.dataset.store;
+    rankPage = 0;
     render();
     const pnl = document.querySelector('#stores .prank');
     if (pnl) pnl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }));
-  document.querySelectorAll('#stores [data-rp]').forEach((el) => el.addEventListener('click', () => { rankPeriod = Number(el.dataset.rp); try { localStorage.setItem('c05rankPeriod', String(rankPeriod)); } catch (e) { /* 무시 */ } render(); }));
-  document.querySelectorAll('#stores [data-rm]').forEach((el) => el.addEventListener('click', () => { rankMode = el.dataset.rm; render(); }));
+  document.querySelectorAll('#stores [data-rp]').forEach((el) => el.addEventListener('click', () => { rankPeriod = Number(el.dataset.rp); rankPage = 0; try { localStorage.setItem('c05rankPeriod', String(rankPeriod)); } catch (e) { /* 무시 */ } render(); }));
+  document.querySelectorAll('#stores [data-rm]').forEach((el) => el.addEventListener('click', () => { rankMode = el.dataset.rm; rankPage = 0; render(); }));
+  document.querySelectorAll('#stores [data-rpage]').forEach((el) => el.addEventListener('click', () => {
+    rankPage = Number(el.dataset.rpage);
+    render();
+    const pnl = document.querySelector('#stores .prank');
+    if (pnl) pnl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
   document.querySelectorAll('#stores [data-rclose]').forEach((el) => el.addEventListener('click', () => { openStore = ''; render(); }));
   document.querySelectorAll('#stores [data-rprice]').forEach((el) => el.addEventListener('click', () => { priceStore = el.dataset.rprice; openManage('prices', true); }));
   renderAbuse();
@@ -771,6 +779,16 @@ function renderAbuse() {
 let openStore = '';
 let rankPeriod = 2; // 0 일 · 1 주 · 2 월 · 3 연 누적 (선택일 기준)
 let rankMode = 'p'; // 'p' 상품별 · 'o' 옵션별
+let rankPage = 0; // 0 = 전체(스크롤), 1 = 1~10위, 2 = 11~20위 …
+const RANK_PAGE = 10;
+// 순위 줄 목록을 전체 또는 10개씩 잘라 보여 주고, 아래에 [전체] [1~10위] … 버튼을 붙임
+function rankPaged(rows) {
+  const pages = Math.ceil(rows.length / RANK_PAGE);
+  if (rankPage > pages) rankPage = 0;
+  const shown = rankPage ? rows.slice((rankPage - 1) * RANK_PAGE, rankPage * RANK_PAGE) : rows;
+  const nav = pages > 1 ? `<div class="pnav"><button type="button" data-rpage="0" class="${rankPage === 0 ? 'on' : ''}">전체 ${rows.length}개</button>${Array.from({ length: pages }, (_, i) => `<button type="button" data-rpage="${i + 1}" class="${rankPage === i + 1 ? 'on' : ''}">${((f, t) => (f === t ? `${f}위` : `${f}~${t}위`))(i * RANK_PAGE + 1, Math.min((i + 1) * RANK_PAGE, rows.length))}</button>`).join('')}</div>` : '';
+  return nav + shown.join('') + (rankPage && pages > 1 ? nav : '');
+}
 const optShort = (n) => { const t = String(n || '기본'); const i = t.lastIndexOf(' / '); return i >= 0 ? t.slice(i + 3) : t; };
 try { const v = localStorage.getItem('c05rankPeriod'); if (v !== null && /^[0-3]$/.test(v)) rankPeriod = Number(v); } catch (e) { /* 무시 */ }
 function storeRankHtml(slug) {
@@ -793,18 +811,18 @@ function storeRankHtml(slug) {
     opts.sort((a, b) => b.sold - a.sold);
     const tot = opts.filter((o) => o.ul === lb).reduce((n, o) => n + o.sold, 0);
     const mx = Math.max(1, ...opts.map((o) => o.sold));
-    var optRows = opts.map((o, i) => `<div class="prow"><span class="pr">${i + 1}위</span><div><a href="${escapeHtml(linkOf[o.p] || '#')}" target="_blank" rel="noopener" title="${escapeHtml(o.full)}">${escapeHtml(o.name)}</a><small>${escapeHtml(shortName(o.pname))}</small><div class="pbar"><i style="width:${Math.round(o.sold / mx * 100)}%"></i></div></div><span class="pq">${fmtNum(o.sold)}${escapeHtml(o.ul)}${tot && o.ul === lb ? `<small>${Math.round(o.sold / tot * 100)}%</small>` : ''}</span><span class="pw">${o.won ? wonShort(o.won) : ''}</span></div>`).join('') || '<div class="muted">이 기간 판매된 옵션이 없습니다.</div>';
+    var optRows = rankPaged(opts.map((o, i) => `<div class="prow"><span class="pr">${i + 1}위</span><div><a href="${escapeHtml(linkOf[o.p] || '#')}" target="_blank" rel="noopener" title="${escapeHtml(o.full)}">${escapeHtml(o.name)}</a><small>${escapeHtml(shortName(o.pname))}</small><div class="pbar"><i style="width:${Math.round(o.sold / mx * 100)}%"></i></div></div><span class="pq">${fmtNum(o.sold)}${escapeHtml(o.ul)}${tot && o.ul === lb ? `<small>${Math.round(o.sold / tot * 100)}%</small>` : ''}</span><span class="pw">${o.won ? wonShort(o.won) : ''}</span></div>`)) || '<div class="muted">이 기간 판매된 옵션이 없습니다.</div>';
   }
   const list = Object.values(byProd).sort((a, b) => (b.o[lb] || 0) - (a.o[lb] || 0) || b.won - a.won || a.name.localeCompare(b.name, 'ko-KR'));
   const total = list.reduce((n, x) => n + (x.o[lb] || 0), 0);
   const max = Math.max(1, ...list.map((x) => x.o[lb] || 0));
   const range = from === to ? from.slice(5).replace('-', '/') : `${from.slice(5).replace('-', '/')} ~ ${to.slice(5).replace('-', '/')}`;
-  const rows = list.map((x, i) => {
+  const rows = rankPaged(list.map((x, i) => {
     const q = x.o[lb] || 0;
     const opts = x.opts.sort((a, b) => b.sold - a.sold);
     const optTxt = opts.slice(0, 5).map((o) => `${escapeHtml(o.name)} ${fmtNum(o.sold)}${escapeHtml(o.ul)}`).join(' · ') + (opts.length > 5 ? ` 외 ${opts.length - 5}개` : '');
     return `<div class="prow"><span class="pr">${q ? `${i + 1}위` : '-'}</span><div><a href="${escapeHtml(linkOf[x.p] || '#')}" target="_blank" rel="noopener" title="${escapeHtml(x.name)}">${escapeHtml(shortName(x.name))}</a><small>${optTxt || '이 기간 판매 없음'}</small><div class="pbar"><i style="width:${Math.round(q / max * 100)}%"></i></div></div><span class="pq">${fmtSums(x.o)}${total && q ? `<small>${Math.round(q / total * 100)}%</small>` : ''}</span><span class="pw" title="옵션별 단가(없으면 네이버 할인가) × 판매량">${x.won ? wonShort(x.won) : ''}</span></div>`;
-  }).join('');
+  }));
   return `<div class="prank"><div class="phead"><b>${escapeHtml(storeName(slug))} · 상품 판매 순위 <small class="muted">${range}</small></b><button type="button" data-rm="p" class="${rankMode === 'p' ? 'on' : ''}">상품별</button><button type="button" data-rm="o" class="${rankMode === 'o' ? 'on' : ''}">옵션별</button><span style="width:8px"></span>${labels.map((t, i) => `<button type="button" data-rp="${i}" class="${i === rankPeriod ? 'on' : ''}">${t}</button>`).join('')}<button type="button" data-rprice="${escapeHtml(slug)}">단가 관리</button><button type="button" data-rclose="1">닫기 ✕</button></div>${rankMode === 'o' ? optRows : rows || '<div class="muted">이 품목에 등록된 상품이 없습니다.</div>'}</div>`;
 }
 
