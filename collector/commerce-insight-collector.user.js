@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         커머스 인사이트 수집기
 // @namespace    commerce-insight
-// @version      5.2.0
+// @version      5.2.1
 // @description  커머스 인사이트: 상품페이지가 스스로 불러오는 옵션별 재고를 읽어 깃허브(ds4eqm-lgtm/commerce-insight)에 기록
 // @match        https://smartstore.naver.com/*/products/*
 // @match        https://brand.naver.com/*/products/*
@@ -19,6 +19,7 @@
 // @downloadURL  none
 // ==/UserScript==
 
+// 5.2.1: 대시보드를 열면 오른쪽 아래에 토큰 상태(정상/비어 있음/틀림)를 보여 줌. 빠진 상품 다시 열기는 이번 시간 수집이 절반 이상 모였을 때만
 // 5.2.0: 토큰을 탬퍼몽키 저장소에도 보관 → 다음 업데이트부터는 토큰을 옮겨 넣지 않아도 됨
 // 5.2.0: 정리(#flush) 때 이번 시간에 빠진 상품을 앞쪽 탭으로 하나씩 다시 열어 재고를 받음 (최대 15개, 상품당 20초)
 //        뒤에 숨은 탭에서는 재고를 늦게 주는 상품(새로고침 600 NPT 등)이 10/8부터 계속 빠졌기 때문
@@ -47,7 +48,7 @@
   })();
   const GITHUB_OWNER = 'ds4eqm-lgtm';
   const GITHUB_REPO = 'commerce-insight';
-  const VERSION = '5.2.0';
+  const VERSION = '5.2.1';
 
   const DAY_START_HOUR = 7;  // 하루 시작 (07:00 ~ 다음날 07:00)
   const SPLIT_HOUR = 17;     // 2타임(07~17) / 1타임(17~다음날 07) 나누는 시각
@@ -449,8 +450,8 @@
   const RETRY_MAX = 15;
   const RETRY_WAIT = 20000;
   async function retryMissing(say) {
-    const got = new Set(pendingKeys().map((k) => k.split('_')[1]));
-    if (!got.size) return; // 이번 시간 조회가 아예 없으면 다시 열지 않음
+    const hourKey = `${ymd(new Date())}T${pad(new Date().getHours())}:00`;
+    const got = new Set(pendingKeys().filter((k) => k.endsWith(hourKey)).map((k) => k.split('_')[1]));
     let urls = [];
     try {
       const { text } = await getTextFile('products.txt');
@@ -461,6 +462,8 @@
         if (!seen.has(no) && !got.has(no)) { seen.add(no); urls.push({ no, url }); }
       });
     } catch (e) { console.log(`${LOG} 상품목록을 못 읽어 다시 열기 건너뜀`, e); return; }
+    // 이번 시간 자동 조회가 절반도 안 모였으면(직접 연 정리 화면 등) 다시 열지 않음
+    if (got.size < urls.length) { console.log(`${LOG} 이번 시간 수집 ${got.size}개뿐이라 다시 열기 건너뜀`); return; }
     urls = urls.slice(0, RETRY_MAX);
     for (let i = 0; i < urls.length; i++) {
       const { no, url } = urls[i];
@@ -540,9 +543,46 @@
     }
   }
 
+  // 토큰 상태 확인: 토큰 자체는 화면에 넘기지 않고 결과 글자만 보여 줌
+  function showTokenStatus() {
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:99999;color:#fff;padding:9px 13px;border-radius:8px;font:13px sans-serif;box-shadow:0 2px 8px #0004;cursor:pointer;background:#475569';
+    box.title = '눌러서 닫기';
+    box.onclick = () => box.remove();
+    const show = (bg, t, hideAfter) => {
+      box.style.background = bg;
+      box.textContent = `수집기 ${VERSION} · ${t}`;
+      if (!box.isConnected && document.body) document.body.appendChild(box);
+      if (hideAfter) setTimeout(() => box.remove(), hideAfter);
+    };
+    const run = () => {
+      if (!TOKEN) return show('#b91c1c', '토큰이 비어 있음: 탬퍼몽키에서 GITHUB_TOKEN 따옴표 안에 토큰을 넣고 저장하세요');
+      show('#475569', '토큰 확인 중…');
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}?t=${Date.now()}`,
+        headers: { Authorization: `token ${TOKEN}`, Accept: 'application/vnd.github+json' },
+        nocache: true,
+        timeout: 30000,
+        onload: (res) => {
+          let push = false;
+          try { push = !!(JSON.parse(res.responseText).permissions || {}).push; } catch (e) { /* 무시 */ }
+          if (res.status === 200 && push) show('#15803d', '토큰 정상 (올리기 가능)', 15000);
+          else if (res.status === 200) show('#b91c1c', '토큰은 맞지만 올리기 권한이 없음: 토큰 권한(Contents 쓰기)을 확인하세요');
+          else if (res.status === 401) show('#b91c1c', '토큰이 틀리거나 만료됨: 새 토큰을 넣어 주세요');
+          else show('#b45309', `토큰 확인 실패 (${res.status}) · 잠시 뒤 새로고침해 보세요`);
+        },
+        onerror: () => show('#b45309', '토큰 확인 실패 (연결 안 됨)'),
+        ontimeout: () => show('#b45309', '토큰 확인 실패 (시간 초과)'),
+      });
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+  }
+
   if (isDashboard) {
     // 대시보드 쪽에서는 #flush 일 때 업로드만 함. 토큰이나 저장 기능은 화면에 넘기지 않음
     if (window.location.hash === '#flush') flushPending();
+    else showTokenStatus();
     return;
   }
 
