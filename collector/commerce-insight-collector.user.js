@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         커머스 인사이트 수집기
 // @namespace    commerce-insight
-// @version      5.1.0
+// @version      5.2.0
 // @description  커머스 인사이트: 상품페이지가 스스로 불러오는 옵션별 재고를 읽어 깃허브(ds4eqm-lgtm/commerce-insight)에 기록
 // @match        https://smartstore.naver.com/*/products/*
 // @match        https://brand.naver.com/*/products/*
@@ -12,12 +12,15 @@
 // @grant        GM_getValue
 // @grant        GM_listValues
 // @grant        GM_deleteValue
+// @grant        GM_openInTab
 // @connect      api.github.com
 // @run-at       document-start
 // @updateURL    none
 // @downloadURL  none
 // ==/UserScript==
 
+// 5.2.0: 정리(#flush) 때 이번 시간에 빠진 상품을 앞쪽 탭으로 하나씩 다시 열어 재고를 받음 (최대 15개, 상품당 20초)
+//        뒤에 숨은 탭에서는 재고를 늦게 주는 상품(새로고침 600 NPT 등)이 10/8부터 계속 빠졌기 때문
 // 5.1.0: 상품 페이지가 이미 불러온 같은 데이터에서 판매가(정가)·할인가·옵션 추가금도 함께 기록 (네이버에 더 접속하지 않음)
 //        latest.json 각 옵션에 sale(정가), disc(할인가), add(옵션 추가금), pd(금액 확인 날짜) 추가. 화면의 [금액 불러오기]가 읽음
 // 4.x 대비 바뀐 점
@@ -36,7 +39,7 @@
   // -------------------------------------------------------------------------------------------
   const GITHUB_OWNER = 'ds4eqm-lgtm';
   const GITHUB_REPO = 'commerce-insight';
-  const VERSION = '5.1.0';
+  const VERSION = '5.2.0';
 
   const DAY_START_HOUR = 7;  // 하루 시작 (07:00 ~ 다음날 07:00)
   const SPLIT_HOUR = 17;     // 2타임(07~17) / 1타임(17~다음날 07) 나누는 시각
@@ -434,6 +437,40 @@
   // ---------------- 정리용 페이지: 대기열에 쌓인 상품을 한꺼번에 올림 ----------------
   const pendingKeys = () => GM_listValues().filter((k) => k.startsWith('pending_'));
 
+  // 이번 시간에 빠진 상품을 앞쪽(보이는) 탭으로 하나씩 다시 열어 봄. 받으면 그 탭은 스스로 닫힘
+  const RETRY_MAX = 15;
+  const RETRY_WAIT = 20000;
+  async function retryMissing(say) {
+    const got = new Set(pendingKeys().map((k) => k.split('_')[1]));
+    if (!got.size) return; // 이번 시간 조회가 아예 없으면 다시 열지 않음
+    let urls = [];
+    try {
+      const { text } = await getTextFile('products.txt');
+      const seen = new Set();
+      ((text || '').match(/^\s*https?:\/\/\S+\/products\/\d+/gm) || []).forEach((l) => {
+        const url = l.trim();
+        const no = url.match(/products\/(\d+)/)[1];
+        if (!seen.has(no) && !got.has(no)) { seen.add(no); urls.push({ no, url }); }
+      });
+    } catch (e) { console.log(`${LOG} 상품목록을 못 읽어 다시 열기 건너뜀`, e); return; }
+    urls = urls.slice(0, RETRY_MAX);
+    for (let i = 0; i < urls.length; i++) {
+      const { no, url } = urls[i];
+      say(`빠진 상품 다시 열기 ${i + 1}/${urls.length}: ${no}`);
+      let tab = null;
+      try { tab = GM_openInTab(`${url}#autotrack`, { active: true, insert: true }); } catch (e) { continue; }
+      const startAt = Date.now();
+      while (Date.now() - startAt < RETRY_WAIT) {
+        await sleep(1000);
+        if (pendingKeys().some((k) => k.split('_')[1] === no)) break;
+      }
+      const ok = pendingKeys().some((k) => k.split('_')[1] === no);
+      console.log(`${LOG} 다시 열기 ${no}: ${ok ? '받음' : '못 받음'}`);
+      if (!ok && tab && typeof tab.close === 'function') { try { tab.close(); } catch (e) { /* 무시 */ } }
+      await sleep(1500);
+    }
+  }
+
   async function flushPending() {
     const box = document.createElement('div');
     box.style.cssText = 'position:fixed;top:12px;right:12px;z-index:99999;background:#111;color:#fff;padding:12px 16px;border-radius:8px;font:14px sans-serif;max-width:420px';
@@ -452,6 +489,8 @@
       if (Date.now() - stableSince > 20000) break;
       await sleep(2000);
     }
+
+    await retryMissing(say);
 
     const keys = pendingKeys();
     const entries = keys.map((k) => GM_getValue(k)).filter(Boolean);
