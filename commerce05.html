@@ -39,6 +39,14 @@ header h1{font-size:24px;letter-spacing:-.6px}header small{color:#d5e5f4}header 
 .stat.bad{grid-column:1/-1;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer;background:#fdecee}.stat.bad b{color:#c94050}.stat.bad.none{background:#f6f8fb;cursor:default}.stat.bad.none b{color:#087a57}.stat.bad:not(.none):hover{background:#fadadf}
 .won{display:block;font-size:12px;font-weight:700;color:#2369c7;white-space:nowrap}.won.part::after{content:'*';color:#c94050}.total .won{font-size:15px;margin-top:2px}.total .basis{display:block;margin-top:4px;font-size:12px;color:#475569;line-height:1.45}.price.diff{border-color:#f59e0b;background:#fffbeb}.npr{font-size:12px;line-height:1.4;white-space:nowrap}.npr small{display:block}.basisPick{display:inline-flex;gap:10px;align-items:center;font-size:14px}.basisPick label{display:inline-flex;gap:4px;align-items:center;cursor:pointer}.day .won{display:inline;font-size:11px;font-weight:600}
 .storeLink{background:none;border:0;padding:0;font:inherit;font-weight:700;font-size:16px;color:inherit;cursor:pointer;text-align:left}.storeLink:hover{color:#2369c7;text-decoration:underline}
+.prank{grid-column:1/-1;border:1px solid #cfe3da;background:#f7fbf9;border-radius:12px;padding:14px 16px;margin-top:-4px}
+.prank .phead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}.prank .phead b{font-size:16px;margin-right:auto}
+.prank .phead button{border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font:inherit;font-size:13px}.prank .phead button.on{background:#16866a;border-color:#16866a;color:#fff}
+.prow{display:grid;grid-template-columns:46px minmax(0,1fr) 110px 110px;gap:10px;align-items:center;padding:9px 4px;border-top:1px solid #e3eee9}
+.prow .pr{font-weight:800;color:#28435f;text-align:center}.prow a{color:inherit;font-weight:700;text-decoration:none}.prow a:hover{color:#2369c7;text-decoration:underline}
+.prow .pq{text-align:right;font-weight:800}.prow .pw{text-align:right;color:#1d4ed8;font-size:13px}.prow small{display:block;color:#64748b;font-size:12px}
+.prow .pbar{height:4px;background:#e2ece8;border-radius:3px;margin-top:5px;overflow:hidden}.prow .pbar i{display:block;height:100%;background:#16866a}
+@media(max-width:800px){.prow{grid-template-columns:34px minmax(0,1fr) 80px}.prow .pw{grid-column:3}}
 .abuse{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:10px;background:#f6f8fb;font-size:13px}.abuse.on{background:#fff4e5;border:1px solid #f5c98a}.abuse b{color:#b45309}.abuse .mbtn{padding:5px 9px}.abuselist{margin-top:8px}.abuselist table{width:100%;border-collapse:collapse;font-size:13px}.abuselist td,.abuselist th{padding:6px 8px;border-bottom:1px solid #eef1f5;text-align:left}
 .price{width:110px;text-align:right}.badlist{margin-top:10px;display:grid;gap:6px;max-height:420px;overflow:auto}.badlist a{display:block;padding:8px 10px;border:1px solid #f3c7cd;border-radius:8px;background:#fff;color:inherit;text-decoration:none;font-size:13px;line-height:1.35}.badlist a:hover{background:#fdecee}.badlist a b{display:block;font-size:13px}.badlist a small{display:block}.main{grid-template-rows:auto}@media(min-width:801px){.top{grid-template-columns:minmax(0,1fr) 300px}}.badpanel .badlist{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));max-height:none}
 .day.today{background:#dff6ed;border:2px solid #138a6e;font-weight:700}
@@ -83,8 +91,8 @@ header .version-stamp{color:#d5e5f4}
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V3.7';
-const SCREEN_UPDATED = '2026-10-20 07:00 KST';
+const APP_VERSION = 'V3.8';
+const SCREEN_UPDATED = '2026-10-21 07:10 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -708,9 +716,18 @@ function render() {
   const max = Math.max(1, ...list.map((x) => x.sales));
   document.getElementById('stores').innerHTML = list.length ? list.map((s) => {
     const memo = workStores[s.slug] && workStores[s.slug].memo;
-    return `<div class="store"><div class="storeName"><span class="rank ${s.rank === 1 ? 'first' : s.rank === 2 ? 'second' : s.rank === 3 ? 'third' : ''}">${s.rank}위</span><div><button class="storeLink" data-store="${escapeHtml(s.slug)}" title="눌러서 이 업체 상품의 단가 보기·수정, 상품 페이지 열기">${escapeHtml(s.name)}</button>${memo ? `<small style="display:block">${escapeHtml(memo)}</small>` : ''}</div></div>${cumulHtml([s.slug])}${comparisonHtml([s.slug])}<div><div class="sales">${fmtNum(s.sales)}${lb}</div>${wonHtml(s.day) ? `<div style="text-align:right">${wonHtml(s.day, true)}</div>` : ''}<div class="bar"><i style="width:${Math.round(s.sales / max * 100)}%"></i></div><small style="display:block;text-align:right">일간 · ${selDay.slice(5).replace('-', '/')}</small><small class="today">오늘 ${fmtSums(s.today)}</small></div></div>`;
+    return `<div class="store"><div class="storeName"><span class="rank ${s.rank === 1 ? 'first' : s.rank === 2 ? 'second' : s.rank === 3 ? 'third' : ''}">${s.rank}위</span><div><button class="storeLink" data-store="${escapeHtml(s.slug)}" title="눌러서 이 업체 상품의 판매 순위 보기">${escapeHtml(s.name)} ${openStore === s.slug ? '▴' : '▾'}</button>${memo ? `<small style="display:block">${escapeHtml(memo)}</small>` : ''}</div></div>${cumulHtml([s.slug])}${comparisonHtml([s.slug])}<div><div class="sales">${fmtNum(s.sales)}${lb}</div>${wonHtml(s.day) ? `<div style="text-align:right">${wonHtml(s.day, true)}</div>` : ''}<div class="bar"><i style="width:${Math.round(s.sales / max * 100)}%"></i></div><small style="display:block;text-align:right">일간 · ${selDay.slice(5).replace('-', '/')}</small><small class="today">오늘 ${fmtSums(s.today)}</small></div></div>${openStore === s.slug ? storeRankHtml(s.slug) : ''}`;
   }).join('') : '<div class="muted">아직 등록된 업체가 없습니다. 상품 URL 관리에서 상품 URL을 등록하면 다음 정각 수집부터 이곳에 표시됩니다.</div>';
-  document.querySelectorAll('#stores [data-store]').forEach((el) => el.addEventListener('click', () => { priceStore = el.dataset.store; openManage('prices', true); }));
+  document.querySelectorAll('#stores [data-store]').forEach((el) => el.addEventListener('click', () => {
+    openStore = openStore === el.dataset.store ? '' : el.dataset.store;
+    render();
+    const pnl = document.querySelector('#stores .prank');
+    if (pnl) pnl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }));
+  document.querySelectorAll('#stores [data-rp]').forEach((el) => el.addEventListener('click', () => { rankPeriod = Number(el.dataset.rp); try { localStorage.setItem('c05rankPeriod', String(rankPeriod)); } catch (e) { /* 무시 */ } render(); }));
+  document.querySelectorAll('#stores [data-rm]').forEach((el) => el.addEventListener('click', () => { rankMode = el.dataset.rm; render(); }));
+  document.querySelectorAll('#stores [data-rclose]').forEach((el) => el.addEventListener('click', () => { openStore = ''; render(); }));
+  document.querySelectorAll('#stores [data-rprice]').forEach((el) => el.addEventListener('click', () => { priceStore = el.dataset.rprice; openManage('prices', true); }));
   renderAbuse();
 }
 
@@ -748,6 +765,47 @@ function renderAbuse() {
     ${ev.length && abuseOpen ? `<div class="abuselist" style="flex-basis:100%"><table><tr><th>시각</th><th>업체</th><th>상품 · 옵션</th><th>줄어든 양</th><th>재고</th><th>판매량 반영</th></tr>${ev.map((e) => `<tr><td>${escapeHtml(e.from.slice(5).replace('T', ' '))} → ${escapeHtml(e.t.slice(0, 10) === e.from.slice(0, 10) ? e.t.slice(11) : e.t.slice(5).replace('T', ' '))}</td><td>${escapeHtml(storeName(e.it.slug))}</td><td><a href="${escapeHtml(linkOf[e.it.product] || '#')}" target="_blank" rel="noopener">${escapeHtml(shortName(e.it.productName))}</a> · ${escapeHtml(e.it.optionName)}</td><td><b>${fmtNum(e.qty)}${e.lb}</b> (약 ${fmtNum(e.py)}평)</td><td>${e.a.toLocaleString('ko-KR')} → ${e.b.toLocaleString('ko-KR')}</td><td>${e.excluded ? '빠짐 (수동변경 의심)' : '<span class="negative">판매로 포함됨</span>'}</td></tr>`).join('')}</table></div>` : ''}`;
   document.getElementById('abuseSel').onchange = (e) => { abuseLimit = Number(e.target.value); try { localStorage.setItem('c05abuse', String(abuseLimit)); } catch (er) { /* 무시 */ } renderAbuse(); };
   const b = document.getElementById('abuseBtn'); if (b) b.onclick = () => { abuseOpen = !abuseOpen; renderAbuse(); };
+}
+
+// ---------------- 업체별 상품 판매 순위 (업체 이름을 누르면 그 줄 아래에 펼침) ----------------
+let openStore = '';
+let rankPeriod = 2; // 0 일 · 1 주 · 2 월 · 3 연 누적 (선택일 기준)
+let rankMode = 'p'; // 'p' 상품별 · 'o' 옵션별
+const optShort = (n) => { const t = String(n || '기본'); const i = t.lastIndexOf(' / '); return i >= 0 ? t.slice(i + 3) : t; };
+try { const v = localStorage.getItem('c05rankPeriod'); if (v !== null && /^[0-3]$/.test(v)) rankPeriod = Number(v); } catch (e) { /* 무시 */ }
+function storeRankHtml(slug) {
+  const labels = ['일', '주 누적', '월 누적', '연 누적'];
+  const [from, to] = periods(selDay)[rankPeriod];
+  const lb = mainUnit(active);
+  const byProd = {};
+  items.filter((it) => it.cat === active && it.slug === slug).forEach((it) => {
+    let sold = 0;
+    for (let d = from; d <= to; d = addDays(d, 1)) { const v = dayData[d] && dayData[d][it.key]; if (v) sold += soldOf(it, v); }
+    const P = (byProd[it.product] = byProd[it.product] || { p: it.product, name: it.productName || collectedName[slug] || it.product, o: {}, won: 0, opts: [] });
+    const ul = unitOf(it).label;
+    P.o[ul] = (P.o[ul] || 0) + sold;
+    P.won += sold * (priceOf(it) || autoPrice(it, 'disc'));
+    if (sold) P.opts.push({ name: optShort(it.optionName), sold, ul, won: sold * (priceOf(it) || autoPrice(it, 'disc')), full: it.optionName || '기본' });
+  });
+  if (rankMode === 'o') {
+    const opts = [];
+    Object.values(byProd).forEach((x) => x.opts.forEach((o) => opts.push({ ...o, pname: x.name, p: x.p })));
+    opts.sort((a, b) => b.sold - a.sold);
+    const tot = opts.filter((o) => o.ul === lb).reduce((n, o) => n + o.sold, 0);
+    const mx = Math.max(1, ...opts.map((o) => o.sold));
+    var optRows = opts.map((o, i) => `<div class="prow"><span class="pr">${i + 1}위</span><div><a href="${escapeHtml(linkOf[o.p] || '#')}" target="_blank" rel="noopener" title="${escapeHtml(o.full)}">${escapeHtml(o.name)}</a><small>${escapeHtml(shortName(o.pname))}</small><div class="pbar"><i style="width:${Math.round(o.sold / mx * 100)}%"></i></div></div><span class="pq">${fmtNum(o.sold)}${escapeHtml(o.ul)}${tot && o.ul === lb ? `<small>${Math.round(o.sold / tot * 100)}%</small>` : ''}</span><span class="pw">${o.won ? wonShort(o.won) : ''}</span></div>`).join('') || '<div class="muted">이 기간 판매된 옵션이 없습니다.</div>';
+  }
+  const list = Object.values(byProd).sort((a, b) => (b.o[lb] || 0) - (a.o[lb] || 0) || b.won - a.won || a.name.localeCompare(b.name, 'ko-KR'));
+  const total = list.reduce((n, x) => n + (x.o[lb] || 0), 0);
+  const max = Math.max(1, ...list.map((x) => x.o[lb] || 0));
+  const range = from === to ? from.slice(5).replace('-', '/') : `${from.slice(5).replace('-', '/')} ~ ${to.slice(5).replace('-', '/')}`;
+  const rows = list.map((x, i) => {
+    const q = x.o[lb] || 0;
+    const opts = x.opts.sort((a, b) => b.sold - a.sold);
+    const optTxt = opts.slice(0, 5).map((o) => `${escapeHtml(o.name)} ${fmtNum(o.sold)}${escapeHtml(o.ul)}`).join(' · ') + (opts.length > 5 ? ` 외 ${opts.length - 5}개` : '');
+    return `<div class="prow"><span class="pr">${q ? `${i + 1}위` : '-'}</span><div><a href="${escapeHtml(linkOf[x.p] || '#')}" target="_blank" rel="noopener" title="${escapeHtml(x.name)}">${escapeHtml(shortName(x.name))}</a><small>${optTxt || '이 기간 판매 없음'}</small><div class="pbar"><i style="width:${Math.round(q / max * 100)}%"></i></div></div><span class="pq">${fmtSums(x.o)}${total && q ? `<small>${Math.round(q / total * 100)}%</small>` : ''}</span><span class="pw" title="옵션별 단가(없으면 네이버 할인가) × 판매량">${x.won ? wonShort(x.won) : ''}</span></div>`;
+  }).join('');
+  return `<div class="prank"><div class="phead"><b>${escapeHtml(storeName(slug))} · 상품 판매 순위 <small class="muted">${range}</small></b><button type="button" data-rm="p" class="${rankMode === 'p' ? 'on' : ''}">상품별</button><button type="button" data-rm="o" class="${rankMode === 'o' ? 'on' : ''}">옵션별</button><span style="width:8px"></span>${labels.map((t, i) => `<button type="button" data-rp="${i}" class="${i === rankPeriod ? 'on' : ''}">${t}</button>`).join('')}<button type="button" data-rprice="${escapeHtml(slug)}">단가 관리</button><button type="button" data-rclose="1">닫기 ✕</button></div>${rankMode === 'o' ? optRows : rows || '<div class="muted">이 품목에 등록된 상품이 없습니다.</div>'}</div>`;
 }
 
 let order = 'sales';
