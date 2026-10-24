@@ -48,6 +48,11 @@ Write-Host "새 목록     : 상품 $($newNos.Count)개  (추가 $($added.Count)
 if ($removed.Count) { Write-Host '목록에서 빠지는 상품은 수집만 멈추고, 지금까지의 판매 기록은 그대로 남습니다.' -ForegroundColor DarkGray }
 
 $stores = Latest '커머스인사이트_업체정보_*.json'
+# 상품목록과 함께 내려받은 업체정보만 씀: 상품목록 파일보다 10분 넘게 오래된 업체정보는 옛 파일이라 건너뜀 (옛 단가로 되돌아가는 것 방지)
+if ($stores -and $stores.LastWriteTime -lt $list.LastWriteTime.AddMinutes(-10)) {
+  Write-Host "업체정보    : $($stores.Name) 은(는) 상품목록보다 오래된 파일이라 건너뜁니다 (stores.json 그대로)" -ForegroundColor DarkGray
+  $stores = $null
+}
 if ($stores) {
   try { $null = [IO.File]::ReadAllText($stores.FullName, [Text.Encoding]::UTF8) | ConvertFrom-Json }
   catch { Write-Host "업체정보 파일이 올바른 형식이 아니라 건너뜁니다: $($stores.Name)" -ForegroundColor Yellow; $stores = $null }
