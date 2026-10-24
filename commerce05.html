@@ -93,7 +93,7 @@ header .version-stamp{color:#d5e5f4}
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
 const APP_VERSION = 'V3.8';
-const SCREEN_UPDATED = '2026-10-21 07:10 KST';
+const SCREEN_UPDATED = '2026-10-24 09:10 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -1143,6 +1143,11 @@ function renderManage() {
       keepPlace(() => { items.filter((x) => x.product === src.product).forEach((x) => setPrice(x, v)); recompute(false, true); });
     }));
   } else if (mtab === 'urls') {
+    // 여러 개 붙여넣기 칸의 흐린 예시: 고른 품목의 실제 링크 2개를 보여 줌 (예시일 뿐, 등록에는 안 쓰임)
+    const bulkHint = (cat) => {
+      const ex = rows.filter((r) => r.cat === cat).slice(0, 2).map((r) => r.url + (r.unit ? ' ' + r.unit : ''));
+      return [`(예시) ${cat}에 넣을 상품 URL을 한 줄에 하나씩 붙여넣으세요`, ...(ex.length ? ex : ['https://smartstore.naver.com/스토어/products/번호'])].join('\n');
+    };
     const e = editing && editing.type === 'url' ? rows.find((r) => r.idx === editing.idx) : null;
     const info = {};
     items.forEach((it) => { if (!info[it.product]) info[it.product] = it; });
@@ -1151,8 +1156,8 @@ function renderManage() {
       <select id="fCatSel">${fileCats.map((c) => `<option ${c === (e ? e.cat : active) ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}</select>
       <input id="fUnit" placeholder="단위 (예: 9장, 20cm)" style="width:150px" value="${e ? escapeHtml(e.unit) : ''}"><button class="mbtn primary" id="bSaveUrl">${e ? '수정 반영' : '등록'}</button>${e ? '<button class="mbtn" id="bCancel">취소</button>' : ''}</div>
     ${e ? '' : `<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:700;font-size:13px">여러 개 한꺼번에 붙여넣기</summary><div class="mform" style="flex-direction:column;align-items:stretch">
-      <textarea id="fBulk" rows="6" placeholder="[데코타일]&#10;https://brand.naver.com/doden/products/11763529292&#10;https://brand.naver.com/doden/products/6941645716 2장" style="font:13px monospace;padding:8px;border:1px solid #d1d9e3;border-radius:8px"></textarea>
-      <div><button class="mbtn primary" id="bBulk">한꺼번에 등록</button> <small class="muted">[품목] 제목 줄 아래 링크는 그 품목으로, 제목이 없으면 위에서 고른 품목으로 들어갑니다. 이미 등록된 상품은 건너뜁니다.</small></div></div></details>`}
+      <textarea id="fBulk" rows="6" placeholder="${escapeHtml(bulkHint(e ? e.cat : active))}" style="font:13px monospace;padding:8px;border:1px solid #d1d9e3;border-radius:8px"></textarea>
+      <div><button class="mbtn primary" id="bBulk">한꺼번에 등록</button> <small class="muted">한 줄에 URL 하나씩 붙여넣으면 위에서 고른 품목으로 들어갑니다. 이미 등록된 상품은 건너뜁니다. (흐린 글씨는 예시입니다. 여러 품목을 한 번에 넣을 때만 [장판] 같은 제목 줄을 적으세요.)</small></div></div></details>`}
     <p class="muted" style="margin:8px 0 0;font-size:13px">왼쪽에서 고른 품목(<b>${escapeHtml(active)}</b>)의 링크 ${shown.length}개 · 전체 ${rows.length}줄</p>
     <div class="list"><table><tr><th>#</th><th>업체</th><th>상품명</th><th>링크</th><th>단위</th><th>최근 수집</th><th></th></tr>${shown.map((r, i) => {
       const it = info[r.no];
@@ -1161,6 +1166,7 @@ function renderManage() {
         <td style="text-align:right;white-space:nowrap"><button class="mbtn" data-op="editUrl" data-v="${r.idx}">수정</button> <button class="mbtn danger" data-op="deleteUrl" data-v="${r.idx}">삭제</button></td></tr>`;
     }).join('') || '<tr><td colspan="7">이 품목에 등록된 링크가 없습니다.</td></tr>'}</table></div>`;
     document.getElementById('bSaveUrl').onclick = () => ops.saveUrl({ url: document.getElementById('fUrl').value, cat: document.getElementById('fCatSel').value, unit: document.getElementById('fUnit').value });
+    const fb = document.getElementById('fBulk'); document.getElementById('fCatSel').onchange = (ev) => { if (fb) fb.placeholder = bulkHint(ev.target.value); };
     const bb = document.getElementById('bBulk'); if (bb) bb.onclick = () => ops.bulkAdd(document.getElementById('fBulk').value, document.getElementById('fCatSel').value);
     const c = document.getElementById('bCancel'); if (c) c.onclick = () => { editing = null; renderManage(); };
   } else {
