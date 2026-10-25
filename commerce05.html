@@ -69,6 +69,7 @@ header h1{font-size:24px;letter-spacing:-.6px}header small{color:#d5e5f4}header 
 .store .today{display:block;text-align:right;color:#2369c7;font-weight:700}
 #manage{margin-top:14px;border:1px solid #dbe5ee;border-radius:12px;padding:4px 14px 14px;background:#fbfdff}
 .tabs button.on{background:#e8f6f0;border-color:#16866a;color:#0b6b58}
+.rangebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px;padding:10px 12px;border:1px solid #cfe5dc;border-radius:10px;background:#f3faf7;font-size:14px}.rangebar input{padding:6px 8px}.rangebar button{border:1px solid #cbd5e1;background:#fff;border-radius:16px;padding:4px 11px;cursor:pointer;font:inherit;font-size:13px}.rangebar button.on{background:#16866a;border-color:#16866a;color:#fff}.rangebar[hidden]{display:none}
 .ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.ctl label{font-size:13px;color:#475569;font-weight:700}
 select,.mbtn{border:1px solid #cbd5e1;border-radius:8px;padding:7px 9px;background:#fff;font:inherit;font-size:13px}
 .mbtn{cursor:pointer;font-weight:700;color:#23415f}.mbtn:hover{background:#eaf2ff}.mbtn.danger{color:#c94050}.mbtn.primary{background:#16866a;border-color:#16866a;color:#fff}.mbtn:disabled{opacity:.45;cursor:default}
@@ -84,16 +85,16 @@ header .version-stamp{color:#d5e5f4}
 <main class="main"><section class="top"><div class="panel"><div class="head"><h2 style="margin:0" id="calTitle">-</h2><span><button class="navbtn" onclick="moveMonth(-1)">◀</button> <button class="navbtn" onclick="moveMonth(1)">▶</button> <span class="pill">날짜별 집계 위치</span></span></div><div class="calendar" id="cal"></div></div>
 <div class="panel"><h3>수집 상태</h3><div class="stats"><div class="stat">등록 상품<b id="stProducts">-</b><small id="stLinks"></small></div><div class="stat">정상 수집<b id="stOk">-</b><small id="stOkDay"></small></div><button type="button" class="stat bad none" id="stBadBtn" onclick="toggleBadList()">수집 불가 (옵션 바뀜 의심)<b id="stBad">-</b><small id="stBadSub"></small></button></div><p class="muted">마지막 데이터 기록<br><b id="stLast">-</b></p><small id="stSource"></small></div></section>
 <section class="panel badpanel" id="badPanel" hidden><div class="head"><h3 style="margin:0">수집 불가 상품 <span class="muted" id="badCount"></span></h3><button class="navbtn" onclick="toggleBadList()">닫기 ✕</button></div><div class="badlist" id="badList"></div></section>
-<section class="panel"><div class="head"><div><h2 style="margin:0" id="catTitle">-</h2><small id="catSub">품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지</small></div><div class="tabs"><button onclick="toggleOrder()" id="orderBtn">가나다순 보기</button><button onclick="openManage('stores')" data-open="stores">업체 관리</button><button onclick="openManage('urls')" data-open="urls">상품 URL 관리</button><button onclick="openManage('prices')" data-open="prices">단가 관리</button><button onclick="openManage('status')" data-open="status">수집 상태</button><button onclick="downloadSales()">엑셀 내려받기</button></div></div>
+<section class="panel"><div class="head"><div><h2 style="margin:0" id="catTitle">-</h2><small id="catSub">품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지</small></div><div class="tabs"><button onclick="setOrder('sales')" data-order="sales">판매량순 보기</button><button onclick="setOrder('name')" data-order="name">가나다순 보기</button><button onclick="setOrder('range')" data-order="range">기간으로 보기</button><button onclick="openManage('stores')" data-open="stores">업체 관리</button><button onclick="openManage('urls')" data-open="urls">상품 URL 관리</button><button onclick="openManage('prices')" data-open="prices">단가 관리</button><button onclick="openManage('status')" data-open="status">수집 상태</button><button onclick="downloadSales()">엑셀 내려받기</button></div></div>
 <div id="manage" hidden><div class="mtabs" id="mtabs"><button data-t="cats">품목 관리</button><button data-t="stores">업체 관리</button><button data-t="urls">상품 URL 관리</button><button data-t="prices">단가 관리</button><button data-t="status">수집 상태</button><button data-t="close" style="margin-left:auto">닫기 ✕</button></div>
 <div id="mbody"></div>
 <div class="savebar" id="savebar"></div></div>
-<div class="abuse" id="abuse"></div><div class="totals" id="totals"></div><div class="stores" id="stores"><div class="loader">기존 상품목록과 판매량 기록을 불러오는 중…</div></div>
+<div class="abuse" id="abuse"></div><div class="totals" id="totals"></div><div class="rangebar" id="rangebar" hidden></div><div class="stores" id="stores"><div class="loader">기존 상품목록과 판매량 기록을 불러오는 중…</div></div>
 <p class="notice">판매량은 기존 수집기가 저장한 기록(data/history.json 시간별, data/latest.json 일별)을 기존 대시보드(index.html)와 같은 방식으로 계산합니다. 근무일 기준이며 토·일·공휴일 판매는 다음 근무일에 합쳐집니다. 주 누적은 월요일부터, 월 누적은 1일부터, 연 누적은 1월 1일부터 선택일까지이며 비교는 직전 기간의 같은 구간과 합니다. 비교할 날의 기록이 없으면 0개가 아닌 <b>비교 불가</b>로 표시합니다. 이 화면은 토큰 없이 기록을 읽기만 합니다. 품목·업체·상품 URL을 바꾸면 <b>적용 파일 내려받기 → 상품목록_적용.bat → GitHub Desktop Push</b> 순서로 반영되고 다음 정각 자동 수집부터 적용되며, 목록에서 빼도 기존 판매 기록은 지워지지 않습니다.</p></section></main></div>
 <script>
 // ---------------- 버전 (화면을 고칠 때마다 같이 바꿀 것) ----------------
-const APP_VERSION = 'V3.8';
-const SCREEN_UPDATED = '2026-10-24 09:10 KST';
+const APP_VERSION = 'V3.9';
+const SCREEN_UPDATED = '2026-10-26 05:25 KST';
 
 // ---------------- 데이터 위치 (기존 대시보드 index.html 과 같은 저장소) ----------------
 const REPO_API = 'https://api.github.com/repos/ds4eqm-lgtm/commerce-insight/contents/';
@@ -692,7 +693,8 @@ function render() {
   const partial = dayCount[selDay] < listOrder.length / 2;
   document.getElementById('catTitle').textContent = `${active} · 업체별 현황`;
   document.getElementById('catSub').textContent = `품목 전체 누적 합계 + 업체별 일·주·월·연 누적 · 기존 대비 지표 유지 · ${selDay} 기준${partial ? ` (${dayCount[selDay] || 0}개 상품만 수집된 날)` : ''}`;
-  document.getElementById('orderBtn').textContent = order === 'sales' ? '가나다순 보기' : '판매량순 보기';
+  document.querySelectorAll('[data-order]').forEach((el) => el.classList.toggle('on', el.dataset.order === order));
+  renderRangeBar();
   renderCalendar();
   const lb = mainUnit(active);
   const hasCat = listSlugsOf(active).length > 0;
@@ -704,11 +706,12 @@ function render() {
     return `<div class="total"><small>${label}</small><strong>${hasCat ? fmtSums(r.o) : '데이터 없음'}</strong>${hasCat ? wonHtml(r, true) + basis + today : ''}</div>`;
   }).join('');
 
-  // 순위 = 선택일(일간) 판매량. 정렬은 '판매량순(1위부터)' 또는 '가나다순'
+  // 순위 = 선택일(일간) 판매량. 정렬은 '판매량순(1위부터)' 또는 '가나다순'. '기간으로 보기'는 고른 기간의 합계로 순위
+  const [rf, rt] = order === 'range' ? rangeOf() : [selDay, selDay];
   let list = listSlugsOf(active).map((slug) => ({
     slug, name: storeName(slug),
-    sales: sumRange(active, [slug], selDay, selDay).o[lb] || 0,
-    day: sumRange(active, [slug], selDay, selDay),
+    sales: sumRange(active, [slug], rf, rt).o[lb] || 0,
+    day: sumRange(active, [slug], rf, rt),
     today: sumRange(active, [slug], currentDay, currentDay).o,
   }));
   const ranked = list.slice().sort((a, b) => b.sales - a.sales || a.name.localeCompare(b.name, 'ko-KR'));
@@ -717,7 +720,7 @@ function render() {
   const max = Math.max(1, ...list.map((x) => x.sales));
   document.getElementById('stores').innerHTML = list.length ? list.map((s) => {
     const memo = workStores[s.slug] && workStores[s.slug].memo;
-    return `<div class="store"><div class="storeName"><span class="rank ${s.rank === 1 ? 'first' : s.rank === 2 ? 'second' : s.rank === 3 ? 'third' : ''}">${s.rank}위</span><div><button class="storeLink" data-store="${escapeHtml(s.slug)}" title="눌러서 이 업체 상품의 판매 순위 보기">${escapeHtml(s.name)} ${openStore === s.slug ? '▴' : '▾'}</button>${memo ? `<small style="display:block">${escapeHtml(memo)}</small>` : ''}</div></div>${cumulHtml([s.slug])}${comparisonHtml([s.slug])}<div><div class="sales">${fmtNum(s.sales)}${lb}</div>${wonHtml(s.day) ? `<div style="text-align:right">${wonHtml(s.day, true)}</div>` : ''}<div class="bar"><i style="width:${Math.round(s.sales / max * 100)}%"></i></div><small style="display:block;text-align:right">일간 · ${selDay.slice(5).replace('-', '/')}</small><small class="today">오늘 ${fmtSums(s.today)}</small></div></div>${openStore === s.slug ? storeRankHtml(s.slug) : ''}`;
+    return `<div class="store"><div class="storeName"><span class="rank ${s.rank === 1 ? 'first' : s.rank === 2 ? 'second' : s.rank === 3 ? 'third' : ''}">${s.rank}위</span><div><button class="storeLink" data-store="${escapeHtml(s.slug)}" title="눌러서 이 업체 상품의 판매 순위 보기">${escapeHtml(s.name)} ${openStore === s.slug ? '▴' : '▾'}</button>${memo ? `<small style="display:block">${escapeHtml(memo)}</small>` : ''}</div></div>${cumulHtml([s.slug])}${comparisonHtml([s.slug])}<div><div class="sales">${fmtNum(s.sales)}${lb}</div>${wonHtml(s.day) ? `<div style="text-align:right">${wonHtml(s.day, true)}</div>` : ''}<div class="bar"><i style="width:${Math.round(s.sales / max * 100)}%"></i></div><small style="display:block;text-align:right">${order === 'range' ? `기간 · ${rangeText(rf, rt)}` : `일간 · ${selDay.slice(5).replace('-', '/')}`}</small><small class="today">오늘 ${fmtSums(s.today)}</small></div></div>${openStore === s.slug ? storeRankHtml(s.slug) : ''}`;
   }).join('') : '<div class="muted">아직 등록된 업체가 없습니다. 상품 URL 관리에서 상품 URL을 등록하면 다음 정각 수집부터 이곳에 표시됩니다.</div>';
   document.querySelectorAll('#stores [data-store]').forEach((el) => el.addEventListener('click', () => {
     openStore = openStore === el.dataset.store ? '' : el.dataset.store;
@@ -793,7 +796,7 @@ const optShort = (n) => { const t = String(n || '기본'); const i = t.lastIndex
 try { const v = localStorage.getItem('c05rankPeriod'); if (v !== null && /^[0-3]$/.test(v)) rankPeriod = Number(v); } catch (e) { /* 무시 */ }
 function storeRankHtml(slug) {
   const labels = ['일', '주 누적', '월 누적', '연 누적'];
-  const [from, to] = periods(selDay)[rankPeriod];
+  const [from, to] = order === 'range' ? rangeOf() : periods(selDay)[rankPeriod];
   const lb = mainUnit(active);
   const byProd = {};
   items.filter((it) => it.cat === active && it.slug === slug).forEach((it) => {
@@ -823,12 +826,44 @@ function storeRankHtml(slug) {
     const optTxt = opts.slice(0, 5).map((o) => `${escapeHtml(o.name)} ${fmtNum(o.sold)}${escapeHtml(o.ul)}`).join(' · ') + (opts.length > 5 ? ` 외 ${opts.length - 5}개` : '');
     return `<div class="prow"><span class="pr">${q ? `${i + 1}위` : '-'}</span><div><a href="${escapeHtml(linkOf[x.p] || '#')}" target="_blank" rel="noopener" title="${escapeHtml(x.name)}">${escapeHtml(shortName(x.name))}</a><small>${optTxt || '이 기간 판매 없음'}</small><div class="pbar"><i style="width:${Math.round(q / max * 100)}%"></i></div></div><span class="pq">${fmtSums(x.o)}${total && q ? `<small>${Math.round(q / total * 100)}%</small>` : ''}</span><span class="pw" title="옵션별 단가(없으면 네이버 할인가) × 판매량">${x.won ? wonShort(x.won) : ''}</span></div>`;
   }));
-  return `<div class="prank"><div class="phead"><b>${escapeHtml(storeName(slug))} · 상품 판매 순위 <small class="muted">${range}</small></b><button type="button" data-rm="p" class="${rankMode === 'p' ? 'on' : ''}">상품별</button><button type="button" data-rm="o" class="${rankMode === 'o' ? 'on' : ''}">옵션별</button><span style="width:8px"></span>${labels.map((t, i) => `<button type="button" data-rp="${i}" class="${i === rankPeriod ? 'on' : ''}">${t}</button>`).join('')}<button type="button" data-rprice="${escapeHtml(slug)}">단가 관리</button><button type="button" data-rclose="1">닫기 ✕</button></div>${rankMode === 'o' ? optRows : rows || '<div class="muted">이 품목에 등록된 상품이 없습니다.</div>'}</div>`;
+  return `<div class="prank"><div class="phead"><b>${escapeHtml(storeName(slug))} · 상품 판매 순위 <small class="muted">${range}</small></b><button type="button" data-rm="p" class="${rankMode === 'p' ? 'on' : ''}">상품별</button><button type="button" data-rm="o" class="${rankMode === 'o' ? 'on' : ''}">옵션별</button><span style="width:8px"></span>${order === 'range' ? '<button type="button" class="on" title="위의 기간 선택을 따릅니다">기간</button>' : labels.map((t, i) => `<button type="button" data-rp="${i}" class="${i === rankPeriod ? 'on' : ''}">${t}</button>`).join('')}<button type="button" data-rprice="${escapeHtml(slug)}">단가 관리</button><button type="button" data-rclose="1">닫기 ✕</button></div>${rankMode === 'o' ? optRows : rows || '<div class="muted">이 품목에 등록된 상품이 없습니다.</div>'}</div>`;
 }
 
-let order = 'sales';
-function toggleOrder() { order = order === 'sales' ? 'name' : 'sales'; try { localStorage.setItem('c05order', order); } catch (e) { /* 무시 */ } render(); }
-try { if (localStorage.getItem('c05order') === 'name') order = 'name'; } catch (e) { /* 무시 */ }
+let order = 'sales'; // 'sales' 판매량순 · 'name' 가나다순 · 'range' 기간으로 보기
+function setOrder(o) { order = o; try { localStorage.setItem('c05order', order); } catch (e) { /* 무시 */ } render(); }
+try { const v = localStorage.getItem('c05order'); if (v === 'name' || v === 'range') order = v; } catch (e) { /* 무시 */ }
+
+// ---------------- 기간으로 보기 (시작일 ~ 종료일 합계로 업체 순위) ----------------
+let rangeFrom = '', rangeTo = '';
+try { rangeFrom = localStorage.getItem('c05rangeFrom') || ''; rangeTo = localStorage.getItem('c05rangeTo') || ''; } catch (e) { /* 무시 */ }
+// 비어 있으면 이번 달 1일 ~ 선택일. 시작일이 더 늦으면 서로 바꿈
+function rangeOf() {
+  let f = rangeFrom || monthStart(selDay), t = rangeTo || selDay;
+  if (f > t) [f, t] = [t, f];
+  return [f, t];
+}
+const rangeText = (f, t) => (f === t ? f.slice(5).replace('-', '/') : `${f.slice(5).replace('-', '/')} ~ ${t.slice(5).replace('-', '/')}`);
+function setRange(f, t) {
+  rangeFrom = f; rangeTo = t; rankPage = 0;
+  try { localStorage.setItem('c05rangeFrom', f); localStorage.setItem('c05rangeTo', t); } catch (e) { /* 무시 */ }
+  render();
+}
+function renderRangeBar() {
+  const bar = document.getElementById('rangebar');
+  bar.hidden = order !== 'range';
+  if (bar.hidden) return;
+  const [f, t] = rangeOf();
+  const last = lastDoneDay() || selDay;
+  const quick = [
+    ['최근 7일', addDays(last, -6), last], ['최근 30일', addDays(last, -29), last],
+    ['이번 주', weekStart(selDay), selDay], ['이번 달', monthStart(selDay), selDay],
+    ['지난달', monthStart(addDays(monthStart(selDay), -1)), addDays(monthStart(selDay), -1)], ['올해', yearStart(selDay), selDay],
+  ];
+  bar.innerHTML = `<b>기간</b><input type="date" id="rgFrom" value="${f}"> ~ <input type="date" id="rgTo" value="${t}">${quick.map(([n, a, b]) => `<button type="button" data-rq="${a}|${b}" class="${a === f && b === t ? 'on' : ''}">${n}</button>`).join('')}<small class="muted">근무일 기준 합계 · 업체를 누르면 이 기간의 상품 순위</small>`;
+  bar.querySelector('#rgFrom').addEventListener('change', (e) => { if (e.target.value) setRange(e.target.value, t); });
+  bar.querySelector('#rgTo').addEventListener('change', (e) => { if (e.target.value) setRange(f, e.target.value); });
+  bar.querySelectorAll('[data-rq]').forEach((el) => el.addEventListener('click', () => { const [a, b] = el.dataset.rq.split('|'); setRange(a, b); }));
+}
 function addCategory() {
   const i = document.getElementById('newCat');
   const v = i.value.trim();
