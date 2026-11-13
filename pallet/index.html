@@ -26,17 +26,27 @@ header h1 small{font-weight:400;font-size:12px;opacity:.75;margin-left:auto}
 .btn.mic{background:#e53935;white-space:nowrap}
 .btn:disabled{opacity:.45}
 main{padding:10px 8px 90px;max-width:720px;margin:0 auto}
-.yard{display:grid;grid-template-columns:22px 26px 1fr .5fr 1fr 22px;gap:6px 6px;align-items:stretch}
+.yard{display:grid;grid-template-columns:18px 20px 1fr .5fr 1fr 18px;gap:6px 6px;align-items:stretch}
 .road,.house{grid-column:1;border-right:3px solid #555;color:#33414e;writing-mode:vertical-rl;text-align:center;font-size:12px;font-weight:700;letter-spacing:4px;padding:6px 0}
 .road span,.house span{padding:4px 0;position:sticky;top:140px}.house{grid-column:6;border-right:0;border-left:3px solid #555}.roadtop{text-align:center;font-size:12px;font-weight:700;color:#33414e;border-bottom:3px solid #555;padding-bottom:2px}
 .colh{text-align:center;font-weight:800;font-size:16px;padding:6px 0;background:#d9e2ec;border-radius:8px}
 .num{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:var(--sub)}
 .slot{background:var(--card);border:2px solid #8a99a8;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:112px}
+.slot.ra,.slot.rb{min-height:150px}
+.rt{writing-mode:vertical-rl;white-space:nowrap;line-height:1}.slot.rb .rt{transform:rotate(180deg)}
+.rt .no{font-weight:800}.rt .dt{font-size:12px!important;margin:0 3px 0 0}.slot.rb .rt .dt{margin:0 3px 0 0}
+.slot.ra .half.old,.slot.rb .half.old{box-shadow:inset 0 0 0 3px var(--warn)}.slot.ra .half.old .no::after,.slot.rb .half.old .no::after{display:none!important}
 .half{flex:1;padding:5px 8px;cursor:pointer;position:relative;display:flex;flex-direction:column;justify-content:center;min-height:54px}
 .half.u{background:var(--up);border-bottom:2px dashed #8a99a8}.half.l{background:var(--dn)}
 .half .lv{position:absolute;right:5px;top:3px;font-size:10px;color:var(--sub);font-weight:700}
 .half .no{font-size:22px;font-weight:800;letter-spacing:.5px;line-height:1.1;word-break:break-all}
 .half .dt{font-size:13px;color:#33414e;margin-top:2px}
+.slot.ra{flex-direction:row-reverse}.slot.rb{flex-direction:row}
+.slot.ra .half,.slot.rb .half{padding:18px 3px 6px;min-width:0;align-items:center;text-align:center}
+.slot.ra .half.u{border-bottom:0;border-left:2px dashed #8a99a8}.slot.rb .half.u{border-bottom:0;border-right:2px dashed #8a99a8}
+.slot.ra .half .no,.slot.rb .half .no{font-size:16px;letter-spacing:0;white-space:nowrap;word-break:normal}.slot.ra .half .dt,.slot.rb .half .dt{font-size:11px;white-space:nowrap;letter-spacing:-.2px}
+.slot.ra .half .lv,.slot.rb .half .lv{left:0;right:0;text-align:center}
+.slot.ra .half.old .no::after,.slot.rb .half.old .no::after{display:block;width:fit-content;margin:3px 0 0}
 .half .em{font-size:13px;color:#9aa6b2}
 .half.hit{outline:4px solid var(--hl);outline-offset:-4px;background:#fff6cc}
 .half.old .no::after{content:"제일 오래됨";font-size:10px;font-weight:700;background:var(--warn);color:#fff;border-radius:4px;padding:1px 4px;margin-left:5px;vertical-align:middle}
@@ -85,7 +95,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.13';
+const VER='0.14';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
 
@@ -103,6 +113,7 @@ function blank(){return {v:1,size:{A:8,B:8},cells:{},log:[]}}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 const LVN={U:'위(2단)',L:'아래(1단)'};
 function cname(c){const p=c.split('-');return p[0]+'구역 '+p[1]+'번 '+LVN[p[2]]}
+function fmtS(d){d=String(d||'');return /^\d{8}$/.test(d)?d.slice(2,4)+'.'+d.slice(4,6)+'.'+d.slice(6):d}
 function fmtD(d){d=String(d||'');return /^\d{8}$/.test(d)?d.slice(0,4)+'.'+d.slice(4,6)+'.'+d.slice(6):d}
 function vtxt(v){return v?(v.no||'?')+(v.d?' ('+fmtD(v.d)+')':''):'비어 있음'}
 
@@ -177,17 +188,20 @@ function render(){const m=$('#main');if(!cfg.tok){setup();return}
   SECTORS.forEach((s,j)=>h+=(j?'<div></div>':'')+`<div class="colh">${s} 구역</div>`);
   for(let i=1;i<=n;i++){h+=`<div class="num">${i}</div>`;
     SECTORS.forEach((s,j)=>{if(j)h+='<div></div>';if(i>(D.size[s]||8)){h+='<div></div>';return}
-      h+='<div class="slot">'+['U','L'].map(lv=>{const k=s+'-'+i+'-'+lv,v=D.cells[k];
+      h+='<div class="slot '+(s==='A'?'ra':'rb')+'">'+['U','L'].map(lv=>{const k=s+'-'+i+'-'+lv,v=D.cells[k];
         const hit=q&&v&&String(v.no).includes(q);
         return `<div class="half ${lv.toLowerCase()}${hit?' hit':''}${old&&old.k===k?' old':''}${pk.has(k)?' pend':''}" data-k="${k}"><span class="lv">${lv==='U'?'위':'아래'}</span>`+
-          (v?`<div class="no">${esc(v.no)}</div><div class="dt">${esc(fmtD(v.d))}</div>`:'<div class="em">비어 있음</div>')+'</div>'}).join('')+'</div>'})}
+          (v?`<div class="rt"><div class="no">${esc(v.no)}</div><div class="dt">${esc(fmtS(v.d))}</div></div>`:'<div class="em">빈칸</div>')+'</div>'}).join('')+'</div>'})}
   h+='</div><div class="foot"><button class="btn gray" id="bHist">전체 이력 보기</button><button class="btn gray" id="bShare">주소 나눠 주기</button><button class="btn gray" id="bSet">설정</button><button class="btn green" id="bHome" style="display:'+(STANDALONE?'none':'block')+'">📱 휴대폰 바탕화면에 바로가기 만들기</button></div>'+
    `<div class="note">칸을 누르면 번호와 생산일자를 넣거나 고치거나 뺄 수 있습니다. 위 칸이 2단(위에 올린 팔레트), 아래 칸이 1단(바닥 팔레트)입니다.<br>말로 기록: [🎤 말로 기록]을 누르고 "A 1번 위 1699 2026 10 11"처럼 말하면 해당 칸이 채워진 채로 열립니다. 빼낼 때는 "A 1번 위 삭제".<br>기록한 사람: ${esc(cfg.name||'아직 이름 없음')} · ver ${VER}</div>`;
-  m.innerHTML=h;
+  m.innerHTML=h;fitNos();
   m.querySelectorAll('.half').forEach(e=>e.onclick=()=>openCell(e.dataset.k));
   $('#bHist').onclick=()=>openHist();$('#bShare').onclick=openShare;$('#bSet').onclick=openSet;$('#bHome').onclick=homeShortcut;
   const f=m.querySelector('.half.hit');if(f&&render.scroll){f.scrollIntoView({block:'center',behavior:'smooth'});render.scroll=false}
   bar()}
+function fitNos(){document.querySelectorAll('#main .rt').forEach(rt=>{const hf=rt.parentElement,no=rt.querySelector('.no');const W=hf.clientWidth-6,H=hf.clientHeight-24;let f=60;no.style.fontSize=f+'px';
+  while(f>12&&(rt.offsetWidth>W||rt.offsetHeight>H)){f--;no.style.fontSize=f+'px'}})}
+window.addEventListener('resize',()=>{clearTimeout(fitNos.t);fitNos.t=setTimeout(fitNos,150)});
 function openS(html,fn){$('#sbox').innerHTML=html;$('#sheet').classList.add('on');fn&&fn()}
 function closeS(){stopRec();$('#sheet').classList.remove('on');curCell=null}
 $('#sheet').onclick=e=>{if(e.target.id==='sheet')closeS()};
@@ -217,8 +231,8 @@ function openCell(k,pre){const D=view(),v=D.cells[k],p=pre||{};curCell=k;
     $('#cClose').onclick=closeS;$('#cMic').onclick=()=>listen(t=>{const r=parseVoice(t,true);$('#heard').style.display='block';$('#heard').textContent='들은 말: '+t;
       if(r.no)$('#fNo').value=r.no;if(r.d)$('#fD').value=r.d;if(!r.no&&!r.d)$('#heard').textContent+=' (번호를 찾지 못했습니다. 다시 말하거나 손으로 넣어 주세요)'},$('#cMic'));
     $('#cSave').onclick=()=>{if(!takeName())return;const no=$('#fNo').value.trim(),d=normDate($('#fD').value);
-      if(!no){toast('팔레트 번호를 넣어 주세요');return}
       if($('#fD').value.trim()&&!d){toast('생산일자는 20261011처럼 8자리로 넣어 주세요');return}
+      if(!no&&!d){if(v){push({a:'del',c:k,v:null});toast(cname(k)+' 빈칸으로 저장했습니다')}else toast(cname(k)+' 빈칸 그대로 두었습니다');closeS();return}
       if(v&&v.no===no&&(v.d||'')===d){closeS();return}
       push({a:'set',c:k,v:{no,d}});toast(cname(k)+' 저장했습니다');closeS()};
     if(v){$('#cDel').onclick=()=>{if(!takeName())return;push({a:'del',c:k,v:null});toast(cname(k)+' 비웠습니다');closeS()};
@@ -231,7 +245,7 @@ function normDate(s){s=String(s||'').replace(/\D/g,'');if(!s)return '';if(s.leng
 function pickMove(k){const D=view();let h=`<h3>${esc(cname(k))} 옮기기</h3><div class="note">옮겨 갈 칸을 누르세요. 팔레트가 있는 칸을 고르면 두 칸을 서로 바꿉니다.</div><div class="yard" style="grid-template-columns:26px 1fr .5fr 1fr;margin-top:8px">`;
   const n=Math.max(D.size.A||8,D.size.B||8);h+='<div></div>'+SECTORS.map(s=>`<div class="colh">${s}</div>`).join('<div></div>');
   for(let i=1;i<=n;i++){h+=`<div class="num">${i}</div>`;SECTORS.forEach((s,j)=>{if(j)h+='<div></div>';if(i>(D.size[s]||8)){h+='<div></div>';return}
-    h+='<div class="slot" style="min-height:70px">'+['U','L'].map(lv=>{const kk=s+'-'+i+'-'+lv,v=D.cells[kk];return `<div class="half ${lv.toLowerCase()}" data-m="${kk}" style="min-height:34px;${kk===k?'outline:3px solid #e53935;outline-offset:-3px':''}"><div style="font-size:14px;font-weight:700">${v?esc(v.no):'<span class="em">빈칸</span>'}</div></div>`}).join('')+'</div>'})}
+    h+='<div class="slot '+(s==='A'?'ra':'rb')+'" style="min-height:56px">'+['U','L'].map(lv=>{const kk=s+'-'+i+'-'+lv,v=D.cells[kk];return `<div class="half ${lv.toLowerCase()}" data-m="${kk}" style="min-height:34px;${kk===k?'outline:3px solid #e53935;outline-offset:-3px':''}"><div style="font-size:14px;font-weight:700">${v?esc(v.no):'<span class="em">빈칸</span>'}</div></div>`}).join('')+'</div>'})}
   h+='</div><button class="btn gray" id="mBack" style="width:100%;margin-top:10px">취소</button>';
   openS(h,()=>{$('#mBack').onclick=()=>openCell(k);$('#sbox').querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const to=e.dataset.m;if(to===k)return;
     if(!cfg.name&&!confirmName())return;push({a:'move',c:k,to});toast(cname(k)+' → '+cname(to)+' 옮겼습니다');closeS()})})}
