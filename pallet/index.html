@@ -95,7 +95,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.15';
+const VER='0.16';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
 
@@ -202,9 +202,13 @@ function render(){const m=$('#main');if(!cfg.tok){setup();return}
 function fitNos(){document.querySelectorAll('#main .rt').forEach(rt=>{const hf=rt.parentElement,no=rt.querySelector('.no'),dt=rt.querySelector('.dt');const W=hf.clientWidth-6,H=hf.clientHeight-24;let f=60;const set=()=>{no.style.fontSize=f+'px';if(dt)dt.style.fontSize=(f*0.5)+'px'};set();
   while(f>12&&(rt.offsetWidth>W||rt.offsetHeight>H)){f--;set()}})}
 window.addEventListener('resize',()=>{clearTimeout(fitNos.t);fitNos.t=setTimeout(fitNos,150)});
-function openS(html,fn){$('#sbox').innerHTML=html;$('#sheet').classList.add('on');fn&&fn()}
+function openS(html,fn){sDirty=false;$('#sbox').innerHTML=html;$('#sheet').classList.add('on');fn&&fn()}
 function closeS(){stopRec();$('#sheet').classList.remove('on');curCell=null}
-$('#sheet').onclick=e=>{if(e.target.id==='sheet')closeS()};
+/* 0.16: 바깥(어두운 곳)을 눌러도 고치던 중이면 닫지 않는다. 자판이 떠 있을 때 바깥을 눌러 자판만 내리려다 창이 닫히던 문제 */
+let sDirty=false;$('#sbox').addEventListener('input',()=>{sDirty=true});
+$('#sheet').onclick=e=>{if(e.target.id!=='sheet')return;const a=document.activeElement;
+  if(a&&/INPUT|TEXTAREA/.test(a.tagName)&&$('#sbox').contains(a)){a.blur();return}
+  if(sDirty){toast('고치던 중입니다. [저장] 또는 [닫기]를 눌러 주세요');return}closeS()};
 function histRows(list,withUndo){if(!list.length)return '<div class="hi w">아직 기록이 없습니다</div>';
   return list.slice().reverse().map(x=>{const nm={add:'넣음',edit:'고침',del:'뺌',move:'옮김',undo:'되돌림',set:'설정'}[x.a]||x.a;
     let body;if(x.a==='move')body=`${esc(cname(x.c))} → ${esc(cname(x.to))} : ${esc(vtxt(x.from))}${x.swap?' (서로 바꿈: '+esc(vtxt(x.swap))+')':''}`;
@@ -234,7 +238,7 @@ function openCell(k,pre){const D=view(),v=D.cells[k],p=pre||{};curCell=k;
       if($('#fD').value.trim()&&!d){toast('생산일자는 20261011처럼 8자리로 넣어 주세요');return}
       if(!no&&!d){if(v){push({a:'del',c:k,v:null});toast(cname(k)+' 빈칸으로 저장했습니다')}else toast(cname(k)+' 빈칸 그대로 두었습니다');closeS();return}
       if(v&&v.no===no&&(v.d||'')===d){closeS();return}
-      push({a:'set',c:k,v:{no,d}});toast(cname(k)+' 저장했습니다');closeS()};
+      push({a:'set',c:k,v:{no,d}});toast(cname(k)+(no?' 저장했습니다':' 번호 없이 생산일자만 저장했습니다'));closeS()};
     if(v){$('#cDel').onclick=()=>{if(!takeName())return;push({a:'del',c:k,v:null});toast(cname(k)+' 비웠습니다');closeS()};
       $('#cMove').onclick=()=>pickMove(k)}
     bindUndo();
