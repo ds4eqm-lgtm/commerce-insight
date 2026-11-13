@@ -26,11 +26,16 @@ header h1 small{font-weight:400;font-size:12px;opacity:.75;margin-left:auto}
 .btn.mic{background:#e53935;white-space:nowrap}
 .btn:disabled{opacity:.45}
 main{padding:10px 8px 90px;max-width:720px;margin:0 auto}
-.yard{display:grid;grid-template-columns:18px 20px 1fr .5fr 1fr 18px;gap:6px 6px;align-items:stretch}
+.yard{display:grid;grid-template-columns:16px 18px 1fr .5fr 1fr 18px 16px;gap:6px 5px;align-items:stretch}
 .road,.house{grid-column:1;border-right:3px solid #555;color:#33414e;writing-mode:vertical-rl;text-align:center;font-size:12px;font-weight:700;letter-spacing:4px;padding:6px 0}
-.road span,.house span{padding:4px 0;position:sticky;top:140px}.house{grid-column:6;border-right:0;border-left:3px solid #555}.roadtop{text-align:center;font-size:12px;font-weight:700;color:#33414e;border-bottom:3px solid #555;padding-bottom:2px}
+.road span,.house span{padding:4px 0;position:sticky;top:140px}.house{grid-column:7;border-right:0;border-left:3px solid #555}.roadtop{text-align:center;font-size:12px;font-weight:700;color:#33414e;border-bottom:3px solid #555;padding-bottom:2px}
 .colh{text-align:center;font-weight:800;font-size:16px;padding:6px 0;background:#d9e2ec;border-radius:8px}
 .num{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:var(--sub)}
+.num.na span,.num.nb span{writing-mode:vertical-rl;text-orientation:sideways;display:inline-block}.num.nb span{transform:rotate(180deg)}
+.slot.ra .half,.slot.rb .half{justify-content:center}
+.slot.ra .half .lv,.slot.rb .half .lv{position:absolute;top:4px;left:0;right:0;margin:0 auto;width:14px;writing-mode:vertical-rl;text-orientation:sideways;white-space:nowrap;text-align:center;font-size:11px;line-height:14px}
+.slot.rb .half .lv{transform:rotate(180deg)}
+.slot.ra .half .em,.slot.rb .half .em{writing-mode:vertical-rl;text-orientation:sideways;white-space:nowrap}.slot.rb .half .em{transform:rotate(180deg)}
 .slot{background:var(--card);border:2px solid #8a99a8;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:112px}
 .slot.ra,.slot.rb{min-height:150px}
 .rt{writing-mode:vertical-rl;white-space:nowrap;line-height:1}.slot.rb .rt{transform:rotate(180deg)}
@@ -42,10 +47,10 @@ main{padding:10px 8px 90px;max-width:720px;margin:0 auto}
 .half .no{font-size:22px;font-weight:800;letter-spacing:.5px;line-height:1.1;word-break:break-all}
 .half .dt{font-size:13px;color:#33414e;margin-top:2px}
 .slot.ra{flex-direction:row-reverse}.slot.rb{flex-direction:row}
-.slot.ra .half,.slot.rb .half{padding:18px 3px 6px;min-width:0;align-items:center;text-align:center}
+.slot.ra .half,.slot.rb .half{padding:34px 2px 6px;min-width:0;align-items:center;text-align:center}
 .slot.ra .half.u{border-bottom:0;border-left:2px dashed #8a99a8}.slot.rb .half.u{border-bottom:0;border-right:2px dashed #8a99a8}
 .slot.ra .half .no,.slot.rb .half .no{font-size:16px;letter-spacing:0;white-space:nowrap;word-break:normal}.slot.ra .half .dt,.slot.rb .half .dt{font-size:11px;white-space:nowrap;letter-spacing:-.2px}
-.slot.ra .half .lv,.slot.rb .half .lv{left:0;right:0;text-align:center}
+
 .slot.ra .half.old .no::after,.slot.rb .half.old .no::after{display:block;width:fit-content;margin:3px 0 0}
 .half .em{font-size:13px;color:#9aa6b2}
 .half.hit{outline:4px solid var(--hl);outline-offset:-4px;background:#fff6cc}
@@ -95,7 +100,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.17';
+const VER='0.18';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
 
@@ -184,14 +189,14 @@ function bar(){const b=$('#bar');if(!cfg.tok){b.className='err';b.textContent='�
 function render(){const m=$('#main');if(!cfg.tok){setup();return}
   const D=view(),q=$('#q').value.trim(),pk=new Set(pend.flatMap(o=>[o.c,o.to]).filter(Boolean));
   let old=null;Object.entries(D.cells).forEach(([k,v])=>{if(/^\d{8}$/.test(v.d||'')&&(!old||v.d<old.d))old={k,d:v.d}});
-  const n=Math.max(D.size.A||8,D.size.B||8);let h=`<div class="yard"><div></div><div></div><div class="roadtop" style="grid-column:3/6">도로측</div><div></div><div class="road" style="grid-row:2/span ${n+1}"><span>공장측 골목</span></div><div class="house" style="grid-row:2/span ${n+1}"><span>주택</span></div><div></div>`;
-  SECTORS.forEach((s,j)=>h+=(j?'<div></div>':'')+`<div class="colh">${s} 구역</div>`);
-  for(let i=1;i<=n;i++){h+=`<div class="num">${i}</div>`;
+  const n=Math.max(D.size.A||8,D.size.B||8);let h=`<div class="yard"><div></div><div></div><div class="roadtop" style="grid-column:3/6">도로측</div><div></div><div></div><div class="road" style="grid-row:2/span ${n+1}"><span>공장측 골목</span></div><div class="house" style="grid-row:2/span ${n+1}"><span>주택</span></div><div></div>`;
+  SECTORS.forEach((s,j)=>h+=(j?'<div></div>':'')+`<div class="colh">${s} 구역</div>`);h+='<div></div>';
+  for(let i=1;i<=n;i++){h+=`<div class="num nb"><span>${i}</span></div>`;
     SECTORS.forEach((s,j)=>{if(j)h+='<div></div>';if(i>(D.size[s]||8)){h+='<div></div>';return}
       h+='<div class="slot '+(s==='A'?'ra':'rb')+'">'+['U','L'].map(lv=>{const k=s+'-'+i+'-'+lv,v=D.cells[k];
         const hit=q&&v&&String(v.no).includes(q);
         return `<div class="half ${lv.toLowerCase()}${hit?' hit':''}${old&&old.k===k?' old':''}${pk.has(k)?' pend':''}" data-k="${k}"><span class="lv">${lv==='U'?'위':'아래'}</span>`+
-          (v?`<div class="rt"><div class="no">${esc(v.no)}</div><div class="dt">${esc(fmtS(v.d))}</div></div>`:'<div class="em">빈칸</div>')+'</div>'}).join('')+'</div>'})}
+          (v?`<div class="rt"><div class="no">${esc(v.no)}</div><div class="dt">${esc(fmtS(v.d))}</div></div>`:'<div class="em">빈칸</div>')+'</div>'}).join('')+'</div>'});h+=`<div class="num na"><span>${i}</span></div>`}
   h+='</div><div class="foot"><button class="btn gray" id="bHist">전체 이력 보기</button><button class="btn gray" id="bShare">주소 나눠 주기</button><button class="btn gray" id="bSet">설정</button><button class="btn green" id="bHome" style="display:'+(STANDALONE?'none':'block')+'">📱 휴대폰 바탕화면에 바로가기 만들기</button></div>'+
    `<div class="note">칸을 누르면 번호와 생산일자를 넣거나 고치거나 뺄 수 있습니다. 위 칸이 2단(위에 올린 팔레트), 아래 칸이 1단(바닥 팔레트)입니다.<br>말로 기록: [🎤 말로 기록]을 누르고 "A 1번 위 1699 2026 10 11"처럼 말하면 해당 칸이 채워진 채로 열립니다. 빼낼 때는 "A 1번 위 삭제".<br>기록한 사람: ${esc(cfg.name||'아직 이름 없음')} · ver ${VER}</div>`;
   m.innerHTML=h;fitNos();
@@ -199,7 +204,7 @@ function render(){const m=$('#main');if(!cfg.tok){setup();return}
   $('#bHist').onclick=()=>openHist();$('#bShare').onclick=openShare;$('#bSet').onclick=openSet;$('#bHome').onclick=homeShortcut;
   const f=m.querySelector('.half.hit');if(f&&render.scroll){f.scrollIntoView({block:'center',behavior:'smooth'});render.scroll=false}
   bar()}
-function fitNos(){document.querySelectorAll('#main .rt').forEach(rt=>{const hf=rt.parentElement,no=rt.querySelector('.no'),dt=rt.querySelector('.dt');const W=hf.clientWidth-6,H=hf.clientHeight-24;let f=60;const set=()=>{no.style.fontSize=f+'px';if(dt)dt.style.fontSize=(f*0.5)+'px'};set();
+function fitNos(){document.querySelectorAll('#main .rt').forEach(rt=>{const hf=rt.parentElement,no=rt.querySelector('.no'),dt=rt.querySelector('.dt');const W=hf.clientWidth-5,H=hf.clientHeight-42;let f=60;const set=()=>{no.style.fontSize=f+'px';if(dt)dt.style.fontSize=(f*0.5)+'px'};set();
   while(f>12&&(rt.offsetWidth>W||rt.offsetHeight>H)){f--;set()}})}
 window.addEventListener('resize',()=>{clearTimeout(fitNos.t);fitNos.t=setTimeout(fitNos,150)});
 function openS(html,fn){sDirty=false;$('#sbox').innerHTML=html;$('#sheet').classList.add('on');fn&&fn()}
