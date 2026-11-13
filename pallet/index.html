@@ -95,7 +95,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.16';
+const VER='0.17';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
 
@@ -113,7 +113,7 @@ function blank(){return {v:1,size:{A:8,B:8},cells:{},log:[]}}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 const LVN={U:'위(2단)',L:'아래(1단)'};
 function cname(c){const p=c.split('-');return p[0]+'구역 '+p[1]+'번 '+LVN[p[2]]}
-function fmtS(d){d=String(d||'');return /^\d{8}$/.test(d)?d.slice(2,4)+'.'+d.slice(4,6)+'.'+d.slice(6):d}
+function fmtS(d){d=String(d||'');return /^\d{8}$/.test(d)?d.slice(2):d}
 function fmtD(d){d=String(d||'');return /^\d{8}$/.test(d)?d.slice(0,4)+'.'+d.slice(4,6)+'.'+d.slice(6):d}
 function vtxt(v){return v?(v.no||'?')+(v.d?' ('+fmtD(v.d)+')':''):'비어 있음'}
 
