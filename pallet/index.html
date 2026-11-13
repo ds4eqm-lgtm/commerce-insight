@@ -81,7 +81,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='1.1';
+const VER='1.2';
 const REPO_DEF='ds4eqm-lgtm/pallet-box',FILE='yard.json',SECTORS=['B','A'];
 const LS='pl1_',$=s=>document.querySelector(s);
 const GH=()=>window.PL_GH||'https://api.github.com';
@@ -236,16 +236,20 @@ function qrInto(el,txt){el.innerHTML='';if(window.QRCode){new QRCode(el,{text:tx
   const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';s.onload=()=>qrInto(el,txt);s.onerror=()=>el.textContent='(QR 그림을 불러오지 못했습니다. 아래 주소를 복사해 보내 주세요)';document.head.appendChild(s)}
 function copyOld(t){try{const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(a);a.select();a.setSelectionRange(0,t.length);const ok=document.execCommand('copy');a.remove();return ok}catch(e){return false}}
 function copyFail(){const m=$('#sbox .mono');if(m){try{const r=document.createRange();r.selectNodeContents(m);const g=getSelection();g.removeAllRanges();g.addRange(r)}catch(e){}}toast('이 화면에서는 저절로 복사가 막혀 있습니다. 회색 칸의 주소를 길게 눌러 복사해 주세요',5000)}
-function copy(t){const done=()=>toast('주소를 복사했습니다. 카톡에 붙여넣어 보내 주세요');
+function copy(t){const done=()=>toast('주소를 복사했습니다. 보낼 대화방에 붙여넣어 주세요');
   if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(done,()=>copyOld(t)?done():copyFail());return}
   copyOld(t)?done():copyFail()}
 function shareTo(u){if(!navigator.share){copy(u);return}
   try{navigator.share({title:'야적장 팔레트 배치도',text:'야적장 팔레트 배치도 (지게차용)',url:u}).catch(e=>{if(!e||e.name!=='AbortError'){copy(u)}})}catch(e){copy(u)}}
 function openShare(){const u=shareUrl();openS(`<h3>주소 나눠 주기</h3>${LIVE?'':'<div style="background:#fff3cd;border-radius:8px;padding:8px;font-size:14px;line-height:1.6;margin-bottom:8px">지금 이 화면은 미리보기라서 복사·보내기가 막힐 수 있습니다. 아래 주소는 실제 주소('+esc(OFFICIAL)+')로 만들어 두었습니다. 깃허브에 합친 뒤 실제 주소에서 열면 바로 됩니다.</div>'}<div class="note" style="margin-top:0">이 주소를 받은 사람은 누구나 기록을 넣고 고치고 지울 수 있습니다 (모든 변경은 이력에 남습니다). 지게차 기사님 휴대폰으로 아래 QR을 찍거나, 주소를 카톡으로 보내 주세요.</div>
   <div id="qr"></div><div class="mono" style="user-select:all;-webkit-user-select:all">${esc(u)}</div>
-  <div class="acts"><button class="btn wide" id="sCopy">주소 복사</button><button class="btn wide" id="sKakao" style="background:#fee500;color:#191919">카카오톡으로 보내기</button><button class="btn green wide" id="sShare">다른 앱으로 보내기</button><a class="btn org wide" id="sSms" style="text-align:center;text-decoration:none" href="sms:?&body=${encodeURIComponent('야적장 팔레트 배치도 '+u)}">문자로 보내기</a><button class="btn gray wide" id="sC">닫기</button></div>
-  <div class="note">[카카오톡으로 보내기]를 누르면 주소가 복사되고 카카오톡이 열립니다. 보낼 대화방에서 입력 칸을 길게 눌러 [붙여넣기] 후 보내면 됩니다. [다른 앱으로 보내기]는 휴대폰의 보내기 화면을 엽니다. [문자로 보내기]는 문자 앱에 주소를 채워 엽니다. 가장 쉬운 방법은 기사님 휴대폰 카메라로 위 QR을 찍게 하는 것입니다. PC에서는 [주소 복사] 뒤 카톡 대화창에 붙여넣어 주세요.<br>카톡 안에서 열면 마이크가 안 될 수 있습니다. 그럴 땐 오른쪽 위 점 세 개 → [다른 브라우저로 열기](크롬·사파리)를 눌러 주세요. 열린 화면에서 [홈 화면에 추가]를 해 두면 앱처럼 바로 열립니다.</div>`,()=>{
-  qrInto($('#qr'),u);$('#sCopy').onclick=()=>copy(u);$('#sC').onclick=closeS;$('#sShare').onclick=()=>shareTo(u);$('#sKakao').onclick=()=>kakao(u)})}
+  <div class="acts"><button class="btn wide" id="sCopy">주소 복사</button><button class="btn wide" id="sKakao" style="background:#fee500;color:#191919">카카오톡으로 보내기</button><button class="btn wide" id="sFlow" style="background:#6449fc">플로우로 보내기</button><button class="btn green wide" id="sShare">다른 앱으로 보내기</button><a class="btn org wide" id="sSms" style="text-align:center;text-decoration:none" href="sms:?&body=${encodeURIComponent('야적장 팔레트 배치도 '+u)}">문자로 보내기</a><button class="btn gray wide" id="sC">닫기</button></div>
+  <div class="note">[카카오톡으로 보내기]를 누르면 주소가 복사되고 카카오톡이 열립니다. 보낼 대화방에서 입력 칸을 길게 눌러 [붙여넣기] 후 보내면 됩니다. [플로우로 보내기]도 같은 방식으로 주소를 복사하고 플로우를 엽니다. [다른 앱으로 보내기]는 휴대폰의 보내기 화면을 엽니다. [문자로 보내기]는 문자 앱에 주소를 채워 엽니다. 가장 쉬운 방법은 기사님 휴대폰 카메라로 위 QR을 찍게 하는 것입니다. PC에서는 [주소 복사] 뒤 카톡 대화창에 붙여넣어 주세요.<br>카톡 안에서 열면 마이크가 안 될 수 있습니다. 그럴 땐 오른쪽 위 점 세 개 → [다른 브라우저로 열기](크롬·사파리)를 눌러 주세요. 열린 화면에서 [홈 화면에 추가]를 해 두면 앱처럼 바로 열립니다.</div>`,()=>{
+  qrInto($('#qr'),u);$('#sCopy').onclick=()=>copy(u);$('#sC').onclick=closeS;$('#sShare').onclick=()=>shareTo(u);$('#sKakao').onclick=()=>kakao(u);$('#sFlow').onclick=()=>flow(u)})}
+function flow(u){copy(u);setTimeout(()=>{const ua=navigator.userAgent;
+  if(/Android/i.test(ua))location.href='intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.webcash.bizplay.collabo;S.browser_fallback_url='+encodeURIComponent('https://flow.team')+';end';
+  else if(/iPhone|iPad|iPod/i.test(ua))location.href='https://flow.team';
+  else{window.open('https://flow.team','_blank');toast('주소를 복사했습니다. 플로우 대화방이나 글쓰기 칸에 붙여넣어(Ctrl+V) 보내 주세요',5000)}},700)}
 function kakao(u){copy(u);setTimeout(()=>{const ua=navigator.userAgent;
   if(/Android/i.test(ua))location.href='intent://launch#Intent;scheme=kakaotalk;package=com.kakao.talk;end';
   else if(/iPhone|iPad|iPod/i.test(ua))location.href='kakaotalk://launch';
