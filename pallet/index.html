@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f3b57">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-title" content="팔레트">
 <meta name="robots" content="noindex">
 <title>야적장 팔레트 배치도</title>
 <style>
@@ -81,7 +85,10 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.12';
+const VER='0.13';
+const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
+let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
+
 const REPO_DEF='ds4eqm-lgtm/pallet-box',FILE='yard.json',SECTORS=['B','A'];
 const LS='pl1_',$=s=>document.querySelector(s);
 const GH=()=>window.PL_GH||'https://api.github.com';
@@ -174,11 +181,11 @@ function render(){const m=$('#main');if(!cfg.tok){setup();return}
         const hit=q&&v&&String(v.no).includes(q);
         return `<div class="half ${lv.toLowerCase()}${hit?' hit':''}${old&&old.k===k?' old':''}${pk.has(k)?' pend':''}" data-k="${k}"><span class="lv">${lv==='U'?'위':'아래'}</span>`+
           (v?`<div class="no">${esc(v.no)}</div><div class="dt">${esc(fmtD(v.d))}</div>`:'<div class="em">비어 있음</div>')+'</div>'}).join('')+'</div>'})}
-  h+='</div><div class="foot"><button class="btn gray" id="bHist">전체 이력 보기</button><button class="btn gray" id="bShare">주소 나눠 주기</button><button class="btn gray" id="bSet">설정</button></div>'+
+  h+='</div><div class="foot"><button class="btn gray" id="bHist">전체 이력 보기</button><button class="btn gray" id="bShare">주소 나눠 주기</button><button class="btn gray" id="bSet">설정</button><button class="btn green" id="bHome" style="display:'+(STANDALONE?'none':'block')+'">📱 휴대폰 바탕화면에 바로가기 만들기</button></div>'+
    `<div class="note">칸을 누르면 번호와 생산일자를 넣거나 고치거나 뺄 수 있습니다. 위 칸이 2단(위에 올린 팔레트), 아래 칸이 1단(바닥 팔레트)입니다.<br>말로 기록: [🎤 말로 기록]을 누르고 "A 1번 위 1699 2026 10 11"처럼 말하면 해당 칸이 채워진 채로 열립니다. 빼낼 때는 "A 1번 위 삭제".<br>기록한 사람: ${esc(cfg.name||'아직 이름 없음')} · ver ${VER}</div>`;
   m.innerHTML=h;
   m.querySelectorAll('.half').forEach(e=>e.onclick=()=>openCell(e.dataset.k));
-  $('#bHist').onclick=()=>openHist();$('#bShare').onclick=openShare;$('#bSet').onclick=openSet;
+  $('#bHist').onclick=()=>openHist();$('#bShare').onclick=openShare;$('#bSet').onclick=openSet;$('#bHome').onclick=homeShortcut;
   const f=m.querySelector('.half.hit');if(f&&render.scroll){f.scrollIntoView({block:'center',behavior:'smooth'});render.scroll=false}
   bar()}
 function openS(html,fn){$('#sbox').innerHTML=html;$('#sheet').classList.add('on');fn&&fn()}
@@ -331,7 +338,23 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
 window.addEventListener('online',()=>sync(true));
 $('#ver').textContent='ver '+VER;
 render();if(cfg.tok)sync(true);
+try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
 (function loop(){setTimeout(()=>{if(cfg.tok&&!$('#sheet').classList.contains('on')||pend.length)sync();loop()},POLL())})();
+
+/* ---------- 휴대폰 바탕화면 바로가기 ---------- */
+window.addEventListener('appinstalled',()=>{instEv=null;toast('바탕화면에 바로가기를 만들었습니다',4000)});
+function homeShortcut(){const ua=navigator.userAgent,and=/Android/i.test(ua),ios=/iPhone|iPad|iPod/i.test(ua);
+  const inapp=/KAKAOTALK|NAVER\(|Line\/|FB_IAB|FBAN|Instagram|; wv\)|flow/i.test(ua),samsung=/SamsungBrowser/i.test(ua);
+  if(instEv){instEv.prompt();instEv.userChoice.then(r=>{if(r&&r.outcome==='accepted')toast('바탕화면에 바로가기를 만들었습니다',4000)}).catch(()=>{});instEv=null;return}
+  if(inapp&&and){toast('크롬으로 다시 엽니다. 크롬에서 이 단추를 한 번 더 눌러 주세요',5000);
+    setTimeout(()=>location.href='intent://'+location.host+location.pathname+location.hash+'#Intent;scheme=https;package=com.android.chrome;end',900);return}
+  let steps;
+  if(ios)steps=inapp?'지금은 카톡·플로우 같은 앱 안의 화면이라 바로가기를 만들 수 없습니다.<br>1. 오른쪽 아래(또는 위)의 [사파리로 열기]를 누릅니다.<br>2. 사파리에서 아래 가운데 공유 단추(네모에 위쪽 화살표)를 누릅니다.<br>3. 목록을 내려 [홈 화면에 추가] → 오른쪽 위 [추가]를 누릅니다.':
+    '1. 화면 아래 가운데 공유 단추(네모에 위쪽 화살표)를 누릅니다.<br>2. 목록을 위로 밀어 [홈 화면에 추가]를 누릅니다.<br>3. 오른쪽 위 [추가]를 누릅니다.<br>(크롬이 아니라 사파리에서만 됩니다)';
+  else if(samsung)steps='1. 화면 아래 줄 세 개(≡) 단추를 누릅니다.<br>2. [현재 페이지 추가]를 누릅니다. (안 보이면 [+ 추가] 또는 위 별표 옆 [+])<br>3. [홈 화면]을 고르고 [추가]를 누릅니다.';
+  else if(and)steps='1. 오른쪽 위 점 세 개(⋮)를 누릅니다.<br>2. [홈 화면에 추가] 또는 [앱 설치]를 누릅니다.<br>3. [추가](또는 [설치])를 누릅니다.<br>메뉴에 없으면 이 주소를 크롬 앱에서 열어 주세요.';
+  else steps='PC에서는 주소창 오른쪽의 설치 아이콘(모니터 모양) 또는 점 세 개 → [앱 설치]를 누르면 바탕화면에 바로가기가 생깁니다. 휴대폰에서는 휴대폰으로 이 주소를 열고 이 단추를 눌러 주세요.';
+  openS('<h3>바탕화면에 바로가기 만들기</h3><div class="note" style="font-size:15px;line-height:1.8;color:#16202a">'+steps+'</div><div class="note">만든 뒤에는 바탕화면의 팔레트 그림을 누르면 이 화면이 바로 열립니다. 처음 설정(출입증)은 그대로 남아 있습니다.</div><button class="btn gray" id="hC" style="width:100%;margin-top:12px">닫기</button>',()=>{$('#hC').onclick=closeS})}
 window.PL={parseVoice,normVoice,view,get pend(){return pend},sync};
 </script>
 </body>
