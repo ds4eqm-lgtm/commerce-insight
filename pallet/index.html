@@ -105,7 +105,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.34';
+const VER='0.35';
 const ICON_V='030';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
@@ -309,7 +309,7 @@ function openSet(){const D=view();openS(`<h3>설정</h3>
   $('#tS').onclick=()=>{const n=$('#tN').value.trim();if(n){cfg.name=n;sv('cfg',cfg)}
     const a=Math.max(1,Math.min(30,parseInt($('#tA').value)||8)),b=Math.max(1,Math.min(30,parseInt($('#tB').value)||8));
     if(a!==(D.size.A||8)||b!==(D.size.B||8)){if(!confirmName())return;push({a:'size',size:{A:a,B:b}})}closeS();render();toast('저장했습니다')};
-  $('#tTS').onclick=()=>{const t=$('#tT').value.trim(),r=$('#tR').value.trim()||REPO_DEF;if(!t)return;cfg.tok=t;cfg.repo=r;sv('cfg',cfg);sha='';etag='';closeS();render();sync(true)}})}
+  $('#tTS').onclick=()=>{const t=$('#tT').value.trim(),r=$('#tR').value.trim()||REPO_DEF;if(!t)return;cfg.tok=t;cfg.repo=r;sv('cfg',cfg);iosManifest();sha='';etag='';closeS();render();sync(true)}})}
 
 /* ---------- 처음 설정 (관리자 한 번) ---------- */
 const REPO_URL='https://github.com/new?name=pallet-box&visibility=private&description='+encodeURIComponent('야적장 팔레트 배치 기록 (비공개)');
@@ -328,7 +328,7 @@ function setup(){$('#main').innerHTML=`<div class="setup"><h3 style="margin-top:
   $('#sGo').onclick=async()=>{const t=$('#sT').value.trim();if(!/^(github_pat_|ghp_)/.test(t)){$('#sM').textContent='github_pat_로 시작하는 출입증을 붙여넣어 주세요';return}
     cfg.tok=t;$('#sM').textContent='확인하는 중...';$('#sGo').disabled=true;
     try{const r=await gh('');if(!r.ok)throw new Error(ghErr(r));const j=await r.json();if(j.permissions&&j.permissions.push===false)throw new Error('perm');
-      sv('cfg',cfg);try{history.replaceState(null,'',location.pathname+location.search+'#t='+encodeURIComponent(cfg.tok))}catch(e){}render();sync(true);openShare()}
+      sv('cfg',cfg);try{history.replaceState(null,'',location.pathname+location.search+'#t='+encodeURIComponent(cfg.tok))}catch(e){}render();iosManifest();sync(true);openShare()}
     catch(e){cfg.tok='';$('#sM').textContent=MSG[e.message]||MSG.net;$('#sGo').disabled=false}};bar()}
 
 /* ---------- 음성 ---------- */
@@ -447,6 +447,13 @@ function doShortcut(){const ua=navigator.userAgent,and=/Android/i.test(ua),ios=/
   instWait=()=>{clearTimeout(t);if(instEv)doPrompt()}}
 /* 사파리 [홈 화면에 추가]로 만들어도 출입증이 따라가도록 주소 끝에 #t= 를 붙여 둔다 */
 try{if(LIVE&&cfg.tok&&!/[#&]t=/.test(location.hash))history.replaceState(null,'',location.pathname+location.search+'#t='+encodeURIComponent(cfg.tok)+(cfg.repo!==REPO_DEF?'&r='+encodeURIComponent(cfg.repo):''))}catch(e){}
+/* ver 0.35: 아이폰·아이패드는 홈 화면 앱이 사파리와 저장 공간이 따로이고, manifest 시작 주소("./")가 #t= 를 떨어뜨려 처음 설정 화면이 떴다.
+   출입증이 있으면 시작 주소에 #t= 를 넣은 manifest 로 바꿔 끼워, [홈 화면에 추가]로 만든 아이콘도 바로 열리게 한다 */
+function iosManifest(){try{const ua=navigator.userAgent;if(!(/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1))||!cfg.tok)return;
+  const m={id:'/commerce-insight/pallet/',name:'야적장 팔레트 배치도',short_name:'팔레트',start_url:liveUrl(),scope:OFFICIAL,display:'standalone',background_color:'#eef1f4',theme_color:'#1f3b57',lang:'ko',
+    icons:[{src:OFFICIAL+'icon-192.png?v='+ICON_V,sizes:'192x192',type:'image/png'},{src:OFFICIAL+'icon-512.png?v='+ICON_V,sizes:'512x512',type:'image/png'}]};
+  const l=document.querySelector('link[rel="manifest"]');if(l)l.href='data:application/manifest+json;charset=utf-8,'+encodeURIComponent(JSON.stringify(m))}catch(e){}}
+iosManifest();
 /* ver 0.32: 바로가기가 이미 있어도 새 아이콘으로 바꿀지 묻고 바꾼다 */
 function lsG(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsS(k,v){try{localStorage.setItem(k,v)}catch(e){}}
