@@ -104,7 +104,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.22';
+const VER='0.23';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
 
@@ -375,15 +375,27 @@ window.addEventListener('appinstalled',()=>{instEv=null;showInst();toast('바탕
 function showInst(){const b=$('#bInst');if(b)b.style.display=STANDALONE?'none':''}
 function doPrompt(){const e=instEv;instEv=null;try{e.prompt();e.userChoice.then(r=>{if(r&&r.outcome==='accepted')toast('바탕화면에 바로가기를 만들었습니다',4000)}).catch(()=>{})}catch(x){}}
 function installedAlready(){try{return navigator.getInstalledRelatedApps?navigator.getInstalledRelatedApps().then(l=>!!(l&&l.length)).catch(()=>false):Promise.resolve(false)}catch(e){return Promise.resolve(false)}}
+function liveUrl(){return OFFICIAL+(cfg.tok?'#t='+encodeURIComponent(cfg.tok)+(cfg.repo!==REPO_DEF?'&r='+encodeURIComponent(cfg.repo):''):'')}
+const AND_CHROME=u=>'intent://'+u.replace(/^https:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end';
+/* 설치 창이 없는 브라우저: 바로가기 파일을 바로 내려받는다 (ver 0.23) */
+function shortcutFile(){const ua=navigator.userAgent,u=liveUrl(),name='야적장 팔레트 배치도';let body,ext;
+  if(/Macintosh|Mac OS X/.test(ua)){ext='.webloc';body='<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>URL</key><string>'+esc(u)+'</string></dict></plist>\n'}
+  else if(/Linux|X11/.test(ua)){ext='.desktop';body='[Desktop Entry]\nType=Link\nName='+name+'\nURL='+u+'\nIcon=web-browser\n'}
+  else{ext='.url';body='[InternetShortcut]\r\nURL='+u+'\r\nIconFile='+OFFICIAL+'favicon.ico\r\nIconIndex=0\r\n'}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([body],{type:'application/octet-stream'}));a.download=name+ext;document.body.appendChild(a);a.click();
+  setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove()}catch(e){}},2000);
+  toast('바로가기 파일을 받았습니다. 바탕화면으로 옮기면 팔레트 바로가기가 됩니다',7000);return ext}
 function homeShortcut(){const ua=navigator.userAgent,and=/Android/i.test(ua),ios=/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
-  const inapp=/KAKAOTALK|NAVER\(|Line\/|FB_IAB|FBAN|Instagram|; wv\)|flow/i.test(ua);
+  const inapp=/KAKAOTALK|NAVER\(|Line\/|FB_IAB|FBAN|Instagram|; wv\)|flow/i.test(ua),bip='onbeforeinstallprompt' in window;
   if(instEv){doPrompt();return}
-  if(!LIVE){location.href=OFFICIAL+(cfg.tok?'#t='+encodeURIComponent(cfg.tok)+(cfg.repo!==REPO_DEF?'&r='+encodeURIComponent(cfg.repo):''):'');return}
-  if(inapp&&and){location.href='intent://'+location.host+location.pathname+location.hash+'#Intent;scheme=https;package=com.android.chrome;end';return}
   if(ios){toast(inapp?'사파리로 연 뒤 공유(□↑) → 홈 화면에 추가':'공유(□↑) → 홈 화면에 추가',6000);return}
-  // 설치 창 준비가 조금 늦는 경우: 잠깐 기다렸다가 바로 띄운다
+  if(and){
+    // 설치 창이 없는 휴대폰 브라우저(파이어폭스, 카톡 안 화면 등)는 크롬으로 열어 설치 창을 띄운다
+    if(!bip||inapp||!LIVE){location.href=AND_CHROME(liveUrl());return}
+  }else if(!bip||!LIVE){shortcutFile();return}
+  // 크롬·엣지·웨일·삼성 인터넷·오페라: 설치 창 준비가 늦으면 잠깐 기다렸다 띄우고, 끝내 없으면(이미 설치 등) PC는 바로가기 파일
   toast('바로가기 준비 중',3000);
-  const t=setTimeout(()=>{instWait=null;installedAlready().then(yes=>toast(yes?'이미 바탕화면에 바로가기가 있습니다':'이미 바탕화면에 바로가기가 있거나, 이 브라우저는 바로 설치가 안 됩니다. 크롬이나 엣지로 열어 주세요',6000))},3500);
+  const t=setTimeout(()=>{instWait=null;if(and)installedAlready().then(()=>toast('이미 홈 화면에 바로가기가 있습니다',5000));else shortcutFile()},3500);
   instWait=()=>{clearTimeout(t);if(instEv)doPrompt()}}
 $('#bInst').onclick=homeShortcut;showInst();
 
