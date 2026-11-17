@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f3b57">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png?v=030">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=030">
 <meta name="apple-mobile-web-app-title" content="팔레트">
 <meta name="robots" content="noindex">
 <title>야적장 팔레트 배치도</title>
@@ -92,7 +92,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <body>
 <header>
   <div id="upd"><span id="updT"></span><br><button class="btn green" id="updGo" type="button">업데이트</button><button class="btn gray" id="updNo" type="button">나중에</button></div>
-  <h1><img src="icon-192.png" alt="" width="26" height="26" style="border-radius:6px">야적장 LVT 배치도 <small id="ver"></small><button class="btn" id="bInst" type="button" style="display:none">📲 바탕화면에 바로가기</button></h1>
+  <h1><img src="icon-192.png?v=030" alt="" width="26" height="26" style="border-radius:6px">야적장 LVT 배치도 <small id="ver"></small><button class="btn" id="bInst" type="button" style="display:none">📲 바탕화면에 바로가기</button></h1>
   <div id="bar">불러오는 중</div>
   <div class="tools">
     <input id="q" inputmode="numeric" placeholder="팔레트 번호 찾기" autocomplete="off">
@@ -104,7 +104,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.23';
+const VER='0.30';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
 
@@ -201,11 +201,11 @@ function render(){const m=$('#main');if(!cfg.tok){setup();return}
         const hit=q&&v&&String(v.no).includes(q);
         return `<div class="half ${lv.toLowerCase()}${hit?' hit':''}${old&&old.k===k?' old':''}${pk.has(k)?' pend':''}" data-k="${k}"><span class="lv">${lv==='U'?'위':'아래'}</span>`+
           (v?`<div class="rt"><div class="no">${esc(v.no)}</div><div class="dt">${esc(fmtS(v.d))}</div></div>`:'<div class="em">빈칸</div>')+'</div>'}).join('')+'</div>'});h+=`<div class="num na"><span>${i}</span></div>`}
-  h+='</div><div class="foot"><button class="btn gray" id="bHist">전체 이력 보기</button><button class="btn gray" id="bShare">주소 나눠 주기</button><button class="btn gray" id="bSet">설정</button><button class="btn green" id="bHome" style="display:'+(STANDALONE?'none':'block')+'">📲 바탕화면에 바로가기</button></div>'+
+  h+='</div><div class="foot"><button class="btn gray" id="bHist">전체 이력 보기</button><button class="btn gray" id="bShare">주소 나눠 주기</button><button class="btn gray" id="bSet">설정</button></div>'+
    `<div class="note">칸을 누르면 번호와 생산일자를 넣거나 고치거나 뺄 수 있습니다. 위 칸이 2단(위에 올린 팔레트), 아래 칸이 1단(바닥 팔레트)입니다.<br>말로 기록: [🎤 말로 기록]을 누르고 "A 1번 위 1699 2026 10 11"처럼 말하면 해당 칸이 채워진 채로 열립니다. 빼낼 때는 "A 1번 위 삭제".<br>기록한 사람: ${esc(cfg.name||'아직 이름 없음')} · ver ${VER}</div>`;
   m.innerHTML=h;fitNos();
   m.querySelectorAll('.half').forEach(e=>e.onclick=()=>openCell(e.dataset.k));
-  $('#bHist').onclick=()=>openHist();$('#bShare').onclick=openShare;$('#bSet').onclick=openSet;$('#bHome').onclick=homeShortcut;
+  $('#bHist').onclick=()=>openHist();$('#bShare').onclick=openShare;$('#bSet').onclick=openSet;
   const f=m.querySelector('.half.hit');if(f&&render.scroll){f.scrollIntoView({block:'center',behavior:'smooth'});render.scroll=false}
   bar()}
 function fitNos(){document.querySelectorAll('#main .rt').forEach(rt=>{const hf=rt.parentElement,no=rt.querySelector('.no'),dt=rt.querySelector('.dt');const W=hf.clientWidth-5,H=hf.clientHeight-42;let f=60;const set=()=>{no.style.fontSize=f+'px';if(dt)dt.style.fontSize=(f*0.5)+'px'};set();
@@ -277,17 +277,24 @@ function shareTo(u){if(!navigator.share){copy(u);return}
   try{navigator.share({title:'야적장 팔레트 배치도',text:'야적장 팔레트 배치도 (지게차용)',url:u}).catch(e=>{if(!e||e.name!=='AbortError'){copy(u)}})}catch(e){copy(u)}}
 function openShare(){const u=shareUrl();openS(`<h3>주소 나눠 주기</h3>${LIVE?'':'<div style="background:#fff3cd;border-radius:8px;padding:8px;font-size:14px;line-height:1.6;margin-bottom:8px">지금 이 화면은 미리보기라서 복사·보내기가 막힐 수 있습니다. 아래 주소는 실제 주소('+esc(OFFICIAL)+')로 만들어 두었습니다. 깃허브에 합친 뒤 실제 주소에서 열면 바로 됩니다.</div>'}<div class="note" style="margin-top:0">이 주소를 받은 사람은 누구나 기록을 넣고 고치고 지울 수 있습니다 (모든 변경은 이력에 남습니다). 지게차 기사님 휴대폰으로 아래 QR을 찍거나, 주소를 카톡으로 보내 주세요.</div>
   <div id="qr"></div><div class="mono" style="user-select:all;-webkit-user-select:all">${esc(u)}</div>
-  <div class="acts"><button class="btn wide" id="sCopy">주소 복사</button><button class="btn wide" id="sKakao" style="background:#fee500;color:#191919">카카오톡으로 보내기</button><button class="btn wide" id="sFlow" style="background:#6449fc">플로우로 보내기</button><button class="btn green wide" id="sShare">다른 앱으로 보내기</button><a class="btn org wide" id="sSms" style="text-align:center;text-decoration:none" href="sms:?&body=${encodeURIComponent('야적장 팔레트 배치도 '+u)}">문자로 보내기</a><button class="btn gray wide" id="sC">닫기</button></div>
-  <div class="note">[카카오톡으로 보내기]를 누르면 주소가 복사되고 카카오톡이 열립니다. 보낼 대화방에서 입력 칸을 길게 눌러 [붙여넣기] 후 보내면 됩니다. [플로우로 보내기]도 같은 방식으로 주소를 복사하고 플로우를 엽니다. [다른 앱으로 보내기]는 휴대폰의 보내기 화면을 엽니다. [문자로 보내기]는 문자 앱에 주소를 채워 엽니다. 가장 쉬운 방법은 기사님 휴대폰 카메라로 위 QR을 찍게 하는 것입니다. PC에서는 [주소 복사] 뒤 카톡 대화창에 붙여넣어 주세요.<br>카톡 안에서 열면 마이크가 안 될 수 있습니다. 그럴 땐 오른쪽 위 크롬이나 사파리로 열어 주세요. 맨 위 [바탕화면에 바로가기]를 눌러 두면 앱처럼 바로 열립니다.</div>`,()=>{
+  <div class="acts"><button class="btn wide" id="sCopy">주소 복사</button><button class="btn wide" id="sKakao" style="background:#fee500;color:#191919">카카오톡으로 보내기</button><button class="btn wide" id="sFlow" style="background:#6449fc">플로우로 보내기</button><button class="btn green wide" id="sShare">다른 앱으로 보내기</button><a class="btn org wide" id="sSms" style="text-align:center;text-decoration:none" href="sms:${/iPhone|iPad|iPod/i.test(navigator.userAgent)?'&':'?'}body=${encodeURIComponent('야적장 팔레트 배치도 '+u)}">문자로 보내기</a><button class="btn gray wide" id="sC">닫기</button></div>
+  <div class="note">[카카오톡으로 보내기]만 누르면 주소가 저절로 복사되고, 로그인되어 있는 카카오톡이 바로 열립니다. 휴대폰은 보낼 대화방만 고르면 주소가 채워져 있습니다. [플로우로 보내기]도 같습니다. [다른 앱으로 보내기]는 휴대폰의 보내기 화면을 엽니다. [문자로 보내기]는 문자 앱에 주소를 채워 엽니다. 가장 쉬운 방법은 기사님 휴대폰 카메라로 위 QR을 찍게 하는 것입니다. PC에서는 [주소 복사] 뒤 카톡 대화창에 붙여넣어 주세요.<br>카톡 안에서 열면 마이크가 안 될 수 있습니다. 그럴 땐 오른쪽 위 크롬이나 사파리로 열어 주세요. 맨 위 [바탕화면에 바로가기]를 눌러 두면 앱처럼 바로 열립니다.</div>`,()=>{
   qrInto($('#qr'),u);$('#sCopy').onclick=()=>copy(u);$('#sC').onclick=closeS;$('#sShare').onclick=()=>shareTo(u);$('#sKakao').onclick=()=>kakao(u);$('#sFlow').onclick=()=>flow(u)})}
-function flow(u){copy(u);setTimeout(()=>{const ua=navigator.userAgent;
-  if(/Android/i.test(ua))location.href='intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.webcash.bizplay.collabo;S.browser_fallback_url='+encodeURIComponent('https://flow.team')+';end';
-  else if(/iPhone|iPad|iPod/i.test(ua))location.href='https://flow.team';
-  else{window.open('https://flow.team','_blank');toast('주소를 복사했습니다. 플로우 대화방이나 글쓰기 칸에 붙여넣어(Ctrl+V) 보내 주세요',5000)}},700)}
-function kakao(u){copy(u);setTimeout(()=>{const ua=navigator.userAgent;
-  if(/Android/i.test(ua))location.href='intent://launch#Intent;scheme=kakaotalk;package=com.kakao.talk;end';
-  else if(/iPhone|iPad|iPod/i.test(ua))location.href='kakaotalk://launch';
-  else toast('주소를 복사했습니다. PC 카카오톡 대화방에 붙여넣어(Ctrl+V) 보내 주세요',5000)},700)}
+/* 카톡·플로우로 보내기 (ver 0.27): 주소는 저절로 복사되고, 이미 로그인된 앱으로 바로 연다 (웹 로그인 화면 안 씀) */
+const SHARE_TXT=u=>'야적장 팔레트 배치도 '+u;
+function andSend(pkg,u,store){return 'intent:#Intent;action=android.intent.action.SEND;type=text/plain;S.android.intent.extra.TEXT='+encodeURIComponent(SHARE_TXT(u))+';package='+pkg+';S.browser_fallback_url='+encodeURIComponent(store)+';end'}
+function sheet(u,fallback){if(navigator.share){navigator.share({title:'야적장 팔레트 배치도',text:SHARE_TXT(u)}).catch(e=>{if(!e||e.name!=='AbortError')location.href=fallback})}else location.href=fallback}
+function tryScheme(href){try{const f=document.createElement('iframe');f.style.display='none';f.src=href;document.body.appendChild(f);setTimeout(()=>f.remove(),2000)}catch(e){}}
+function kakao(u){copy(u);const ua=navigator.userAgent;
+  // 휴대폰: 보내기 창(로그인된 카톡이 목록에 있음)을 먼저, 없으면 카톡 앱을 바로 연다 (ver 0.28)
+  if(/Android/i.test(ua)){sheet(u,'intent://launch#Intent;scheme=kakaotalk;package=com.kakao.talk;end');return}
+  if(/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1)){sheet(u,'kakaotalk://launch');return}
+  tryScheme('kakaotalk://');setTimeout(()=>toast('주소를 복사했습니다. 열린 PC 카카오톡 대화방에 붙여넣어(Ctrl+V) 보내 주세요',6000),400)}
+function flow(u){copy(u);const ua=navigator.userAgent;
+  if(/Android/i.test(ua)){sheet(u,'intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.webcash.bizplay.collabo;S.browser_fallback_url='+encodeURIComponent('https://flow.team/main.act')+';end');return}
+  if(/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1)){sheet(u,'flow://');return}
+  // PC: 로그인된 브라우저 플로우 화면(로그인되어 있으면 바로 들어감)
+  window.open('https://flow.team/main.act','_blank');setTimeout(()=>toast('주소를 복사했습니다. 플로우 대화방이나 글쓰기 칸에 붙여넣어(Ctrl+V) 보내 주세요',6000),400)}
 function openSet(){const D=view();openS(`<h3>설정</h3>
   <label>기록할 이름 (이 휴대폰)</label><input id="tN" value="${esc(cfg.name||'')}" autocomplete="off">
   <div class="row2"><div><label>A 구역 칸 수</label><input id="tA" inputmode="numeric" value="${D.size.A||8}"></div><div><label>B 구역 칸 수</label><input id="tB" inputmode="numeric" value="${D.size.B||8}"></div></div>
@@ -371,32 +378,71 @@ try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serv
 /* ---------- 바탕화면에 바로가기: 누르면 바로 설치 창 (ver 0.21) ---------- */
 let instWait=null;
 window.addEventListener('beforeinstallprompt',()=>{showInst();if(instWait){const f=instWait;instWait=null;f()}});
-window.addEventListener('appinstalled',()=>{instEv=null;showInst();toast('바탕화면에 바로가기를 만들었습니다',4000)});
+window.addEventListener('appinstalled',()=>{instEv=null;showInst();
+  // 설치 창의 [바탕화면 바로 가기] 칸은 웹이 대신 누를 수 없어서, PC는 바로가기 파일도 함께 만들어 둔다 (ver 0.25)
+  const ua=navigator.userAgent;if(!/Android|iPhone|iPad|iPod/i.test(ua)){setTimeout(()=>shortcutFile(true),600)}else toast('홈 화면에 바로가기를 만들었습니다',4000)});
 function showInst(){const b=$('#bInst');if(b)b.style.display=STANDALONE?'none':''}
 function doPrompt(){const e=instEv;instEv=null;try{e.prompt();e.userChoice.then(r=>{if(r&&r.outcome==='accepted')toast('바탕화면에 바로가기를 만들었습니다',4000)}).catch(()=>{})}catch(x){}}
 function installedAlready(){try{return navigator.getInstalledRelatedApps?navigator.getInstalledRelatedApps().then(l=>!!(l&&l.length)).catch(()=>false):Promise.resolve(false)}catch(e){return Promise.resolve(false)}}
 function liveUrl(){return OFFICIAL+(cfg.tok?'#t='+encodeURIComponent(cfg.tok)+(cfg.repo!==REPO_DEF?'&r='+encodeURIComponent(cfg.repo):''):'')}
 const AND_CHROME=u=>'intent://'+u.replace(/^https:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end';
 /* 설치 창이 없는 브라우저: 바로가기 파일을 바로 내려받는다 (ver 0.23) */
-function shortcutFile(){const ua=navigator.userAgent,u=liveUrl(),name='야적장 팔레트 배치도';let body,ext;
-  if(/Macintosh|Mac OS X/.test(ua)){ext='.webloc';body='<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>URL</key><string>'+esc(u)+'</string></dict></plist>\n'}
-  else if(/Linux|X11/.test(ua)){ext='.desktop';body='[Desktop Entry]\nType=Link\nName='+name+'\nURL='+u+'\nIcon=web-browser\n'}
-  else{ext='.url';body='[InternetShortcut]\r\nURL='+u+'\r\nIconFile='+OFFICIAL+'favicon.ico\r\nIconIndex=0\r\n'}
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([body],{type:'application/octet-stream'}));a.download=name+ext;document.body.appendChild(a);a.click();
-  setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove()}catch(e){}},2000);
-  toast('바로가기 파일을 받았습니다. 바탕화면으로 옮기면 팔레트 바로가기가 됩니다',7000);return ext}
+/* 설치 창이 없을 때: 바탕화면에 바로가기 파일을 만든다 (ver 0.26)
+   크롬·엣지는 .url 파일 받기를 막아(…download 로 남음) 여는 파일(.html)로 만들고, 저장 창은 바탕화면에서 열리게 한다 */
+function launcherHtml(u){return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>야적장 팔레트 배치도</title><meta http-equiv="refresh" content="0;url='+esc(u)+'"><link rel="icon" href="'+OFFICIAL+'icon-192.png?v=030"></head><body><script>location.replace('+JSON.stringify(u)+')<\/script><a href="'+esc(u)+'">야적장 팔레트 배치도 열기</a></body></html>\n'}
+function shortcutFile(noPicker){const ua=navigator.userAgent,u=liveUrl(),name='야적장 팔레트 배치도';let body,ext,desc;
+  const chromium=/Chrome\/|Chromium|Edg\//.test(ua)&&!/Firefox/.test(ua);
+  if(/Macintosh|Mac OS X/.test(ua)){ext='.webloc';body='<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>URL</key><string>'+esc(u)+'</string></dict></plist>\n';desc='바로가기'}
+  else if(/Linux|X11/.test(ua)&&!/Windows/.test(ua)){ext='.desktop';body='[Desktop Entry]\nType=Link\nName='+name+'\nURL='+u+'\nIcon=web-browser\n';desc='바로가기'}
+  else if(chromium){ext='.html';body=launcherHtml(u);desc='웹 문서'}
+  else{ext='.url';body='[InternetShortcut]\r\nURL='+u+'\r\nIconFile='+OFFICIAL+'favicon.ico?v=030\r\nIconIndex=0\r\n';desc='바로가기'}
+  const blob=new Blob([body],{type:ext==='.html'?'text/html':'application/octet-stream'});
+  const plain=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name+ext;document.body.appendChild(a);a.click();
+    setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove()}catch(e){}},2000);toast('바로가기 파일을 받았습니다. 바탕화면으로 옮기면 팔레트 바로가기가 됩니다',7000)};
+  // 크롬·엣지: 바탕화면이 열린 저장 창 → [저장] 한 번이면 바탕화면에 생긴다
+  if(!noPicker&&window.showSaveFilePicker&&window.isSecureContext){
+    window.showSaveFilePicker({suggestedName:name+ext,startIn:'desktop',types:[{description:desc,accept:{[blob.type]:[ext]}}]})
+      .then(h=>h.createWritable().then(w=>w.write(blob).then(()=>w.close())).then(()=>toast('바탕화면에 바로가기를 만들었습니다',5000)))
+      .catch(e=>{if(!e||e.name!=='AbortError')plain()});return ext}
+  plain();return ext}
+/* 아이폰·아이패드: 홈 화면 아이콘 설정 파일(.mobileconfig)을 받는다 (ver 0.24) */
+function uuid4(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==='x'?r:(r&3|8)).toString(16).toUpperCase()})}
+function iosProfile(){const u=liveUrl(),name='야적장 팔레트 배치도';
+  return fetch((LIVE?'':OFFICIAL)+'apple-touch-icon.png?v=030').then(r=>r.ok?r.arrayBuffer():null).catch(()=>null).then(buf=>{
+    const icon=buf?'<key>Icon</key><data>'+b64e(new Uint8Array(buf))+'</data>':'';
+    const x='<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict>'+
+      '<key>PayloadContent</key><array><dict>'+
+        '<key>FullScreen</key><true/>'+icon+'<key>IsRemovable</key><true/><key>Label</key><string>팔레트</string>'+
+        '<key>PayloadDisplayName</key><string>'+name+'</string><key>PayloadIdentifier</key><string>io.github.ds4eqm-lgtm.pallet.webclip</string>'+
+        '<key>PayloadType</key><string>com.apple.webClip.managed</string><key>PayloadUUID</key><string>'+uuid4()+'</string><key>PayloadVersion</key><integer>1</integer>'+
+        '<key>Precomposed</key><true/><key>URL</key><string>'+esc(u)+'</string>'+
+      '</dict></array>'+
+      '<key>PayloadDescription</key><string>홈 화면에 팔레트 바로가기를 만듭니다</string><key>PayloadDisplayName</key><string>'+name+' 바로가기</string>'+
+      '<key>PayloadIdentifier</key><string>io.github.ds4eqm-lgtm.pallet</string><key>PayloadRemovalDisallowed</key><false/>'+
+      '<key>PayloadType</key><string>Configuration</string><key>PayloadUUID</key><string>'+uuid4()+'</string><key>PayloadVersion</key><integer>1</integer>'+
+      '</dict></plist>\n';
+    return x})}
+function iosShortcut(){iosProfile().then(x=>{
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([x],{type:'application/x-apple-aspen-config'}));a.download='pallet.mobileconfig';document.body.appendChild(a);a.click();
+  setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove()}catch(e){}},4000);
+  toast('[허용] → 설정 앱 맨 위 [프로필이 다운로드됨] → [설치]를 누르면 홈 화면에 팔레트가 생깁니다',12000)})}
 function homeShortcut(){const ua=navigator.userAgent,and=/Android/i.test(ua),ios=/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
-  const inapp=/KAKAOTALK|NAVER\(|Line\/|FB_IAB|FBAN|Instagram|; wv\)|flow/i.test(ua),bip='onbeforeinstallprompt' in window;
+  const inapp=/KAKAOTALK|NAVER\(|NAVER\b|Line\/|BAND\/|FB_IAB|FBAN|Instagram|DaumApps|; wv\)|flow/i.test(ua),kakao=/KAKAOTALK/i.test(ua),bip='onbeforeinstallprompt' in window;
   if(instEv){doPrompt();return}
-  if(ios){toast(inapp?'사파리로 연 뒤 공유(□↑) → 홈 화면에 추가':'공유(□↑) → 홈 화면에 추가',6000);return}
+  if(ios){
+    // 앱 안 화면(카톡 등)은 사파리로 열어야 설정 파일을 받을 수 있다
+    if(kakao){location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(liveUrl());return}
+    if(inapp){toast('사파리로 연 뒤 다시 눌러 주세요',6000);return}
+    iosShortcut();return}
   if(and){
-    // 설치 창이 없는 휴대폰 브라우저(파이어폭스, 카톡 안 화면 등)는 크롬으로 열어 설치 창을 띄운다
+    if(kakao&&!bip){location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(liveUrl());return}
     if(!bip||inapp||!LIVE){location.href=AND_CHROME(liveUrl());return}
   }else if(!bip||!LIVE){shortcutFile();return}
-  // 크롬·엣지·웨일·삼성 인터넷·오페라: 설치 창 준비가 늦으면 잠깐 기다렸다 띄우고, 끝내 없으면(이미 설치 등) PC는 바로가기 파일
   toast('바로가기 준비 중',3000);
-  const t=setTimeout(()=>{instWait=null;if(and)installedAlready().then(()=>toast('이미 홈 화면에 바로가기가 있습니다',5000));else shortcutFile()},3500);
+  const t=setTimeout(()=>{instWait=null;if(and)installedAlready().then(()=>toast('이미 홈 화면에 바로가기가 있습니다',5000));else shortcutFile()},2500);
   instWait=()=>{clearTimeout(t);if(instEv)doPrompt()}}
+/* 사파리 [홈 화면에 추가]로 만들어도 출입증이 따라가도록 주소 끝에 #t= 를 붙여 둔다 */
+try{if(LIVE&&cfg.tok&&!/[#&]t=/.test(location.hash))history.replaceState(null,'',location.pathname+location.search+'#t='+encodeURIComponent(cfg.tok)+(cfg.repo!==REPO_DEF?'&r='+encodeURIComponent(cfg.repo):''))}catch(e){}
 $('#bInst').onclick=homeShortcut;showInst();
 
 /* ---------- 새 버전 알림 (ver 0.19) ---------- */
