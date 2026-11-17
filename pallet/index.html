@@ -104,7 +104,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.30';
+const VER='0.31';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
 
@@ -380,7 +380,7 @@ let instWait=null;
 window.addEventListener('beforeinstallprompt',()=>{showInst();if(instWait){const f=instWait;instWait=null;f()}});
 window.addEventListener('appinstalled',()=>{instEv=null;showInst();
   // 설치 창의 [바탕화면 바로 가기] 칸은 웹이 대신 누를 수 없어서, PC는 바로가기 파일도 함께 만들어 둔다 (ver 0.25)
-  const ua=navigator.userAgent;if(!/Android|iPhone|iPad|iPod/i.test(ua)){setTimeout(()=>shortcutFile(true),600)}else toast('홈 화면에 바로가기를 만들었습니다',4000)});
+  toast(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)?'홈 화면에 팔레트 아이콘을 만들었습니다':'바탕화면에 팔레트 아이콘을 만들었습니다',4000)});
 function showInst(){const b=$('#bInst');if(b)b.style.display=STANDALONE?'none':''}
 function doPrompt(){const e=instEv;instEv=null;try{e.prompt();e.userChoice.then(r=>{if(r&&r.outcome==='accepted')toast('바탕화면에 바로가기를 만들었습니다',4000)}).catch(()=>{})}catch(x){}}
 function installedAlready(){try{return navigator.getInstalledRelatedApps?navigator.getInstalledRelatedApps().then(l=>!!(l&&l.length)).catch(()=>false):Promise.resolve(false)}catch(e){return Promise.resolve(false)}}
@@ -394,7 +394,7 @@ function shortcutFile(noPicker){const ua=navigator.userAgent,u=liveUrl(),name='�
   const chromium=/Chrome\/|Chromium|Edg\//.test(ua)&&!/Firefox/.test(ua);
   if(/Macintosh|Mac OS X/.test(ua)){ext='.webloc';body='<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>URL</key><string>'+esc(u)+'</string></dict></plist>\n';desc='바로가기'}
   else if(/Linux|X11/.test(ua)&&!/Windows/.test(ua)){ext='.desktop';body='[Desktop Entry]\nType=Link\nName='+name+'\nURL='+u+'\nIcon=web-browser\n';desc='바로가기'}
-  else if(chromium){ext='.html';body=launcherHtml(u);desc='웹 문서'}
+  else if(chromium){toast('바탕화면에 팔레트 아이콘이 이미 있습니다',5000);return ''}
   else{ext='.url';body='[InternetShortcut]\r\nURL='+u+'\r\nIconFile='+OFFICIAL+'favicon.ico?v=030\r\nIconIndex=0\r\n';desc='바로가기'}
   const blob=new Blob([body],{type:ext==='.html'?'text/html':'application/octet-stream'});
   const plain=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name+ext;document.body.appendChild(a);a.click();
@@ -456,6 +456,9 @@ function checkUpd(force){if(!force&&Date.now()-updAt<10*60000)return;updAt=Date.
     $('#updT').textContent='새 버전('+j.ver+')이 있습니다. 업데이트하시겠습니까?';$('#upd').style.display='block';$('#upd').dataset.v=j.ver}).catch(()=>{})}
 $('#updNo').onclick=()=>{updSkip=$('#upd').dataset.v||'';$('#upd').style.display='none'};
 $('#updGo').onclick=()=>{$('#updT').textContent='새 버전으로 바꾸는 중입니다. 기록은 그대로 남습니다.';
+  /* ver 0.31: 업데이트 누를 때 바로가기가 없으면 새 팔레트 아이콘으로 함께 만든다 */
+  if(LIVE&&!STANDALONE&&instEv){const e=instEv;instEv=null;let done=false;const fin=()=>{if(done)return;done=true;$('#updGo').onclick()};
+    try{e.prompt();e.userChoice.then(fin,fin)}catch(x){fin()};setTimeout(fin,60000);return}
   if(!LIVE){location.href=OFFICIAL+(cfg.tok?'#t='+encodeURIComponent(cfg.tok)+(cfg.repo!==REPO_DEF?'&r='+encodeURIComponent(cfg.repo):''):'');return}
   const go=()=>location.reload();
   Promise.all(['./','index.html','manifest.json','sw.js'].map(u=>fetch(u,{cache:'reload'}).catch(()=>{})))
