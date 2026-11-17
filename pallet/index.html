@@ -105,7 +105,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.32';
+const VER='0.33';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
 
@@ -381,9 +381,10 @@ let instWait=null;
 window.addEventListener('beforeinstallprompt',()=>{showInst();if(instWait){const f=instWait;instWait=null;f()}});
 window.addEventListener('appinstalled',()=>{instEv=null;showInst();
   // 설치 창의 [바탕화면 바로 가기] 칸은 웹이 대신 누를 수 없어서, PC는 바로가기 파일도 함께 만들어 둔다 (ver 0.25)
+  if(WINPC&&!PLAIN_CHROME){setTimeout(iconMaker,800);return}
   toast(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)?'홈 화면에 팔레트 아이콘을 만들었습니다':'바탕화면에 팔레트 아이콘을 만들었습니다',4000)});
 function showInst(){const b=$('#bInst');if(b)b.style.display=STANDALONE?'none':''}
-function doPrompt(){const e=instEv;instEv=null;try{e.prompt();e.userChoice.then(r=>{if(r&&r.outcome==='accepted')toast('바탕화면에 바로가기를 만들었습니다',4000)}).catch(()=>{})}catch(x){}}
+function doPrompt(){const e=instEv;instEv=null;try{e.prompt();e.userChoice.then(r=>{if(r&&r.outcome==='accepted'&&!(WINPC&&!PLAIN_CHROME))toast('바탕화면에 팔레트 아이콘을 만들었습니다',4000)}).catch(()=>{})}catch(x){}}
 function installedAlready(){try{return navigator.getInstalledRelatedApps?navigator.getInstalledRelatedApps().then(l=>!!(l&&l.length)).catch(()=>false):Promise.resolve(false)}catch(e){return Promise.resolve(false)}}
 function liveUrl(){return OFFICIAL+(cfg.tok?'#t='+encodeURIComponent(cfg.tok)+(cfg.repo!==REPO_DEF?'&r='+encodeURIComponent(cfg.repo):''):'')}
 const AND_CHROME=u=>'intent://'+u.replace(/^https:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end';
@@ -395,7 +396,8 @@ function shortcutFile(noPicker){const ua=navigator.userAgent,u=liveUrl(),name='�
   const chromium=/Chrome\/|Chromium|Edg\//.test(ua)&&!/Firefox/.test(ua);
   if(/Macintosh|Mac OS X/.test(ua)){ext='.webloc';body='<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict><key>URL</key><string>'+esc(u)+'</string></dict></plist>\n';desc='바로가기'}
   else if(/Linux|X11/.test(ua)&&!/Windows/.test(ua)){ext='.desktop';body='[Desktop Entry]\nType=Link\nName='+name+'\nURL='+u+'\nIcon=web-browser\n';desc='바로가기'}
-  else if(chromium){toast('바탕화면 팔레트 아이콘은 크롬·엣지가 다음에 열 때 새 그림으로 바꿉니다',6000);return ''}
+  else if(WINPC){iconMaker();return '.bat'}
+  else if(chromium){toast('바탕화면 팔레트 아이콘은 브라우저가 다음에 열 때 새 그림으로 바꿉니다',6000);return ''}
   else{ext='.url';body='[InternetShortcut]\r\nURL='+u+'\r\nIconFile='+OFFICIAL+'favicon.ico?v=030\r\nIconIndex=0\r\n';desc='바로가기'}
   const blob=new Blob([body],{type:ext==='.html'?'text/html':'application/octet-stream'});
   const plain=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name+ext;document.body.appendChild(a);a.click();
@@ -460,6 +462,41 @@ window.addEventListener('beforeinstallprompt',()=>{setTimeout(()=>{
   if(Date.now()-(+lsG('pl_rep_skip')||0)<86400000)return;
   askReplace('바탕화면 바로가기를 새 팔레트 아이콘으로 바꾸시겠습니까?',()=>{if(instEv)doPrompt();else doShortcut()})},1500)});
 $('#bInst').onclick=homeShortcut;showInst();
+
+
+/* ---------- ver 0.33: 윈도우 PC 바탕화면 아이콘 만들기 파일 ----------
+   브라우저는 웹이 바탕화면에 아이콘 달린 바로가기(.lnk/.url)를 쓰는 것을 막는다.
+   그래서 한 번 실행하면 팔레트 아이콘 바로가기를 만들고, 크롬 모양 예전 파일을 지우고, 스스로 지워지는 작은 파일을 준다. */
+const UA0=navigator.userAgent,WINPC=/Windows NT/.test(UA0)&&!/Android|iPhone|iPad/.test(UA0);
+const PLAIN_CHROME=/Chrome\//.test(UA0)&&!/Edg\/|OPR\/|Whale\/|SamsungBrowser|YaBrowser|Vivaldi/.test(UA0);
+function psq(x){return "'"+String(x).replace(/'/g,"''")+"'"}
+function iconMakerPs(u){const pref=/Edg\//.test(UA0)?'edge':/Whale\//.test(UA0)?'whale':'chrome';
+  return [
+"$ErrorActionPreference='SilentlyContinue'",
+"$url="+psq(u),"$name="+psq('야적장 팔레트 배치도'),"$pref="+psq(pref),
+"$h=Join-Path $env:LOCALAPPDATA 'PalletYard'; New-Item -ItemType Directory -Force $h | Out-Null",
+"Get-ChildItem $h -Filter 'pallet*.ico' | Remove-Item -Force",
+"$ico=Join-Path $h 'pallet_030.ico'",
+"try{[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12}catch{}",
+"Invoke-WebRequest -UseBasicParsing "+psq(OFFICIAL+'favicon.ico?v=030')+" -OutFile $ico",
+"$pf=$env:ProgramFiles; $px=${env:ProgramFiles(x86)}; $la=$env:LOCALAPPDATA",
+"$c=@{chrome=@(\"$pf\\Google\\Chrome\\Application\\chrome.exe\",\"$px\\Google\\Chrome\\Application\\chrome.exe\",\"$la\\Google\\Chrome\\Application\\chrome.exe\");edge=@(\"$px\\Microsoft\\Edge\\Application\\msedge.exe\",\"$pf\\Microsoft\\Edge\\Application\\msedge.exe\");whale=@(\"$pf\\Naver\\Naver Whale\\Application\\whale.exe\",\"$px\\Naver\\Naver Whale\\Application\\whale.exe\",\"$la\\Naver\\Naver Whale\\Application\\whale.exe\")}",
+"$exe=$null; foreach($k in @($pref,'chrome','edge','whale')){ foreach($e in $c[$k]){ if(-not $exe -and (Test-Path $e)){$exe=$e} } }",
+"$d=[Environment]::GetFolderPath('Desktop')",
+"foreach($x in @('.html','.url','.lnk')){ Remove-Item (Join-Path $d ($name+$x)) -Force }",
+"$s=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $d ($name+'.lnk')))",
+"if($exe){$s.TargetPath=$exe; $s.Arguments='--app='+$url; $s.WorkingDirectory=Split-Path $exe}else{$s.TargetPath=$url}",
+"if(Test-Path $ico){$s.IconLocation=$ico+',0'}",
+"$s.Description=$name; $s.Save()",
+"try{& (Join-Path $env:SystemRoot 'System32\\ie4uinit.exe') -show}catch{}"
+  ].join('\r\n')}
+function utf16b64(t){const u=new Uint8Array(t.length*2);for(let i=0;i<t.length;i++){const c=t.charCodeAt(i);u[i*2]=c&255;u[i*2+1]=c>>8}return b64e(u)}
+function iconMakerBat(u){return '@echo off\r\npowershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -EncodedCommand '+utf16b64(iconMakerPs(u))+'\r\n(goto) 2>nul & del "%~f0"\r\n'}
+function iconMaker(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([iconMakerBat(liveUrl())],{type:'application/octet-stream'}));
+  a.download='pallet_icon.bat';document.body.appendChild(a);a.click();
+  setTimeout(()=>{try{URL.revokeObjectURL(a.href);a.remove()}catch(e){}},3000);
+  toast('내려받은 pallet_icon 파일을 한 번 열면 바탕화면에 팔레트 아이콘이 생깁니다',9000)}
+window.PL_iconMakerPs=iconMakerPs;
 
 /* ---------- 새 버전 알림 (ver 0.19) ---------- */
 function verCmp(a,b){const x=String(a).split('.').map(n=>parseInt(n,10)||0),y=String(b).split('.').map(n=>parseInt(n,10)||0);
