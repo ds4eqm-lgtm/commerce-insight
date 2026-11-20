@@ -93,7 +93,17 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;word-break:break-all;background:#f4f6f8;padding:8px;border-radius:8px}
 .listen{animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.55}}
 </style>
-<style>.dests{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 4px}.btn.dst{background:#1f5fa0;color:#fff;font-size:15px;padding:12px 6px}.dests .btn{margin:0;width:100%}#plBan{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#1f5fa0;color:#fff;font-size:15px;padding:10px 12px}#plBan button{margin-left:auto;background:#fff;color:#1f5fa0;border:none;border-radius:8px;padding:6px 12px;font-weight:700}</style><style>.dests .btn.dst{position:relative;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.dests .btn.dst span{position:relative;z-index:1}.dests .btn.dst::before{content:"";position:absolute;left:0;top:0;bottom:0;width:0;background:#c0392b}.dests .btn.dst.hold::before{width:100%;transition:width 5s linear}.ebox{margin-top:10px;padding:10px;border:2px solid #c0392b;border-radius:10px;background:#fff5f4}.ebt{font-size:14px;margin-bottom:6px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}.row3 .btn{margin:0;width:100%;font-size:14px;padding:10px 4px}.btn.dadd{background:#fff;color:#1f5fa0;border:2px dashed #1f5fa0;font-size:15px;padding:12px 6px;margin:0;width:100%}</style><style>.nhint{font-weight:400;color:#888;font-size:11px}#fNo.hold{background:linear-gradient(90deg,#ffe2dd 0,#ffe2dd 100%) no-repeat;background-size:0 100%;animation:nh 5s linear forwards}@keyframes nh{to{background-size:100% 100%}}#fNo.txt{border-color:#1f5fa0;background:#f2f7ff}</style><style>.fitb{display:flex;justify-content:flex-end;margin:0 0 6px}.fitb .btn{flex:0 0 auto;width:auto;min-width:0;margin:0;padding:7px 12px;font-size:14px}</style></head>
+<style>.dests{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 4px}.btn.dst{background:#1f5fa0;color:#fff;font-size:15px;padding:12px 6px}.dests .btn{margin:0;width:100%}#plBan{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#1f5fa0;color:#fff;font-size:15px;padding:10px 12px}#plBan button{margin-left:auto;background:#fff;color:#1f5fa0;border:none;border-radius:8px;padding:6px 12px;font-weight:700}</style><style>.dests .btn.dst{position:relative;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.dests .btn.dst span{position:relative;z-index:1}.dests .btn.dst::before{content:"";position:absolute;left:0;top:0;bottom:0;width:0;background:#c0392b}.dests .btn.dst.hold::before{width:100%;transition:width 5s linear}.ebox{margin-top:10px;padding:10px;border:2px solid #c0392b;border-radius:10px;background:#fff5f4}.ebt{font-size:14px;margin-bottom:6px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}.row3 .btn{margin:0;width:100%;font-size:14px;padding:10px 4px}.btn.dadd{background:#fff;color:#1f5fa0;border:2px dashed #1f5fa0;font-size:15px;padding:12px 6px;margin:0;width:100%}</style><style>.nhint{font-weight:400;color:#888;font-size:11px}#fNo.hold{background:linear-gradient(90deg,#ffe2dd 0,#ffe2dd 100%) no-repeat;background-size:0 100%;animation:nh 5s linear forwards}@keyframes nh{to{background-size:100% 100%}}#fNo.txt{border-color:#1f5fa0;background:#f2f7ff}</style><style>/* 0.42 글자 크게·진하게 */
+.yard{grid-template-columns:20px 24px 1fr .5fr 1fr 24px 20px}
+.rt{text-orientation:sideways}
+.road,.house{font-size:16px;font-weight:800;color:#1b2733;letter-spacing:5px}
+.roadtop{font-size:16px;font-weight:800;color:#1b2733}
+.colh{font-size:19px;font-weight:900;color:#13202c;background:#c9d5e2}
+.num{font-size:24px;font-weight:900;color:#1b2733}
+.slot.ra .half,.slot.rb .half{padding-top:46px}
+.slot.ra .half .lv,.slot.rb .half .lv{font-size:16px;line-height:20px;width:20px;font-weight:900;color:#1b2733;top:5px}
+.slot.ra .half .em,.slot.rb .half .em{color:#4f5d6b;font-weight:800}
+</style></head>
 <body>
 <header>
   <div id="upd"><span id="updT"></span><br><button class="btn green" id="updGo" type="button">업데이트</button><button class="btn gray" id="updNo" type="button">나중에</button></div>
@@ -110,7 +120,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.41';
+const VER='0.42';
 const ICON_V='030';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
@@ -203,7 +213,7 @@ function bar(){const b=$('#bar');if(!cfg.tok){b.className='err';b.textContent='�
 function render(){const m=$('#main');if(!cfg.tok){setup();return}
   const D=view(),q=$('#q').value.trim(),pk=new Set(pend.flatMap(o=>[o.c,o.to]).filter(Boolean));
   let old=null;Object.entries(D.cells).forEach(([k,v])=>{if(/^\d{8}$/.test(v.d||'')&&(!old||v.d<old.d))old={k,d:v.d}});
-  const n=Math.max(D.size.A||8,D.size.B||8);let h=`<div class="fitb"><button class="btn gray" id="bFit">${fitOn()?'🔍 크게 보기':'▦ 1~'+n+'번 전체 보기'}</button></div><div class="yard"><div></div><div></div><div class="roadtop" style="grid-column:3/6">도로측</div><div></div><div></div><div class="road" style="grid-row:2/span ${n+1}"><span>공장측 골목</span></div><div class="house" style="grid-row:2/span ${n+1}"><span>주택</span></div><div></div>`;
+  const n=Math.max(D.size.A||8,D.size.B||8);let h=`<div class="yard"><div></div><div></div><div class="roadtop" style="grid-column:3/6">도로측</div><div></div><div></div><div class="road" style="grid-row:2/span ${n+1}"><span>공장측 골목</span></div><div class="house" style="grid-row:2/span ${n+1}"><span>주택</span></div><div></div>`;
   SECTORS.forEach((s,j)=>h+=(j?'<div></div>':'')+`<div class="colh">${s} 구역</div>`);h+='<div></div>';
   for(let i=1;i<=n;i++){h+=`<div class="num nb"><span>${i}</span></div>`;
     SECTORS.forEach((s,j)=>{if(j)h+='<div></div>';if(i>(D.size[s]||8)){h+='<div></div>';return}
@@ -213,13 +223,15 @@ function render(){const m=$('#main');if(!cfg.tok){setup();return}
           (v?`<div class="rt"><div class="no">${esc(v.no)}</div><div class="dt">${esc(fmtS(v.d))}</div></div>`:'<div class="em">빈칸</div>')+'</div>'}).join('')+'</div>'});h+=`<div class="num na"><span>${i}</span></div>`}
   h+='</div><div class="foot"><button class="btn gray" id="bHist">전체 이력 보기</button><button class="btn gray" id="bShare">주소 나눠 주기</button><button class="btn gray" id="bSet">설정</button></div>'+
    `<div class="note">칸을 누르면 번호와 생산일자를 넣거나 고치거나 뺄 수 있습니다. 위 칸이 2단(위에 올린 팔레트), 아래 칸이 1단(바닥 팔레트)입니다.<br>말로 기록: [🎤 말로 기록]을 누르고 "A 1번 위 1699 2026 10 11"처럼 말하면 해당 칸이 채워진 채로 열립니다. 빼낼 때는 "A 1번 위 삭제".<br>기록한 사람: ${esc(cfg.name||'아직 이름 없음')} · ver ${VER}</div>`;
-  m.innerHTML=h;fitNos();fitYard();
+  m.innerHTML=h;fitNos();
   m.querySelectorAll('.half').forEach(e=>e.onclick=()=>{if(plPend&&!view().cells[e.dataset.k])openCell(e.dataset.k,{no:plPend.no,d:plPend.d});else openCell(e.dataset.k)});
   $('#bHist').onclick=()=>openHist();$('#bShare').onclick=openShare;$('#bSet').onclick=openSet;
   const f=m.querySelector('.half.hit');if(f&&render.scroll){f.scrollIntoView({block:'center',behavior:'smooth'});render.scroll=false}
   bar()}
 function fitNos(){document.querySelectorAll('#main .rt').forEach(rt=>{const hf=rt.parentElement,no=rt.querySelector('.no'),dt=rt.querySelector('.dt');const W=hf.clientWidth-5,H=hf.clientHeight-42;let f=60;const set=()=>{no.style.fontSize=f+'px';if(dt)dt.style.fontSize=(f*0.5)+'px'};set();
-  while(f>12&&(rt.offsetWidth>W||rt.offsetHeight>H)){f--;set()}})}
+  while(f>12&&(rt.offsetWidth>W||rt.offsetHeight>H)){f--;set()}});
+  /* 0.42 빈칸 글자도 칸에 들어가는 만큼 크게 */
+  document.querySelectorAll('#main .slot.ra .half .em,#main .slot.rb .half .em').forEach(em=>{const hf=em.parentElement;const W=hf.clientWidth-8,H=hf.clientHeight-50;let f=30;em.style.fontSize=f+'px';while(f>12&&(em.offsetWidth>W||em.offsetHeight>H)){f--;em.style.fontSize=f+'px'}})}
 window.addEventListener('resize',()=>{clearTimeout(fitNos.t);fitNos.t=setTimeout(fitNos,150)});
 function openS(html,fn){sDirty=false;$('#sbox').innerHTML=html;$('#sheet').classList.add('on');fn&&fn()}
 function closeS(){stopRec();$('#sheet').classList.remove('on');curCell=null}
@@ -275,14 +287,6 @@ function noHold(el){if(!el)return;let tm=null,sx=0,sy=0;
   el.addEventListener('touchmove',e=>{const t=e.touches[0];if(Math.hypot(t.clientX-sx,t.clientY-sy)>12)stop()},{passive:true});
   el.addEventListener('touchend',stop);
   el.addEventListener('mousedown',e=>start(e.clientX,e.clientY));el.addEventListener('mouseup',stop);el.addEventListener('mouseleave',stop)}
-/* 0.41 1~8번 전체 보기: 화면 높이에 맞춰 배치도를 줄임 (재고관리 안에서는 처음부터) */
-function fitOn(){try{const v=localStorage.getItem('pl_fit');if(v!==null)return v==='1'}catch(x){}return window.parent!==window}
-function fitYard(){const y=document.querySelector('#main .yard');if(!y)return;y.style.zoom='';const b=$('#bFit');
-  if(b)b.onclick=()=>{try{localStorage.setItem('pl_fit',fitOn()?'0':'1')}catch(x){}render();if(!fitOn())y.scrollIntoView&&document.querySelector('#main .yard').scrollIntoView({block:'start'})};
-  if(!fitOn())return;const top=y.getBoundingClientRect().top+scrollY-(document.querySelector('header')?document.querySelector('header').offsetHeight:0);
-  const avail=innerHeight-(document.querySelector('header')?document.querySelector('header').offsetHeight:0)-(b?b.offsetHeight+14:0)-10;const z=Math.min(1,avail/y.scrollHeight);
-  if(z<1){y.style.zoom=z;fitNos();}}
-addEventListener('resize',()=>{clearTimeout(window.__fr);window.__fr=setTimeout(()=>{try{if(fitOn())fitYard()}catch(x){}},200)});
 function takeName(){const n=$('#fBy')&&$('#fBy').value.trim();if(!n){toast('기록할 이름을 넣어 주세요');$('#fBy').focus();return false}if(n!==cfg.name){cfg.name=n;sv('cfg',cfg)}return true}
 function normDate(s){s=String(s||'').replace(/\D/g,'');if(!s)return '';if(s.length===6)s='20'+s;
   if(!/^\d{8}$/.test(s))return null;const m=+s.slice(4,6),d=+s.slice(6);if(m<1||m>12||d<1||d>31)return null;return s}
@@ -638,6 +642,10 @@ function checkUpd(force){if(!force&&Date.now()-updAt<10*60000)return;updAt=Date.
   const base=window.PL_VERURL||(LIVE?location.origin+location.pathname.replace(/[^\/]*$/,''):OFFICIAL);
   fetch(base+'version.json?ts='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{
     if(!j||!j.ver||verCmp(j.ver,VER)<=0||j.ver===updSkip)return;
+    /* 0.42 묻지 않고 바로 업데이트 (적는 중이면 끝날 때까지 기다림, 같은 판은 한 세션에 두 번까지) */
+    let tn=0;try{tn=parseInt(sessionStorage.getItem('pl_auto_'+j.ver)||'0',10)||0}catch(x){}
+    if(tn<2&&LIVE){const go=()=>{const a=document.activeElement;if((a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))||[...document.querySelectorAll('#sheet,#rep')].some(e=>e&&e.offsetParent!==null)){setTimeout(go,5000);return}
+      try{sessionStorage.setItem('pl_auto_'+j.ver,String(tn+1))}catch(x){}$('#upd').dataset.v=j.ver;const ie=instEv;instEv=null;$('#updGo').onclick();instEv=ie};go();return}
     $('#updT').textContent='새 버전('+j.ver+')이 있습니다. 업데이트하시겠습니까?';$('#upd').style.display='block';$('#upd').dataset.v=j.ver}).catch(()=>{})}
 $('#updNo').onclick=()=>{updSkip=$('#upd').dataset.v||'';$('#upd').style.display='none'};
 $('#updGo').onclick=()=>{$('#updT').textContent='새 버전으로 바꾸는 중입니다. 기록은 그대로 남습니다.';
