@@ -84,7 +84,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 .hi b{font-weight:700}.hi .w{color:var(--sub)}
 .hi button{font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:#fff;margin-left:6px}
 .tag{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:0 5px;color:#fff;margin-right:4px}
-.t-add{background:#1b6e3c}.t-edit{background:#1f5fa0}.t-del{background:#b3261e}.t-move{background:#7a4fb0}.t-undo{background:#666}.t-set{background:#555}
+.t-add{background:#1b6e3c}.t-edit{background:#1f5fa0}.t-del{background:#b3261e}.t-move{background:#7a4fb0}.t-undo{background:#666}.t-dst{background:#B4560C}.t-set{background:#555}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 14px;border-radius:10px;font-size:14px;z-index:40;display:none;max-width:92vw;text-align:center}
 .setup{background:#fff;border-radius:12px;padding:14px;line-height:1.7;font-size:15px}
 .setup .btn{width:100%;margin:6px 0}
@@ -93,7 +93,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;word-break:break-all;background:#f4f6f8;padding:8px;border-radius:8px}
 .listen{animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.55}}
 </style>
-</head>
+<style>.dests{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 4px}.btn.dst{background:#1f5fa0;color:#fff;font-size:15px;padding:12px 6px}.dests .btn{margin:0;width:100%}#plBan{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#1f5fa0;color:#fff;font-size:15px;padding:10px 12px}#plBan button{margin-left:auto;background:#fff;color:#1f5fa0;border:none;border-radius:8px;padding:6px 12px;font-weight:700}</style></head>
 <body>
 <header>
   <div id="upd"><span id="updT"></span><br><button class="btn green" id="updGo" type="button">업데이트</button><button class="btn gray" id="updNo" type="button">나중에</button></div>
@@ -110,7 +110,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.36';
+const VER='0.37';
 const ICON_V='030';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
@@ -165,13 +165,16 @@ async function pull(force){
 function applyOp(D,op){
   if(D.log.some(x=>x.id===op.id))return;
   const by=op.by||'',t=op.t;
+  if(op.a==='dests'){const L=(D.dests||DESTS).slice(),i=L.indexOf(op.name);
+    if(op.act==='add'){if(!op.name||i>=0)return;L.push(op.name)}else if(op.act==='del'){if(i<0)return;L.splice(i,1)}else if(op.act==='ren'){if(i<0||!op.to||L.includes(op.to))return;L[i]=op.to}else return;
+    D.dests=L;D.log.push({id:op.id,t,by,a:'dst',act:op.act,c:'',from:op.name,to:op.to||''});return}
   if(op.a==='size'){const from=Object.assign({},D.size);D.size=Object.assign({},D.size,op.size);D.log.push({id:op.id,t,by,a:'set',c:'',from,to:D.size});return}
   if(op.a==='move'){const f=D.cells[op.c]||null,g=D.cells[op.to]||null;if(!f)return;
     D.cells[op.to]=Object.assign({},f,{t,by});if(g)D.cells[op.c]=Object.assign({},g,{t,by});else delete D.cells[op.c];
     D.log.push({id:op.id,t,by,a:'move',c:op.c,to:op.to,from:f,swap:g});return}
   const before=D.cells[op.c]||null;let a=op.a;
   if(op.v){D.cells[op.c]={no:op.v.no,d:op.v.d,t,by};if(a!=='undo')a=before?'edit':'add'}else{if(!before&&a!=='undo')return;delete D.cells[op.c];if(a!=='undo')a='del'}
-  D.log.push({id:op.id,t,by,a,c:op.c,from:before,to:op.v||null})}
+  D.log.push({id:op.id,t,by,a,c:op.c,from:before,to:op.v||null,dest:op.dest||''})}
 function view(){const D=JSON.parse(JSON.stringify(data||blank()));pend.forEach(op=>applyOp(D,op));return D}
 async function sync(force,depth){if(!cfg.tok)return;depth=depth||0;
   if(busy){if(force||pend.length)setTimeout(()=>sync(force),1200);return}busy=true;
@@ -211,7 +214,7 @@ function render(){const m=$('#main');if(!cfg.tok){setup();return}
   h+='</div><div class="foot"><button class="btn gray" id="bHist">전체 이력 보기</button><button class="btn gray" id="bShare">주소 나눠 주기</button><button class="btn gray" id="bSet">설정</button></div>'+
    `<div class="note">칸을 누르면 번호와 생산일자를 넣거나 고치거나 뺄 수 있습니다. 위 칸이 2단(위에 올린 팔레트), 아래 칸이 1단(바닥 팔레트)입니다.<br>말로 기록: [🎤 말로 기록]을 누르고 "A 1번 위 1699 2026 10 11"처럼 말하면 해당 칸이 채워진 채로 열립니다. 빼낼 때는 "A 1번 위 삭제".<br>기록한 사람: ${esc(cfg.name||'아직 이름 없음')} · ver ${VER}</div>`;
   m.innerHTML=h;fitNos();
-  m.querySelectorAll('.half').forEach(e=>e.onclick=()=>openCell(e.dataset.k));
+  m.querySelectorAll('.half').forEach(e=>e.onclick=()=>{if(plPend&&!view().cells[e.dataset.k])openCell(e.dataset.k,{no:plPend.no,d:plPend.d});else openCell(e.dataset.k)});
   $('#bHist').onclick=()=>openHist();$('#bShare').onclick=openShare;$('#bSet').onclick=openSet;
   const f=m.querySelector('.half.hit');if(f&&render.scroll){f.scrollIntoView({block:'center',behavior:'smooth'});render.scroll=false}
   bar()}
@@ -226,11 +229,13 @@ $('#sheet').onclick=e=>{if(e.target.id!=='sheet')return;const a=document.activeE
   if(a&&/INPUT|TEXTAREA/.test(a.tagName)&&$('#sbox').contains(a)){a.blur();return}
   if(sDirty){toast('고치던 중입니다. [저장] 또는 [닫기]를 눌러 주세요');return}closeS()};
 function histRows(list,withUndo){if(!list.length)return '<div class="hi w">아직 기록이 없습니다</div>';
-  return list.slice().reverse().map(x=>{const nm={add:'넣음',edit:'고침',del:'뺌',move:'옮김',undo:'되돌림',set:'설정'}[x.a]||x.a;
+  return list.slice().reverse().map(x=>{const nm={dst:'보낼 곳',add:'넣음',edit:'고침',del:x.dest?'이동':'뺌',move:'옮김',undo:'되돌림',set:'설정'}[x.a]||x.a;
     let body;if(x.a==='move')body=`${esc(cname(x.c))} → ${esc(cname(x.to))} : ${esc(vtxt(x.from))}${x.swap?' (서로 바꿈: '+esc(vtxt(x.swap))+')':''}`;
     else if(x.a==='set')body='칸 수 '+SECTORS.map(s=>s+' '+(x.from&&x.from[s])+'→'+(x.to&&x.to[s])).join(', ');
+    else if(x.a==='dst')body=x.act==='add'?'보낼 곳 더함: <b>'+esc(x.from)+'</b>':x.act==='del'?'보낼 곳 지움: <b>'+esc(x.from)+'</b>':'보낼 곳 이름 고침: '+esc(x.from)+' → <b>'+esc(x.to)+'</b>';
+    else if(x.a==='del'&&x.dest)body=(withUndo==='all'?'<b>'+esc(cname(x.c))+'</b> ':'')+esc(vtxt(x.from))+' → <b>'+esc(x.dest)+'</b>(으)로 이동';
     else body=(withUndo==='all'?'<b>'+esc(cname(x.c))+'</b> ':'')+esc(vtxt(x.from))+' → <b>'+esc(vtxt(x.to))+'</b>';
-    const u=(x.a!=='move'&&x.a!=='set'&&withUndo)?`<button data-u="${esc(x.id)}">이 전으로 되돌리기</button>`:'';
+    const u=(x.a!=='move'&&x.a!=='set'&&x.a!=='dst'&&withUndo)?`<button data-u="${esc(x.id)}">이 전으로 되돌리기</button>`:'';
     return `<div class="hi"><span class="tag t-${x.a}">${nm}</span>${body}<br><span class="w">${hm(x.t)} · ${esc(x.by||'이름 없음')}</span>${u}</div>`}).join('')}
 function bindUndo(){$('#sbox').querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{const D=view(),x=D.log.find(l=>l.id===b.dataset.u);if(!x)return;
   if(!confirmName())return;push({a:'undo',c:x.c,v:x.from?{no:x.from.no,d:x.from.d}:null});toast(cname(x.c)+'을(를) '+vtxt(x.from)+'(으)로 되돌렸습니다');closeS()})}
@@ -244,9 +249,9 @@ function openCell(k,pre){const D=view(),v=D.cells[k],p=pre||{};curCell=k;
    <button class="btn mic" id="cMic" type="button" style="width:100%;margin-top:10px">🎤 말로 넣기 (예: 1699 2026 10 11)</button><div id="heard"></div>
    <label>기록할 이름 (한 번만 넣으면 기억합니다)</label><input id="fBy" autocomplete="off" value="${esc(cfg.name||'')}" placeholder="예) 김기사" style="font-size:17px">
    <div class="acts"><button class="btn green wide" id="cSave">${v?'고쳐서 저장':'넣고 저장'}</button>
-   ${v?'<button class="btn red" id="cDel">빼냄 (지우기)</button><button class="btn org" id="cMove">다른 칸으로 옮기기</button>':''}
+   ${v?'<button class="btn red" id="cDel">이동 (어디로)</button><button class="btn org" id="cMove">야적장 안 다른 칸으로</button>':''}
    <button class="btn gray wide" id="cClose">닫기</button></div>
-   ${p.del&&v?'<div style="color:var(--red);font-weight:700;margin-top:8px">말로 "삭제"를 들었습니다. 맞으면 [빼냄]을 눌러 주세요</div>':''}
+   ${p.del&&v?'<div style="color:var(--red);font-weight:700;margin-top:8px">말로 "삭제"를 들었습니다. 맞으면 [이동]을 눌러 주세요</div>':''}
    <div class="hist"><h4>이 칸의 이력 (${hist.length}건)</h4>${histRows(hist,'cell')}</div>`,()=>{
     $('#cClose').onclick=closeS;$('#cMic').onclick=()=>listen(t=>{const r=parseVoice(t,true);$('#heard').style.display='block';$('#heard').textContent='들은 말: '+t;
       if(r.no)$('#fNo').value=r.no;if(r.d)$('#fD').value=r.d;if(!r.no&&!r.d)$('#heard').textContent+=' (번호를 찾지 못했습니다. 다시 말하거나 손으로 넣어 주세요)'},$('#cMic'));
@@ -254,14 +259,70 @@ function openCell(k,pre){const D=view(),v=D.cells[k],p=pre||{};curCell=k;
       if($('#fD').value.trim()&&!d){toast('생산일자는 20261011처럼 8자리로 넣어 주세요');return}
       if(!no&&!d){if(v){push({a:'del',c:k,v:null});toast(cname(k)+' 빈칸으로 저장했습니다')}else toast(cname(k)+' 빈칸 그대로 두었습니다');closeS();return}
       if(v&&v.no===no&&(v.d||'')===d){closeS();return}
-      push({a:'set',c:k,v:{no,d}});toast(cname(k)+(no?' 저장했습니다':' 번호 없이 생산일자만 저장했습니다'));closeS()};
-    if(v){$('#cDel').onclick=()=>{if(!takeName())return;push({a:'del',c:k,v:null});toast(cname(k)+' 비웠습니다');closeS()};
+      push({a:'set',c:k,v:{no,d}});toast(cname(k)+(no?' 저장했습니다':' 번호 없이 생산일자만 저장했습니다'));if(plPend&&!v)plDone();closeS()};
+    if(v){$('#cDel').onclick=()=>{if(!takeName())return;pickOut(k)};
       $('#cMove').onclick=()=>pickMove(k)}
     bindUndo();
     if(!pre&&!v)setTimeout(()=>$('#fNo').focus(),80)})}
 function takeName(){const n=$('#fBy')&&$('#fBy').value.trim();if(!n){toast('기록할 이름을 넣어 주세요');$('#fBy').focus();return false}if(n!==cfg.name){cfg.name=n;sv('cfg',cfg)}return true}
 function normDate(s){s=String(s||'').replace(/\D/g,'');if(!s)return '';if(s.length===6)s='20'+s;
   if(!/^\d{8}$/.test(s))return null;const m=+s.slice(4,6),d=+s.slice(6);if(m<1||m>12||d<1||d>31)return null;return s}
+const DESTS=['2층창고','3층창고','10번창고','40번창고','매장','서두','가격표'];
+function pickOut(k){const D=view(),v=D.cells[k];if(!v){closeS();return}
+  openS(`<h3>${esc(cname(k))} 이동</h3><div class="note">팔레트 <b>${esc(vtxt(v))}</b>을(를) 어디로 보내나요? 누르면 칸이 비고, 새로고침 재고관리의 그 분류에 상품으로 들어갑니다. 모두 이력에 남습니다.</div>
+   <div class="dests">${(D.dests||DESTS).map(d=>`<button class="btn dst" data-d="${esc(d)}">야적장 → ${esc(d)}</button>`).join('')}</div>
+   <label>다른 곳 (직접 쓰기)</label><div class="row2" style="grid-template-columns:1fr auto"><input id="oTo" autocomplete="off" placeholder="예) 41번매장" style="font-size:16px"><button class="btn dst" id="oGo">보내기</button></div>
+   <button class="btn org" id="oEdit" style="width:100%;margin-top:14px">보낼 곳 목록 고치기 (더하기·지우기·이름 바꾸기)</button>
+   <button class="btn gray" id="oWrong" style="width:100%;margin-top:14px">보낸 곳 없이 지우기 (잘못 넣은 번호)</button>
+   <button class="btn gray" id="oBack" style="width:100%;margin-top:8px">취소</button>`,()=>{
+    const go=d=>{d=(d||'').trim();push({a:'del',c:k,v:null,dest:d});if(d)invSend(v,d,cname(k));else toast(cname(k)+' 비웠습니다');closeS()};
+    $('#sbox').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>go(b.dataset.d));
+    $('#oGo').onclick=()=>{const d=$('#oTo').value.trim();if(!d){toast('보낼 곳을 써 주세요');$('#oTo').focus();return}go(d)};
+    $('#oWrong').onclick=()=>go('');$('#oBack').onclick=()=>openCell(k);$('#oEdit').onclick=()=>pickDests(k)})}
+function pickDests(k){const D=view(),L=D.dests||DESTS,hist=D.log.filter(x=>x.a==='dst');
+  openS(`<h3>보낼 곳 목록 고치기</h3><div class="note">이름을 바꾸고 [고치기], 필요 없으면 [지우기]를 누르세요. 바꾼 것은 모두 이력에 남습니다.</div>
+   ${L.map((d,i)=>`<div class="row2" style="grid-template-columns:1fr auto auto;margin-top:8px"><input data-i="${i}" value="${esc(d)}" autocomplete="off" style="font-size:16px"><button class="btn dst" data-r="${i}">고치기</button><button class="btn red" data-x="${i}">지우기</button></div>`).join('')}
+   <label style="margin-top:14px">새로 더할 곳</label><div class="row2" style="grid-template-columns:1fr auto"><input id="nD" autocomplete="off" placeholder="예) 40번 창고" style="font-size:16px"><button class="btn green" id="nAdd">더하기</button></div>
+   <button class="btn gray" id="dBack" style="width:100%;margin-top:14px">다 고쳤습니다 (돌아가기)</button>
+   <div class="hist"><h4>보낼 곳 고친 이력 (${hist.length}건)</h4>${histRows(hist,'')}</div>`,()=>{
+    const op=(o,msg)=>{if(!cfg.name&&!confirmName())return;push(Object.assign({a:'dests'},o));toast(msg);pickDests(k)};
+    $('#sbox').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const i=+b.dataset.r,old=L[i],nw=$('#sbox').querySelector('[data-i="'+i+'"]').value.trim();
+      if(!nw||nw===old){toast('바꿀 이름을 써 주세요');return}if(L.includes(nw)){toast('이미 있는 이름입니다');return}op({act:'ren',name:old,to:nw},old+' → '+nw+' 이름을 고쳤습니다')});
+    $('#sbox').querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{const d=L[+b.dataset.x];op({act:'del',name:d},d+' 을(를) 목록에서 지웠습니다')});
+    $('#nAdd').onclick=()=>{const d=$('#nD').value.trim();if(!d){toast('더할 곳 이름을 써 주세요');$('#nD').focus();return}if(L.includes(d)){toast('이미 있는 이름입니다');return}op({act:'add',name:d},d+' 을(를) 더했습니다')};
+    $('#dBack').onclick=()=>pickOut(k)})}
+/* 0.37 새로고침 재고관리로 보내기: 같은 이름(팔레트 번호 + 생산일 6자리)·단위 "팔레트"가 있으면 1 더하고, 없으면 새 상품 */
+let invFs=null;
+function invDb(){if(!invFs)invFs=Promise.all([import('https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js'),import('https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js')]).then(([A,F])=>{
+  const app=A.initializeApp({
+  apiKey: "AIzaSyCNpACKBrRc4e0aZcy4yindQPIHSMcOp50",
+  authDomain: "serogochim-inventory.firebaseapp.com",
+  projectId: "serogochim-inventory",
+  storageBucket: "serogochim-inventory.firebasestorage.app",
+  messagingSenderId: "881089077673",
+  appId: "1:881089077673:web:9981db337464535f1ee4b8"
+},'serogochim');return {F,db:F.getFirestore(app)}});return invFs}
+const invNorm=t=>String(t||'').replace(/\s+/g,'');
+function invName(v){return (v.no||'').trim()+(v.d?' '+String(v.d).slice(2):'')}
+async function invSend(v,dest,from){const nm=invName(v);
+  try{const {F,db}=await invDb();const cs=await F.getDocs(F.collection(db,'categories'));
+    let cat=cs.docs.find(x=>invNorm(x.data().name)===invNorm(dest)),cid=cat&&cat.id,cnm=cat?cat.data().name:dest;
+    if(!cid){const r=await F.addDoc(F.collection(db,'categories'),{name:dest,order:cs.size,createdAt:F.serverTimestamp()});cid=r.id;
+      await F.addDoc(F.collection(db,'logs'),{message:'[분류 추가] "'+dest+'" (야적장에서 보내며 만듦)',author:cfg.name||'이름없음',createdAt:F.serverTimestamp()})}
+    const is=await F.getDocs(F.query(F.collection(db,'items'),F.where('categoryId','==',cid)));
+    const same=is.docs.find(x=>{const d=x.data();return invNorm(d.name)===invNorm(nm)&&d.unit==='팔레트'});
+    if(same)await F.updateDoc(same.ref,{qty:(Number(same.data().qty)||0)+1});
+    else await F.addDoc(F.collection(db,'items'),{categoryId:cid,name:nm,unit:'팔레트',qty:1,price:0,location:'야적장 '+from+'에서',createdAt:F.serverTimestamp()});
+    await F.addDoc(F.collection(db,'logs'),{message:'[야적장 → '+cnm+'] "'+nm+'" 1팔레트 (야적장 '+from+'에서)',author:cfg.name||'이름없음',createdAt:F.serverTimestamp()});
+    toast(from+' → '+cnm+' 이동했습니다 (재고관리에 들어감)')}
+  catch(e){console.error(e);toast(from+' → '+dest+' 이동은 기록했지만 재고관리에 넣지 못했습니다. 재고관리에서 직접 넣어 주세요',6000)}}
+/* 0.37 재고관리에서 야적장으로 보낸 상품: 빈 칸을 누르면 번호·생산일이 들어간 채로 열림 */
+let plPend=null;
+window.plPlace=function(p){plPend={no:String(p&&p.no||''),d:String(p&&p.d||'')};let b=document.getElementById('plBan');
+  if(!b){b=document.createElement('div');b.id='plBan';document.body.insertBefore(b,document.body.firstChild)}
+  b.innerHTML='📦 <b>'+esc(plPend.no+(plPend.d?' ('+fmtD(plPend.d)+')':''))+'</b> 넣을 빈 칸을 누르세요 <button type="button" id="plBanX">취소</button>';b.style.display='flex';
+  document.getElementById('plBanX').onclick=()=>{plPend=null;b.style.display='none'};return true};
+function plDone(){plPend=null;const b=document.getElementById('plBan');if(b)b.style.display='none'}
 function pickMove(k){const D=view();let h=`<h3>${esc(cname(k))} 옮기기</h3><div class="note">옮겨 갈 칸을 누르세요. 팔레트가 있는 칸을 고르면 두 칸을 서로 바꿉니다.</div><div class="yard" style="grid-template-columns:26px 1fr .5fr 1fr;margin-top:8px">`;
   const n=Math.max(D.size.A||8,D.size.B||8);h+='<div></div>'+SECTORS.map(s=>`<div class="colh">${s}</div>`).join('<div></div>');
   for(let i=1;i<=n;i++){h+=`<div class="num">${i}</div>`;SECTORS.forEach((s,j)=>{if(j)h+='<div></div>';if(i>(D.size[s]||8)){h+='<div></div>';return}
