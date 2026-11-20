@@ -120,7 +120,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.43';
+const VER='0.44';
 const ICON_V='030';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
@@ -269,11 +269,11 @@ function render(){const m=$('#main');if(!FSM&&!(cfg.tok&&FSM===false)){if(FSM===
   $('#bHist').onclick=()=>openHist();$('#bShare').onclick=openShare;$('#bSet').onclick=openSet;
   const f=m.querySelector('.half.hit');if(f&&render.scroll){f.scrollIntoView({block:'center',behavior:'smooth'});render.scroll=false}
   bar()}
-function fitNos(){document.querySelectorAll('#main .rt').forEach(rt=>{const hf=rt.parentElement,no=rt.querySelector('.no'),dt=rt.querySelector('.dt');const W=hf.clientWidth-5,H=hf.clientHeight-42;let f=60;const set=()=>{no.style.fontSize=f+'px';if(dt)dt.style.fontSize=(f*0.5)+'px'};set();
+function fitNos(R){R=R||'#main';document.querySelectorAll(R+' .rt').forEach(rt=>{const hf=rt.parentElement,no=rt.querySelector('.no'),dt=rt.querySelector('.dt');const W=hf.clientWidth-5,H=hf.clientHeight-42;let f=60;const set=()=>{no.style.fontSize=f+'px';if(dt)dt.style.fontSize=(f*0.5)+'px'};set();
   while(f>12&&(rt.offsetWidth>W||rt.offsetHeight>H)){f--;set()}});
   /* 0.42 빈칸 글자도 칸에 들어가는 만큼 크게 */
-  document.querySelectorAll('#main .slot.ra .half .em,#main .slot.rb .half .em').forEach(em=>{const hf=em.parentElement;const W=hf.clientWidth-8,H=hf.clientHeight-50;let f=30;em.style.fontSize=f+'px';while(f>12&&(em.offsetWidth>W||em.offsetHeight>H)){f--;em.style.fontSize=f+'px'}})}
-window.addEventListener('resize',()=>{clearTimeout(fitNos.t);fitNos.t=setTimeout(fitNos,150)});
+  document.querySelectorAll(R+' .slot.ra .half .em,'+R+' .slot.rb .half .em').forEach(em=>{const hf=em.parentElement;const W=hf.clientWidth-8,H=hf.clientHeight-50;let f=30;em.style.fontSize=f+'px';while(f>12&&(em.offsetWidth>W||em.offsetHeight>H)){f--;em.style.fontSize=f+'px'}})}
+window.addEventListener('resize',()=>{clearTimeout(fitNos.t);fitNos.t=setTimeout(()=>{fitNos();if($('#sheet').classList.contains('on'))fitNos('#sbox')},150)});
 function openS(html,fn){sDirty=false;$('#sbox').innerHTML=html;$('#sheet').classList.add('on');fn&&fn()}
 function closeS(){stopRec();$('#sheet').classList.remove('on');curCell=null}
 /* 0.16: 바깥(어두운 곳)을 눌러도 고치던 중이면 닫지 않는다. 자판이 떠 있을 때 바깥을 눌러 자판만 내리려다 창이 닫히던 문제 */
@@ -409,7 +409,18 @@ window.plPlace=function(p){plPend={no:String(p&&p.no||''),d:String(p&&p.d||'')};
   b.innerHTML='📦 <b>'+esc(plPend.no+(plPend.d?' ('+fmtD(plPend.d)+')':''))+'</b> 넣을 빈 칸을 누르세요 <button type="button" id="plBanX">취소</button>';b.style.display='flex';
   document.getElementById('plBanX').onclick=()=>{plPend=null;b.style.display='none'};return true};
 function plDone(){plPend=null;const b=document.getElementById('plBan');if(b)b.style.display='none';try{if(window.parent!==window&&parent.serogochimNext)parent.serogochimNext()}catch(e){}}
-function pickMove(k){const D=view();let h=`<h3>${esc(cname(k))} 옮기기</h3><div class="note">옮겨 갈 칸을 누르세요. 팔레트가 있는 칸을 고르면 두 칸을 서로 바꿉니다.</div><div class="yard" style="grid-template-columns:26px 1fr .5fr 1fr;margin-top:8px">`;
+function yardSame(D,k){let old=null;Object.entries(D.cells).forEach(([kk,v])=>{if(/^\d{8}$/.test(v.d||'')&&(!old||v.d<old.d))old={k:kk,d:v.d}});
+  const n=Math.max(D.size.A||8,D.size.B||8);let h=`<div class="yard"><div></div><div></div><div class="roadtop" style="grid-column:3/6">도로측</div><div></div><div></div><div class="road" style="grid-row:2/span ${n+1}"><span>공장측 골목</span></div><div class="house" style="grid-row:2/span ${n+1}"><span>주택</span></div><div></div>`;
+  SECTORS.forEach((s,j)=>h+=(j?'<div></div>':'')+`<div class="colh">${s} 구역</div>`);h+='<div></div>';
+  for(let i=1;i<=n;i++){h+=`<div class="num nb"><span>${i}</span></div>`;
+    SECTORS.forEach((s,j)=>{if(j)h+='<div></div>';if(i>(D.size[s]||8)){h+='<div></div>';return}
+      h+='<div class="slot '+(s==='A'?'ra':'rb')+'">'+['U','L'].map(lv=>{const kk=s+'-'+i+'-'+lv,v=D.cells[kk];
+        return `<div class="half ${lv.toLowerCase()}${old&&old.k===kk?' old':''}" data-m="${kk}" style="${kk===k?'outline:4px solid #e53935;outline-offset:-4px':''}"><span class="lv">${lv==='U'?'위':'아래'}</span>`+
+          (v?`<div class="rt"><div class="no">${esc(v.no)}</div><div class="dt">${esc(fmtS(v.d))}</div></div>`:'<div class="em">빈칸</div>')+'</div>'}).join('')+'</div>'});h+=`<div class="num na"><span>${i}</span></div>`}
+  return h+'</div>'}
+function pickMove(k){const D=view();if(true){openS(`<h3>${esc(cname(k))} 옮기기</h3><div class="note">옮겨 갈 칸을 누르세요. 팔레트가 있는 칸을 고르면 두 칸을 서로 바꿉니다. (빨간 테두리가 지금 칸)</div><div style="margin-top:8px">${yardSame(D,k)}</div><button class="btn gray" id="mBack" style="width:100%;margin-top:10px">취소</button>`,()=>{
+    $('#mBack').onclick=()=>openCell(k);setTimeout(()=>fitNos('#sbox'),30);$('#sbox').querySelectorAll('[data-m]').forEach(e=>e.onclick=()=>{const to=e.dataset.m;if(to===k)return;
+      if(!cfg.name&&!confirmName())return;push({a:'move',c:k,to});toast(cname(k)+' → '+cname(to)+' 옮겼습니다');closeS()})});return}let h=`<h3>${esc(cname(k))} 옮기기</h3><div class="note">옮겨 갈 칸을 누르세요. 팔레트가 있는 칸을 고르면 두 칸을 서로 바꿉니다.</div><div class="yard" style="grid-template-columns:26px 1fr .5fr 1fr;margin-top:8px">`;
   const n=Math.max(D.size.A||8,D.size.B||8);h+='<div></div>'+SECTORS.map(s=>`<div class="colh">${s}</div>`).join('<div></div>');
   for(let i=1;i<=n;i++){h+=`<div class="num">${i}</div>`;SECTORS.forEach((s,j)=>{if(j)h+='<div></div>';if(i>(D.size[s]||8)){h+='<div></div>';return}
     h+='<div class="slot '+(s==='A'?'ra':'rb')+'" style="min-height:56px">'+['U','L'].map(lv=>{const kk=s+'-'+i+'-'+lv,v=D.cells[kk];return `<div class="half ${lv.toLowerCase()}" data-m="${kk}" style="min-height:34px;${kk===k?'outline:3px solid #e53935;outline-offset:-3px':''}"><div style="font-size:14px;font-weight:700">${v?esc(v.no):'<span class="em">빈칸</span>'}</div></div>`}).join('')+'</div>'})}
