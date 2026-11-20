@@ -110,7 +110,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.37';
+const VER='0.38';
 const ICON_V='030';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
@@ -267,7 +267,7 @@ function openCell(k,pre){const D=view(),v=D.cells[k],p=pre||{};curCell=k;
 function takeName(){const n=$('#fBy')&&$('#fBy').value.trim();if(!n){toast('기록할 이름을 넣어 주세요');$('#fBy').focus();return false}if(n!==cfg.name){cfg.name=n;sv('cfg',cfg)}return true}
 function normDate(s){s=String(s||'').replace(/\D/g,'');if(!s)return '';if(s.length===6)s='20'+s;
   if(!/^\d{8}$/.test(s))return null;const m=+s.slice(4,6),d=+s.slice(6);if(m<1||m>12||d<1||d>31)return null;return s}
-const DESTS=['2층창고','3층창고','10번창고','40번창고','매장','서두','가격표'];
+const DESTS=['2층창고','3층창고','매장','10번창고','40번창고','서두','가격표'];
 function pickOut(k){const D=view(),v=D.cells[k];if(!v){closeS();return}
   openS(`<h3>${esc(cname(k))} 이동</h3><div class="note">팔레트 <b>${esc(vtxt(v))}</b>을(를) 어디로 보내나요? 누르면 칸이 비고, 새로고침 재고관리의 그 분류에 상품으로 들어갑니다. 모두 이력에 남습니다.</div>
    <div class="dests">${(D.dests||DESTS).map(d=>`<button class="btn dst" data-d="${esc(d)}">야적장 → ${esc(d)}</button>`).join('')}</div>
@@ -322,7 +322,7 @@ window.plPlace=function(p){plPend={no:String(p&&p.no||''),d:String(p&&p.d||'')};
   if(!b){b=document.createElement('div');b.id='plBan';document.body.insertBefore(b,document.body.firstChild)}
   b.innerHTML='📦 <b>'+esc(plPend.no+(plPend.d?' ('+fmtD(plPend.d)+')':''))+'</b> 넣을 빈 칸을 누르세요 <button type="button" id="plBanX">취소</button>';b.style.display='flex';
   document.getElementById('plBanX').onclick=()=>{plPend=null;b.style.display='none'};return true};
-function plDone(){plPend=null;const b=document.getElementById('plBan');if(b)b.style.display='none'}
+function plDone(){plPend=null;const b=document.getElementById('plBan');if(b)b.style.display='none';try{if(window.parent!==window&&parent.serogochimNext)parent.serogochimNext()}catch(e){}}
 function pickMove(k){const D=view();let h=`<h3>${esc(cname(k))} 옮기기</h3><div class="note">옮겨 갈 칸을 누르세요. 팔레트가 있는 칸을 고르면 두 칸을 서로 바꿉니다.</div><div class="yard" style="grid-template-columns:26px 1fr .5fr 1fr;margin-top:8px">`;
   const n=Math.max(D.size.A||8,D.size.B||8);h+='<div></div>'+SECTORS.map(s=>`<div class="colh">${s}</div>`).join('<div></div>');
   for(let i=1;i<=n;i++){h+=`<div class="num">${i}</div>`;SECTORS.forEach((s,j)=>{if(j)h+='<div></div>';if(i>(D.size[s]||8)){h+='<div></div>';return}
