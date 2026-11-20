@@ -93,7 +93,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;word-break:break-all;background:#f4f6f8;padding:8px;border-radius:8px}
 .listen{animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.55}}
 </style>
-<style>.dests{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 4px}.btn.dst{background:#1f5fa0;color:#fff;font-size:15px;padding:12px 6px}.dests .btn{margin:0;width:100%}#plBan{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#1f5fa0;color:#fff;font-size:15px;padding:10px 12px}#plBan button{margin-left:auto;background:#fff;color:#1f5fa0;border:none;border-radius:8px;padding:6px 12px;font-weight:700}</style></head>
+<style>.dests{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 4px}.btn.dst{background:#1f5fa0;color:#fff;font-size:15px;padding:12px 6px}.dests .btn{margin:0;width:100%}#plBan{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#1f5fa0;color:#fff;font-size:15px;padding:10px 12px}#plBan button{margin-left:auto;background:#fff;color:#1f5fa0;border:none;border-radius:8px;padding:6px 12px;font-weight:700}</style><style>.dests .btn.dst{position:relative;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.dests .btn.dst span{position:relative;z-index:1}.dests .btn.dst::before{content:"";position:absolute;left:0;top:0;bottom:0;width:0;background:#c0392b}.dests .btn.dst.hold::before{width:100%;transition:width 5s linear}.ebox{margin-top:10px;padding:10px;border:2px solid #c0392b;border-radius:10px;background:#fff5f4}.ebt{font-size:14px;margin-bottom:6px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}.row3 .btn{margin:0;width:100%;font-size:14px;padding:10px 4px}.btn.dadd{background:#fff;color:#1f5fa0;border:2px dashed #1f5fa0;font-size:15px;padding:12px 6px;margin:0;width:100%}</style></head>
 <body>
 <header>
   <div id="upd"><span id="updT"></span><br><button class="btn green" id="updGo" type="button">업데이트</button><button class="btn gray" id="updNo" type="button">나중에</button></div>
@@ -110,7 +110,7 @@ label{display:block;font-size:14px;color:var(--sub);margin:10px 0 4px}
 <div id="toast"></div>
 <script>
 'use strict';
-const VER='0.38';
+const VER='0.39';
 const ICON_V='030';
 const STANDALONE=(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})();
 let instEv=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEv=e});
@@ -166,8 +166,8 @@ function applyOp(D,op){
   if(D.log.some(x=>x.id===op.id))return;
   const by=op.by||'',t=op.t;
   if(op.a==='dests'){const L=(D.dests||DESTS).slice(),i=L.indexOf(op.name);
-    if(op.act==='add'){if(!op.name||i>=0)return;L.push(op.name)}else if(op.act==='del'){if(i<0)return;L.splice(i,1)}else if(op.act==='ren'){if(i<0||!op.to||L.includes(op.to))return;L[i]=op.to}else return;
-    D.dests=L;D.log.push({id:op.id,t,by,a:'dst',act:op.act,c:'',from:op.name,to:op.to||''});return}
+    let at=null;if(op.act==='add'){if(!op.name||i>=0)return;if(op.at!=null&&op.at>=0&&op.at<=L.length)L.splice(op.at,0,op.name);else L.push(op.name)}else if(op.act==='del'){if(i<0)return;at=i;L.splice(i,1)}else if(op.act==='ren'){if(i<0||!op.to||L.includes(op.to))return;L[i]=op.to}else return;
+    D.dests=L;D.log.push({id:op.id,t,by,a:'dst',act:op.act,c:'',from:op.name,to:op.to||'',at:at!=null?at:undefined,undo:op.undo||undefined});return}
   if(op.a==='size'){const from=Object.assign({},D.size);D.size=Object.assign({},D.size,op.size);D.log.push({id:op.id,t,by,a:'set',c:'',from,to:D.size});return}
   if(op.a==='move'){const f=D.cells[op.c]||null,g=D.cells[op.to]||null;if(!f)return;
     D.cells[op.to]=Object.assign({},f,{t,by});if(g)D.cells[op.c]=Object.assign({},g,{t,by});else delete D.cells[op.c];
@@ -232,7 +232,7 @@ function histRows(list,withUndo){if(!list.length)return '<div class="hi w">아�
   return list.slice().reverse().map(x=>{const nm={dst:'보낼 곳',add:'넣음',edit:'고침',del:x.dest?'이동':'뺌',move:'옮김',undo:'되돌림',set:'설정'}[x.a]||x.a;
     let body;if(x.a==='move')body=`${esc(cname(x.c))} → ${esc(cname(x.to))} : ${esc(vtxt(x.from))}${x.swap?' (서로 바꿈: '+esc(vtxt(x.swap))+')':''}`;
     else if(x.a==='set')body='칸 수 '+SECTORS.map(s=>s+' '+(x.from&&x.from[s])+'→'+(x.to&&x.to[s])).join(', ');
-    else if(x.a==='dst')body=x.act==='add'?'보낼 곳 더함: <b>'+esc(x.from)+'</b>':x.act==='del'?'보낼 곳 지움: <b>'+esc(x.from)+'</b>':'보낼 곳 이름 고침: '+esc(x.from)+' → <b>'+esc(x.to)+'</b>';
+    else if(x.a==='dst')body=x.act==='add'?(x.undo?'보낼 곳 되살림: <b>':'보낼 곳 더함: <b>')+esc(x.from)+'</b>':x.act==='del'?'보낼 곳 지움: <b>'+esc(x.from)+'</b>':'보낼 곳 이름 고침: '+esc(x.from)+' → <b>'+esc(x.to)+'</b>';
     else if(x.a==='del'&&x.dest)body=(withUndo==='all'?'<b>'+esc(cname(x.c))+'</b> ':'')+esc(vtxt(x.from))+' → <b>'+esc(x.dest)+'</b>(으)로 이동';
     else body=(withUndo==='all'?'<b>'+esc(cname(x.c))+'</b> ':'')+esc(vtxt(x.from))+' → <b>'+esc(vtxt(x.to))+'</b>';
     const u=(x.a!=='move'&&x.a!=='set'&&x.a!=='dst'&&withUndo)?`<button data-u="${esc(x.id)}">이 전으로 되돌리기</button>`:'';
@@ -268,15 +268,37 @@ function takeName(){const n=$('#fBy')&&$('#fBy').value.trim();if(!n){toast('기�
 function normDate(s){s=String(s||'').replace(/\D/g,'');if(!s)return '';if(s.length===6)s='20'+s;
   if(!/^\d{8}$/.test(s))return null;const m=+s.slice(4,6),d=+s.slice(6);if(m<1||m>12||d<1||d>31)return null;return s}
 const DESTS=['2층창고','3층창고','매장','10번창고','40번창고','서두','가격표'];
+function dstLast(D){const L=D.log.filter(x=>x.a==='dst'),done=new Set(L.filter(x=>x.undo).map(x=>x.undo));for(let i=L.length-1;i>=0;i--){const x=L[i];if(x.undo||done.has(x.id))continue;if(x.act==='del'&&(D.dests||DESTS).includes(x.from))continue;return x}return null}
 function pickOut(k){const D=view(),v=D.cells[k];if(!v){closeS();return}
   openS(`<h3>${esc(cname(k))} 이동</h3><div class="note">팔레트 <b>${esc(vtxt(v))}</b>을(를) 어디로 보내나요? 누르면 칸이 비고, 새로고침 재고관리의 그 분류에 상품으로 들어갑니다. 모두 이력에 남습니다.</div>
-   <div class="dests">${(D.dests||DESTS).map(d=>`<button class="btn dst" data-d="${esc(d)}">야적장 → ${esc(d)}</button>`).join('')}</div>
+   <div class="dests">${(D.dests||DESTS).map(d=>`<button class="btn dst" data-d="${esc(d)}"><span>야적장 → ${esc(d)}</span></button>`).join('')}<button class="btn dadd" id="oAdd">+ 이동 추가</button></div>
+   <div id="oAddRow" class="row2" style="grid-template-columns:1fr auto;display:none;margin-top:8px"><input id="oAddIn" autocomplete="off" placeholder="새로 더할 곳 (예: 41번매장)" style="font-size:16px"><button class="btn green" id="oAddGo">더하기</button></div>
+   <div class="note" style="margin-top:6px">보낼 곳 단추를 <b>5초</b> 동안 누르고 있으면 이름을 고치거나 지울 수 있습니다.</div>
+   ${(()=>{const g=dstLast(D);if(!g)return '';const w=g.act==='del'?'지운 '+esc(g.from)+' 다시 살리기':g.act==='ren'?esc(g.to)+' → '+esc(g.from)+' 이름 되돌리기':'더한 '+esc(g.from)+' 빼기';return `<button class="btn org" id="oUndo" style="width:100%;margin-top:8px">↶ 되돌리기: ${w}</button>`})()}
+   <div id="oEditBox" class="ebox" style="display:none"><div class="ebt">보낼 곳 고치기: <b id="oEName"></b></div><input id="oEIn" autocomplete="off" style="font-size:16px;width:100%"><div class="row3"><button class="btn dst" id="oERen">이름 고치기</button><button class="btn red" id="oEDel">지우기</button><button class="btn gray" id="oEX">취소</button></div></div>
    <label>다른 곳 (직접 쓰기)</label><div class="row2" style="grid-template-columns:1fr auto"><input id="oTo" autocomplete="off" placeholder="예) 41번매장" style="font-size:16px"><button class="btn dst" id="oGo">보내기</button></div>
    <button class="btn org" id="oEdit" style="width:100%;margin-top:14px">보낼 곳 목록 고치기 (더하기·지우기·이름 바꾸기)</button>
    <button class="btn gray" id="oWrong" style="width:100%;margin-top:14px">보낸 곳 없이 지우기 (잘못 넣은 번호)</button>
    <button class="btn gray" id="oBack" style="width:100%;margin-top:8px">취소</button>`,()=>{
     const go=d=>{d=(d||'').trim();push({a:'del',c:k,v:null,dest:d});if(d)invSend(v,d,cname(k));else toast(cname(k)+' 비웠습니다');closeS()};
-    $('#sbox').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>go(b.dataset.d));
+    const dop=(o,msg)=>{push(Object.assign({a:'dests'},o));toast(msg,3500);pickOut(k)};
+    $('#sbox').querySelectorAll('[data-d]').forEach(b=>{let tm=null,held=false,t0=0;
+      const start=e=>{held=false;t0=Date.now();b.classList.add('hold');tm=setTimeout(()=>{held=true;b.classList.remove('hold');try{navigator.vibrate&&navigator.vibrate(40)}catch(x){}
+        const n=b.dataset.d;$('#oEName').textContent=n;$('#oEIn').value=n;$('#oEditBox').style.display='block';$('#oEditBox').dataset.n=n;$('#oEditBox').scrollIntoView({block:'nearest'})},5000)};
+      const stop=()=>{clearTimeout(tm);b.classList.remove('hold')};
+      b.addEventListener('pointerdown',start);['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));
+      b.addEventListener('contextmenu',e=>e.preventDefault());
+      b.onclick=()=>{const lp=held||(t0&&Date.now()-t0>700);held=false;t0=0;if(lp)return;go(b.dataset.d)}});
+    $('#oEX').onclick=()=>{$('#oEditBox').style.display='none'};
+    $('#oEDel').onclick=()=>{const n=$('#oEditBox').dataset.n;dop({act:'del',name:n},n+' 을(를) 목록에서 지웠습니다. [↶ 되돌리기]로 살릴 수 있습니다')};
+    $('#oERen').onclick=()=>{const n=$('#oEditBox').dataset.n,nw=$('#oEIn').value.trim(),L=view().dests||DESTS;if(!nw||nw===n){toast('바꿀 이름을 써 주세요');$('#oEIn').focus();return}if(L.includes(nw)){toast('이미 있는 이름입니다');return}dop({act:'ren',name:n,to:nw},n+' → '+nw+' 이름을 고쳤습니다')};
+    if($('#oUndo'))$('#oUndo').onclick=()=>{const g=dstLast(view());if(!g)return;
+      if(g.act==='del')dop({act:'add',name:g.from,at:g.at,undo:g.id},g.from+' 을(를) 되살렸습니다');
+      else if(g.act==='ren')dop({act:'ren',name:g.to,to:g.from,undo:g.id},g.to+' → '+g.from+' 이름을 되돌렸습니다');
+      else dop({act:'del',name:g.from,undo:g.id},g.from+' 을(를) 뺐습니다')};
+    $('#oAdd').onclick=()=>{$('#oAddRow').style.display='grid';$('#oAddIn').focus()};
+    $('#oAddGo').onclick=()=>{const d=$('#oAddIn').value.trim(),L=view().dests||DESTS;if(!d){toast('더할 곳 이름을 써 주세요');$('#oAddIn').focus();return}if(L.includes(d)){toast('이미 있는 이름입니다');return}dop({act:'add',name:d},d+' 을(를) 더했습니다')};
+
     $('#oGo').onclick=()=>{const d=$('#oTo').value.trim();if(!d){toast('보낼 곳을 써 주세요');$('#oTo').focus();return}go(d)};
     $('#oWrong').onclick=()=>go('');$('#oBack').onclick=()=>openCell(k);$('#oEdit').onclick=()=>pickDests(k)})}
 function pickDests(k){const D=view(),L=D.dests||DESTS,hist=D.log.filter(x=>x.a==='dst');
